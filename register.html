@@ -3,267 +3,156 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Registrasi UMKM - ID-TRIBE</title>
+    <title>Daftar Akun - ID-TRIBE</title>
     
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Plus+Jakarta+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+
     <script type="module" src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
     <script type="module" src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js"></script>
     <script type="module" src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"></script>
 
     <style>
-        /* --- DESIGN SYSTEM (ID-TRIBE) --- */
         :root {
-            --forest-green: #2E5C48;
-            --forest-green-dark: #1e3d2f;
-            --golden-orange: #F2994A;
-            --golden-orange-dark: #e88a38;
-            --text-dark: #1a1a1a;
-            --text-muted: #64748b;
-            
-            /* Glass Effect */
-            --glass-bg: rgba(255, 255, 255, 0.9);
-            --glass-border: rgba(255, 255, 255, 0.5);
-            --glass-blur: blur(20px);
-            --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+            --primary: #059669; --primary-dark: #047857;
+            --accent: #f59e0b; --dark: #0f172a;
+            --font-head: 'Outfit', sans-serif;
+            --font-body: 'Plus Jakarta Sans', sans-serif;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
-            font-family: 'Lato', sans-serif;
-            background-color: var(--forest-green);
-            color: var(--text-dark);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            overflow-y: auto;
-            padding: 40px 20px;
+            font-family: var(--font-body);
+            background: #f0fdf4;
+            display: flex; align-items: center; justify-content: center;
+            min-height: 100vh; padding: 20px;
+            background-image: radial-gradient(#d1fae5 1px, transparent 1px);
+            background-size: 20px 20px;
         }
 
-        /* --- BACKGROUND --- */
-        .bg-image {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background-image: url('https://images.unsplash.com/photo-1619338098121-5925681fc9ab?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1920');
-            background-size: cover; background-position: center;
-            z-index: -2;
-        }
-        .bg-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(135deg, rgba(46, 92, 72, 0.9), rgba(46, 92, 72, 0.75));
-            z-index: -1;
-        }
-
-        /* --- TOMBOL KEMBALI --- */
-        .back-button {
-            position: absolute; top: 30px; left: 30px;
-            display: flex; align-items: center; gap: 8px;
-            color: rgba(255,255,255,0.8);
-            text-decoration: none; font-weight: 500; font-size: 0.9rem;
-            transition: all 0.3s; z-index: 20;
-            background: rgba(255,255,255,0.1); padding: 8px 16px; border-radius: 50px;
-            border: 1px solid rgba(255,255,255,0.2);
-        }
-        .back-button:hover { background: rgba(255,255,255,0.2); color: white; transform: translateX(-3px); }
-
-        /* --- CONTAINER --- */
         .register-container {
-            width: 100%; max-width: 500px;
-            position: relative; z-index: 10;
+            background: white; width: 100%; max-width: 500px;
+            padding: 40px; border-radius: 24px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.05);
+            border: 1px solid rgba(255,255,255,0.8);
         }
 
-        .brand-header { text-align: center; margin-bottom: 25px; }
-        .brand-header h1 { color: white; font-size: 1.8rem; font-weight: 700; }
+        .header { text-align: center; margin-bottom: 30px; }
+        .brand { font-family: var(--font-head); font-weight: 800; font-size: 1.8rem; color: var(--primary); margin-bottom: 5px; }
+        .subtitle { color: #64748b; font-size: 0.95rem; }
+
+        /* ROLE SELECTOR CARDS */
+        .role-selector { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 25px; }
         
-        .glass-card {
-            background: var(--glass-bg);
-            backdrop-filter: var(--glass-blur);
-            border: 1px solid var(--glass-border);
-            border-radius: 24px;
-            padding: 40px;
-            box-shadow: var(--glass-shadow);
+        .role-card {
+            border: 2px solid #e2e8f0; border-radius: 16px; padding: 15px;
+            text-align: center; cursor: pointer; transition: 0.3s;
+            background: #f8fafc; opacity: 0.7;
         }
-
-        /* --- STEP WIZARD --- */
-        .progress-dots { display: flex; justify-content: center; gap: 8px; margin-bottom: 30px; }
-        .dot { width: 10px; height: 10px; background: #cbd5e1; border-radius: 50%; transition: all 0.3s; }
-        .dot.active { background: var(--forest-green); width: 30px; border-radius: 10px; }
-
-        .step-section { display: none; animation: fadeIn 0.5s ease; }
-        .step-section.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-        .form-header { text-align: center; margin-bottom: 30px; }
-        .form-header h2 { font-size: 1.5rem; color: var(--forest-green); margin-bottom: 5px; font-weight: 700; }
-        .form-header p { color: var(--text-muted); font-size: 0.9rem; }
-
-        /* --- FORM ELEMENTS --- */
-        .form-group { margin-bottom: 20px; text-align: left; }
-        .form-label { display: block; margin-bottom: 8px; font-size: 0.9rem; font-weight: 600; color: var(--text-dark); }
+        .role-card:hover { transform: translateY(-3px); }
         
+        .role-card.active {
+            border-color: var(--primary); background: #ecfdf5;
+            opacity: 1; box-shadow: 0 4px 15px rgba(5, 150, 105, 0.1);
+        }
+        
+        .role-icon { font-size: 1.5rem; margin-bottom: 8px; color: #64748b; }
+        .role-card.active .role-icon { color: var(--primary); }
+        
+        .role-title { font-weight: 700; font-size: 0.9rem; color: var(--dark); }
+        .role-desc { font-size: 0.75rem; color: #64748b; line-height: 1.2; margin-top: 5px; }
+
+        /* FORM */
+        .form-group { margin-bottom: 20px; }
+        .form-label { display: block; font-weight: 700; margin-bottom: 8px; color: var(--dark); font-size: 0.9rem; }
         .form-input {
-            width: 100%; padding: 12px 16px;
-            background: white;
-            border: 2px solid #e2e8f0; border-radius: 12px;
-            color: var(--text-dark); font-family: inherit; font-size: 1rem;
-            transition: all 0.3s;
+            width: 100%; padding: 14px; border: 2px solid #e2e8f0;
+            border-radius: 12px; font-family: inherit; font-size: 1rem;
+            transition: 0.3s; outline: none;
         }
-        .form-input:focus { outline: none; border-color: var(--forest-green); box-shadow: 0 0 0 4px rgba(46, 92, 72, 0.1); }
-        
-        select.form-input { appearance: none; background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%232E5C48%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E"); background-repeat: no-repeat; background-position: right 15px top 50%; background-size: 12px auto; }
+        .form-input:focus { border-color: var(--primary); background: #f0fdf4; }
 
         .btn-submit {
-            width: 100%; padding: 14px;
-            background: var(--golden-orange);
-            border: none; border-radius: 12px;
-            color: white; font-weight: 700; font-size: 1rem;
-            cursor: pointer; transition: all 0.3s;
-            box-shadow: 0 4px 15px rgba(242, 153, 74, 0.4); margin-top: 10px;
+            width: 100%; padding: 15px; background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white; border: none; border-radius: 12px; font-weight: 700;
+            font-size: 1rem; cursor: pointer; transition: 0.3s; margin-top: 10px;
         }
-        .btn-submit:hover { background: var(--golden-orange-dark); transform: translateY(-2px); }
-        .btn-submit:disabled { background: #cbd5e1; cursor: not-allowed; transform: none; box-shadow: none; }
+        .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(5, 150, 105, 0.2); }
+        .btn-submit:disabled { background: #cbd5e1; cursor: not-allowed; transform: none; }
 
-        .link-text { text-align: center; margin-top: 20px; font-size: 0.9rem; color: var(--text-muted); }
-        .link-text a { color: var(--forest-green); text-decoration: none; font-weight: 600; }
-        .link-text a:hover { text-decoration: underline; }
-
-        /* --- SUCCESS STATE --- */
-        .success-icon {
-            width: 80px; height: 80px;
-            background: #dcfce7; color: var(--forest-green);
-            border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            margin: 0 auto 20px; font-size: 40px;
-            box-shadow: 0 0 0 10px rgba(220, 252, 231, 0.5);
-        }
-
-        @media (max-width: 768px) {
-            .back-button { top: 15px; left: 15px; }
-            .glass-card { padding: 30px 20px; }
+        .footer-link { text-align: center; margin-top: 25px; font-size: 0.9rem; color: #64748b; }
+        .footer-link a { color: var(--primary); text-decoration: none; font-weight: 700; }
+        
+        /* Alert Error */
+        .alert-error {
+            background: #fee2e2; color: #b91c1c; padding: 12px; border-radius: 8px;
+            font-size: 0.9rem; margin-bottom: 20px; display: none; text-align: center;
         }
     </style>
 </head>
 <body>
 
-    <div class="bg-image"></div>
-    <div class="bg-overlay"></div>
-
-    <a href="index.html" class="back-button">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M19 12H5M12 19l-7-7 7-7"/>
-        </svg>
-        Kembali
-    </a>
-
     <div class="register-container">
-        <div class="brand-header">
-            <h1>ID<span style="color: var(--golden-orange)">Business</span>Matching</h1>
+        <div class="header">
+            <div class="brand">ID-TRIBE</div>
+            <p class="subtitle">Bergabung dengan ekosistem digital terbesar.</p>
         </div>
 
-        <div class="glass-card">
+        <div class="role-selector">
+            <div class="role-card active" onclick="selectRole('umkm')" id="card-umkm">
+                <div class="role-icon"><i class="fas fa-store"></i></div>
+                <div class="role-title">Pemilik UMKM</div>
+                <div class="role-desc">Saya ingin belajar & mengembangkan bisnis.</div>
+            </div>
+            <div class="role-card" onclick="selectRole('coach')" id="card-coach">
+                <div class="role-icon"><i class="fas fa-chalkboard-teacher"></i></div>
+                <div class="role-title">Expert / Coach</div>
+                <div class="role-desc">Saya ingin mengajar & membuka kelas live.</div>
+            </div>
+        </div>
+
+        <div id="errorBox" class="alert-error"></div>
+
+        <form onsubmit="handleRegister(event)">
+            <div class="form-group">
+                <label class="form-label">Nama Lengkap</label>
+                <input type="text" id="regName" class="form-input" placeholder="Nama Anda" required>
+            </div>
+
+            <div class="form-group" id="fieldUsaha">
+                <label class="form-label">Nama Usaha / Bisnis</label>
+                <input type="text" id="regBusiness" class="form-input" placeholder="Contoh: Keripik Pedas Juara">
+            </div>
+
+            <div class="form-group" id="fieldSkill" style="display: none;">
+                <label class="form-label">Spesialisasi / Keahlian</label>
+                <input type="text" id="regSkill" class="form-input" placeholder="Contoh: Digital Marketing, Finance...">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Email</label>
+                <input type="email" id="regEmail" class="form-input" placeholder="email@contoh.com" required>
+            </div>
             
-            <div class="progress-dots" id="progressIndicator">
-                <div class="dot active" id="dot1"></div>
-                <div class="dot" id="dot2"></div>
-                <div class="dot" id="dot3"></div>
+            <div class="form-group">
+                <label class="form-label">Password</label>
+                <input type="password" id="regPass" class="form-input" placeholder="Minimal 6 karakter" required>
             </div>
 
-            <div id="step1" class="step-section active">
-                <div class="form-header">
-                    <h2>Buat Akun Baru</h2>
-                    <p>Lengkapi data diri pemilik usaha</p>
-                </div>
-                <form id="formPersonal" onsubmit="handlePersonalData(event)">
-                    <div class="form-group">
-                        <label class="form-label">Nama Lengkap</label>
-                        <input type="text" class="form-input" required placeholder="Contoh: Budi Santoso">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Email</label>
-                        <input type="email" class="form-input" required placeholder="nama@email.com">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Nomor WhatsApp</label>
-                        <input type="tel" id="waNumber" class="form-input" required placeholder="0812xxxx (Aktif WA)">
-                        <small style="color: var(--text-muted); font-size: 0.8rem; margin-top:5px; display:block;">Kode OTP akan dikirim ke nomor ini.</small>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Password</label>
-                        <input type="password" class="form-input" required placeholder="Buat kata sandi aman">
-                    </div>
-                    <button type="submit" class="btn-submit">Lanjut Verifikasi &rarr;</button>
-                </form>
-                <div class="link-text">
-                    Sudah punya akun? <a href="login.html">Masuk disini</a>
-                </div>
-            </div>
+            <button type="submit" id="btnReg" class="btn-submit">Daftar Sekarang</button>
+        </form>
 
-            <div id="step2" class="step-section">
-                <div class="form-header">
-                    <h2>Verifikasi OTP</h2>
-                    <p>Kode telah dikirim ke WhatsApp <br><strong id="displayWa" style="color: var(--forest-green);">...</strong></p>
-                </div>
-                <form id="formOtp" onsubmit="handleOtp(event)">
-                    <div class="form-group" style="text-align: center;">
-                        <label class="form-label">Masukkan 4 Digit Kode</label>
-                        <input type="text" class="form-input" style="text-align: center; letter-spacing: 12px; font-size: 1.5rem; width: 70%; margin: 0 auto; font-weight: bold; color: var(--forest-green);" maxlength="4" required placeholder="0000">
-                    </div>
-                    <button type="submit" class="btn-submit">Verifikasi</button>
-                    <div class="link-text">
-                        <a href="#" onclick="alert('Kode dikirim ulang!'); return false;" style="font-size: 0.9rem; color: var(--text-muted);">Kirim ulang kode</a>
-                    </div>
-                </form>
-            </div>
-
-            <div id="step3" class="step-section">
-                <div class="form-header">
-                    <h2>Profil Bisnis</h2>
-                    <p>Beritahu kami tentang usaha Anda</p>
-                </div>
-                <form id="formBusiness" onsubmit="handleBusiness(event)">
-                    <div class="form-group">
-                        <label class="form-label">Nama Usaha</label>
-                        <input type="text" class="form-input" required placeholder="Contoh: Keripik Pedas Juara">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Kategori Usaha</label>
-                        <select class="form-input" required>
-                            <option value="" disabled selected>Pilih Kategori</option>
-                            <option value="kuliner">Kuliner & F&B</option>
-                            <option value="fashion">Fashion & Busana</option>
-                            <option value="craft">Kerajinan Tangan (Craft)</option>
-                            <option value="jasa">Jasa & Layanan</option>
-                            <option value="pertanian">Agribisnis</option>
-                            <option value="lainnya">Lainnya</option>
-                        </select>
-                    </div>
-                    <button type="submit" class="btn-submit">Selesaikan Registrasi</button>
-                </form>
-            </div>
-
-            <div id="stepSuccess" class="step-section" style="text-align: center;">
-                <div class="success-icon">✓</div>
-                <div class="form-header">
-                    <h2>Registrasi Berhasil!</h2>
-                    <p>Akun dan Profil Usaha Anda telah aktif.</p>
-                </div>
-                <p style="color: var(--text-muted); margin-bottom: 20px;">Anda akan diarahkan ke Dashboard dalam 3 detik...</p>
-                <a href="setup-umkm.html" class="btn-submit" style="display: inline-block; text-decoration: none;">Masuk Sekarang</a>
-            </div>
-
+        <div class="footer-link">
+            Sudah punya akun? <a href="login.html">Masuk di sini</a>
         </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getAuth, createUserWithEmailAndPassword, updateProfile } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
         import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        // Konfigurasi Firebase Anda (Sama seperti sebelumnya)
         const firebaseConfig = {
             apiKey: "AIzaSyBIaLzkNM0KqPVKxuMNmardLqcrr2kYTWQ",
             authDomain: "database-idbm.firebaseapp.com",
@@ -274,116 +163,105 @@
             measurementId: "G-EQLBB94DY2"
         };
 
-        // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // Temp Storage
-        let tempData = {};
+        // GLOBAL STATE
+        window.selectedRole = 'umkm';
 
-        // Helper: Switch Step
-        window.switchStep = function(hideId, showId, dotIndex) {
-            document.getElementById(hideId).classList.remove('active');
-            document.getElementById(showId).classList.add('active');
+        // 1. LOGIC PILIH PERAN
+        window.selectRole = (role) => {
+            window.selectedRole = role;
             
-            const dots = document.querySelectorAll('.dot');
-            dots.forEach(d => d.classList.remove('active'));
-            if(dots[dotIndex]) dots[dotIndex].classList.add('active');
+            // UI Update
+            document.querySelectorAll('.role-card').forEach(c => c.classList.remove('active'));
+            document.getElementById(`card-${role}`).classList.add('active');
+
+            // Form Logic
+            if (role === 'umkm') {
+                document.getElementById('fieldUsaha').style.display = 'block';
+                document.getElementById('fieldSkill').style.display = 'none';
+            } else {
+                document.getElementById('fieldUsaha').style.display = 'none';
+                document.getElementById('fieldSkill').style.display = 'block';
+            }
         }
 
-        // 1. Handle Personal Data
-        window.handlePersonalData = function(e) {
+        // 2. REGISTER HANDLER
+        window.handleRegister = async (e) => {
             e.preventDefault();
             
-            const form = e.target;
-            const btn = form.querySelector('button');
-            const originalText = btn.innerHTML;
-
-            // Collect Data
-            tempData.nama = form.querySelector('input[type="text"]').value;
-            tempData.email = form.querySelector('input[type="email"]').value;
-            tempData.wa = form.querySelector('#waNumber').value;
-            tempData.password = form.querySelector('input[type="password"]').value;
-
-            document.getElementById('displayWa').textContent = tempData.wa;
-
-            // Simple Animation
-            btn.innerHTML = "Memproses...";
-            btn.disabled = true;
-
-            setTimeout(() => {
-                btn.innerHTML = originalText;
-                btn.disabled = false;
-                switchStep('step1', 'step2', 1);
-            }, 500);
-        }
-
-        // 2. Handle OTP
-        window.handleOtp = function(e) {
-            e.preventDefault();
-            const btn = e.target.querySelector('button');
-            const originalText = btn.innerHTML;
-
-            btn.innerHTML = "Verifikasi...";
-            btn.disabled = true;
-
-            setTimeout(() => {
-                btn.innerHTML = originalText;
-                btn.disabled = false;
-                switchStep('step2', 'step3', 2);
-            }, 800);
-        }
-
-        // 3. Handle Business & Submit to Firebase
-        window.handleBusiness = async function(e) {
-            e.preventDefault();
-            const form = e.target;
-            const btn = form.querySelector('button');
-            const originalText = btn.innerHTML;
+            const btn = document.getElementById('btnReg');
+            const errorBox = document.getElementById('errorBox');
             
-            btn.innerHTML = "Mendaftarkan Akun...";
-            btn.disabled = true;
+            const name = document.getElementById('regName').value;
+            const email = document.getElementById('regEmail').value;
+            const pass = document.getElementById('regPass').value;
+            
+            // Data opsional sesuai peran
+            const businessName = document.getElementById('regBusiness').value;
+            const skill = document.getElementById('regSkill').value;
 
-            const namaUsaha = form.querySelector('input[type="text"]').value;
-            const kategori = form.querySelector('select').value;
+            // Validasi Sederhana
+            if(window.selectedRole === 'umkm' && !businessName) {
+                alert("Harap isi nama usaha!"); return;
+            }
+            if(window.selectedRole === 'coach' && !skill) {
+                alert("Harap isi keahlian Anda!"); return;
+            }
+
+            btn.innerText = "Memproses...";
+            btn.disabled = true;
+            errorBox.style.display = 'none';
 
             try {
-                // 1. Create Auth User
-                const userCredential = await createUserWithEmailAndPassword(auth, tempData.email, tempData.password);
+                // A. Buat Akun Auth
+                const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
                 const user = userCredential.user;
 
-                // 2. Save Profile to Firestore
+                // B. Update Display Name
+                await updateProfile(user, { displayName: name });
+
+                // C. Simpan ke Firestore
+                // Kita gunakan 1 koleksi "users_umkm" tapi dengan field "role" yang berbeda
                 await setDoc(doc(db, "users_umkm", user.uid), {
-                    nama_lengkap: tempData.nama,
-                    email: tempData.email,
-                    no_wa: tempData.wa,
-                    nama_usaha: namaUsaha,
-                    kategori: kategori,
-                    level: "basic",
-                    tanggal_daftar: new Date(),
-                    health_check_result: {}, // Placeholder
-                    unlocked_features: [] // Placeholder
+                    nama_lengkap: name,
+                    email: email,
+                    role: window.selectedRole, // 'umkm' atau 'coach'
+                    
+                    // Field khusus
+                    nama_usaha: window.selectedRole === 'umkm' ? businessName : null,
+                    spesialisasi: window.selectedRole === 'coach' ? skill : null,
+                    
+                    // Field default
+                    join_date: new Date(),
+                    completed_courses: [],
+                    is_verified: window.selectedRole === 'coach' ? true : false // Demo: Coach langsung verified
                 });
 
-                // Success UI
-                document.getElementById('progressIndicator').style.display = 'none';
-                switchStep('step3', 'stepSuccess', -1);
+                // D. Redirect sesuai peran
+                alert("Pendaftaran Berhasil! Selamat datang " + name);
                 
-                // Redirect
-                setTimeout(() => {
-                    // Redirect ke Setup UMKM (sesuai request sebelumnya)
-                    window.location.href = 'setup-umkm.html'; 
-                }, 3000);
+                if (window.selectedRole === 'coach') {
+                    window.location.href = "coach-dashboard.html";
+                } else {
+                    window.location.href = "dashboard.html";
+                }
 
             } catch (error) {
-                console.error("Error:", error);
-                alert("Gagal mendaftar: " + error.message);
-                btn.innerHTML = originalText;
+                console.error(error);
+                let msg = "Terjadi kesalahan.";
+                if (error.code === 'auth/email-already-in-use') msg = "Email sudah terdaftar.";
+                if (error.code === 'auth/weak-password') msg = "Password terlalu lemah (min 6 karakter).";
+                
+                errorBox.innerText = msg;
+                errorBox.style.display = 'block';
+            } finally {
+                btn.innerText = "Daftar Sekarang";
                 btn.disabled = false;
             }
         }
     </script>
-
 </body>
 </html>

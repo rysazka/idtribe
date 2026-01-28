@@ -5,72 +5,88 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Super Admin - ID-TRIBE</title>
     
-    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     
     <script type="module" src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
     <script type="module" src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js"></script>
     <script type="module" src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"></script>
 
     <style>
-        :root { --admin-dark: #0f172a; --admin-accent: #3b82f6; --danger: #ef4444; --success: #10b981; --bg-light: #f1f5f9; }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Lato', sans-serif; }
-        body { display: flex; min-height: 100vh; background: var(--bg-light); }
+        /* --- SAMA SEPERTI SEBELUMNYA (TETAP AMAN) --- */
+        :root {
+            --primary: #059669; --primary-dark: #047857; --accent: #f59e0b;
+            --dark: #0f172a; --light: #f8fafc; --sidebar-bg: #111827;
+            --font-head: 'Outfit', sans-serif; --font-body: 'Plus Jakarta Sans', sans-serif;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: var(--font-body); background-color: #f1f5f9; color: var(--dark); display: flex; min-height: 100vh; }
         
-        .sidebar { width: 250px; background: var(--admin-dark); color: white; display: flex; flex-direction: column; padding: 20px; position: fixed; height: 100vh; overflow-y: auto; }
-        .brand { font-size: 1.5rem; font-weight: bold; margin-bottom: 40px; display: flex; align-items: center; gap: 10px; }
+        .sidebar { width: 280px; background: var(--sidebar-bg); color: white; display: flex; flex-direction: column; padding: 25px; position: fixed; height: 100vh; overflow-y: auto; box-shadow: 4px 0 20px rgba(0,0,0,0.1); z-index: 100; }
+        .brand { font-family: var(--font-head); font-size: 1.6rem; font-weight: 800; margin-bottom: 40px; display: flex; align-items: center; gap: 12px; color: var(--primary); }
+        .brand i { background: rgba(5, 150, 105, 0.2); padding: 8px; border-radius: 8px; }
         
-        .nav-item { padding: 12px 15px; cursor: pointer; border-radius: 8px; margin-bottom: 5px; display: flex; align-items: center; gap: 10px; color: #94a3b8; transition: 0.3s; }
-        /* Style untuk menu yang aktif */
-        .nav-item:hover, .nav-item.active { background: rgba(255,255,255,0.1); color: white; font-weight: bold; border-left: 4px solid var(--admin-accent); }
+        .nav-item { padding: 14px 18px; cursor: pointer; border-radius: 12px; margin-bottom: 8px; display: flex; align-items: center; gap: 12px; color: #9ca3af; transition: 0.3s; font-weight: 500; }
+        .nav-item:hover { background: rgba(255,255,255,0.05); color: white; padding-left: 22px; }
+        .nav-item.active { background: linear-gradient(90deg, var(--primary), var(--primary-dark)); color: white; font-weight: 700; box-shadow: 0 4px 15px rgba(5, 150, 105, 0.4); }
+        .logout { margin-top: auto; color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2); }
         
-        .logout { margin-top: auto; color: var(--danger); }
-        
-        .main { flex: 1; margin-left: 250px; padding: 30px; }
+        .main { flex: 1; margin-left: 280px; padding: 40px; background-image: radial-gradient(at 0% 0%, hsla(152,100%,93%,0.5) 0, transparent 50%), radial-gradient(at 100% 100%, hsla(43,100%,93%,0.5) 0, transparent 50%); min-height: 100vh; }
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
-        .page-title { font-size: 1.8rem; font-weight: bold; color: var(--admin-dark); }
+        .page-title { font-family: var(--font-head); font-size: 2rem; font-weight: 800; color: var(--dark); }
         
-        .section { display: none; animation: fadeIn 0.3s ease; }
+        .section { display: none; animation: slideUp 0.4s ease-out; }
         .section.active { display: block; }
-        @keyframes fadeIn { from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:translateY(0);} }
+        @keyframes slideUp { from{opacity:0; transform:translateY(20px);} to{opacity:1; transform:translateY(0);} }
         
-        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        .card { background: white; padding: 30px; border-radius: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); margin-bottom: 25px; border: 1px solid rgba(255,255,255,0.8); }
         
-        table { width: 100%; border-collapse: collapse; }
-        th, td { padding: 15px; text-align: left; border-bottom: 1px solid #e2e8f0; }
-        th { font-weight: 700; color: #64748b; font-size: 0.9rem; }
+        /* FORM & INPUT */
+        .form-group { margin-bottom: 20px; }
+        .form-label { display: block; margin-bottom: 8px; font-weight: 600; font-size: 0.9rem; }
+        .form-input { width: 100%; padding: 12px 15px; border: 2px solid #e5e7eb; border-radius: 10px; font-family: inherit; background: #f9fafb; transition: 0.3s; }
+        .form-input:focus { border-color: var(--primary); background: white; outline: none; }
         
-        .btn { padding: 8px 16px; border-radius: 6px; border: none; cursor: pointer; font-weight: 600; font-size: 0.85rem; }
-        .btn-green { background: var(--success); color: white; }
-        .btn-red { background: var(--danger); color: white; }
-        .btn-blue { background: var(--admin-accent); color: white; }
-        
-        .form-group { margin-bottom: 15px; }
-        .form-label { display: block; margin-bottom: 5px; font-weight: 600; }
-        .form-input { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; }
-        
-        /* Image Upload Styles */
-        .img-option { display: flex; gap: 15px; margin-bottom: 10px; }
-        .radio-label { display: flex; align-items: center; gap: 5px; cursor: pointer; font-size: 0.9rem; }
-        .file-preview { margin-top: 10px; width: 100%; height: 150px; border: 2px dashed #cbd5e1; border-radius: 6px; display: flex; align-items: center; justify-content: center; overflow: hidden; background: #f8fafc; color: #94a3b8; }
+        /* BUTTONS */
+        .btn { padding: 10px 20px; border-radius: 10px; border: none; cursor: pointer; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; justify-content: center; transition: 0.3s; font-size: 0.9rem; }
+        .btn:hover { transform: translateY(-2px); }
+        .btn-green { background: var(--primary); color: white; }
+        .btn-blue { background: #3b82f6; color: white; }
+        .btn-red { background: #ef4444; color: white; padding: 8px 12px; font-size: 0.8rem; }
+        .btn-warning { background: var(--accent); color: white; }
+        .btn-gray { background: #64748b; color: white; }
+
+        /* TABLE */
+        table { width: 100%; border-collapse: separate; border-spacing: 0; }
+        th { text-align: left; padding: 15px; background: #f8fafc; color: #64748b; font-weight: 700; font-size: 0.85rem; text-transform: uppercase; border-bottom: 2px solid #e2e8f0; }
+        td { padding: 15px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; font-size: 0.95rem; }
+        tr:hover td { background: #f8fafc; }
+
+        /* QUIZ */
+        .quiz-container { background: #f0fdf4; border: 1px dashed var(--primary); padding: 20px; border-radius: 16px; margin-top: 15px; }
+        .quiz-item { background: white; border: 1px solid #e2e8f0; padding: 20px; border-radius: 12px; margin-bottom: 15px; position: relative; }
+        .quiz-delete { position: absolute; top: 15px; right: 15px; color: #ef4444; cursor: pointer; }
+        .option-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px; }
+
+        /* IMAGE UPLOAD */
+        .file-preview { margin-top: 10px; width: 100%; height: 180px; border: 2px dashed #cbd5e1; border-radius: 12px; display: flex; align-items: center; justify-content: center; overflow: hidden; background: #f8fafc; }
         .file-preview img { width: 100%; height: 100%; object-fit: cover; }
+        .img-option { display: flex; gap: 20px; margin-bottom: 10px; }
         
-        /* Spec Info Box */
-        .info-box { background: #e0f2fe; border: 1px solid #bae6fd; color: #0369a1; padding: 15px; border-radius: 8px; font-size: 0.85rem; line-height: 1.5; margin-bottom: 20px; }
-        .info-box strong { display: block; margin-bottom: 5px; }
+        .info-box { background: #eff6ff; border-left: 4px solid #3b82f6; color: #1e40af; padding: 15px; border-radius: 8px; font-size: 0.9rem; margin-bottom: 20px; display: flex; gap: 10px; }
     </style>
 </head>
 <body>
 
     <nav class="sidebar">
-        <div class="brand"><i class="fas fa-shield-alt"></i> ID-TRIBE Admin</div>
-        
+        <div class="brand"><i class="fas fa-cube"></i> ID-TRIBE <span style="color:var(--primary);">Admin</span></div>
         <div class="nav-item active" onclick="switchTab('validasi', this)"><i class="fas fa-check-circle"></i> Validasi UMKM</div>
         <div class="nav-item" onclick="switchTab('cms', this)"><i class="fas fa-video"></i> CMS Training</div>
-        <div class="nav-item" onclick="switchTab('artikel', this)"><i class="fas fa-newspaper"></i> Manajemen Artikel</div>
-        <div class="nav-item" onclick="switchTab('forum', this)"><i class="fas fa-comments"></i> Moderasi Forum</div>
-        <div class="nav-item" onclick="switchTab('users', this)"><i class="fas fa-users"></i> Manajemen User</div>
-        
+        <div class="nav-item" onclick="switchTab('artikel', this)"><i class="fas fa-newspaper"></i> Artikel</div>
+        <div class="nav-item" onclick="switchTab('forum', this)"><i class="fas fa-comments"></i> Forum</div>
+        <div class="nav-item" onclick="switchTab('users', this)"><i class="fas fa-users"></i> Pengguna</div>
         <div class="nav-item logout" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Keluar</div>
     </nav>
 
@@ -78,94 +94,99 @@
         
         <div id="validasi" class="section active">
             <div class="header"><h1 class="page-title">Validasi Legalitas</h1></div>
-            <div class="card"><table id="tableValidasi"><thead><tr><th>Nama Usaha</th><th>NIB</th><th>Status</th><th>Aksi</th></tr></thead><tbody></tbody></table></div>
+            <div class="card">
+                <table id="tableValidasi">
+                    <thead><tr><th>Nama Usaha</th><th>Pemilik</th><th>NIB</th><th>Status</th><th>Aksi</th></tr></thead>
+                    <tbody><tr><td colspan="5" align="center">Memuat data...</td></tr></tbody>
+                </table>
+            </div>
         </div>
 
         <div id="cms" class="section">
-            <div class="header"><h1 class="page-title">Upload Materi Belajar</h1></div>
-            <div class="card">
-                <form onsubmit="handleAddCourse(event)">
-                    <div class="form-group"><label class="form-label">Judul Materi</label><input type="text" id="courseTitle" class="form-input" required></div>
-                    <div class="form-group"><label class="form-label">Kategori</label><select id="courseCat" class="form-input"><option value="digital">Digital</option><option value="finance">Keuangan</option></select></div>
-                    <button type="submit" class="btn btn-blue">Upload Materi</button>
-                </form>
+            <div class="header"><h1 class="page-title">Materi & Ujian</h1></div>
+            <div style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 30px;">
+                <div class="card">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                        <h3 class="card-title" id="formTitle">Buat Modul Baru</h3>
+                        <button id="btnCancelEdit" class="btn btn-gray" style="display:none; font-size:0.8rem;" onclick="cancelEditMode()">Batal</button>
+                    </div>
+                    <form onsubmit="handleCourseSubmit(event)">
+                        <div class="form-group"><label class="form-label">Judul Modul</label><input type="text" id="c_title" class="form-input" required></div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                            <div class="form-group"><label class="form-label">Kategori</label><select id="c_sector" class="form-input"><option value="digital">Digital</option><option value="finance">Finance</option><option value="legal">Legal</option><option value="ops">Ops</option><option value="network">Network</option></select></div>
+                            <div class="form-group"><label class="form-label">Level</label><select id="c_level" class="form-input"><option value="Beginner">Beginner</option><option value="Intermediate">Intermediate</option><option value="Advanced">Advanced</option></select></div>
+                        </div>
+                        <div class="form-group"><label class="form-label">Deskripsi</label><textarea id="c_desc" class="form-input" rows="3" required></textarea></div>
+                        <div class="form-group" style="background:#fffbeb; padding:15px; border-radius:10px; border:1px dashed #f59e0b;">
+                            <label class="form-label" style="color:#b45309;">Link Konten</label>
+                            <input type="text" id="c_url" class="form-input" placeholder="YouTube URL" style="margin-bottom:10px;" required>
+                            <input type="text" id="c_file" class="form-input" placeholder="PDF/Drive URL (Opsional)">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" style="display:flex; justify-content:space-between; align-items:center;">
+                                <span>📝 Quiz Builder</span>
+                                <button type="button" class="btn btn-green" style="font-size:0.75rem; padding:6px 12px;" onclick="addQuestion()">+ Soal</button>
+                            </label>
+                            <div id="quizBuilder" class="quiz-container"></div>
+                        </div>
+                        <button type="submit" id="btnSubmitCourse" class="btn btn-blue" style="width:100%">Simpan & Publish</button>
+                    </form>
+                </div>
+                <div class="card">
+                    <h3 class="card-title" style="margin-bottom: 20px;">Daftar Materi</h3>
+                    <table id="tableCourses"><thead><tr><th>Modul</th><th>Level</th><th>Aksi</th></tr></thead><tbody><tr><td colspan="3">Memuat...</td></tr></tbody></table>
+                </div>
             </div>
         </div>
 
         <div id="artikel" class="section">
             <div class="header"><h1 class="page-title">Manajemen Artikel</h1></div>
-            
-            <div class="info-box">
-                <strong>📸 Spesifikasi Teknis Foto:</strong>
-                • <strong>Format:</strong> JPG, PNG, atau WEBP.<br>
-                • <strong>Ukuran File:</strong> Maksimal 2MB (Sistem akan otomatis mengompres jika lebih besar).<br>
-                • <strong>Dimensi:</strong> Disarankan Landscape (16:9), minimal 800x450 pixel agar tidak pecah.<br>
-                • <strong>Fitur:</strong> Sistem menggunakan Base64 Compression untuk menyimpan gambar langsung di database tanpa server storage tambahan.
-            </div>
-
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
                 <div class="card">
-                    <h3 style="margin-bottom: 20px;">Tulis Artikel Baru</h3>
+                    <h3 class="card-title" style="margin-bottom: 20px;">Artikel Baru</h3>
                     <form onsubmit="handleAddArticle(event)">
-                        
+                        <div class="form-group"><label class="form-label">Judul</label><input type="text" id="artTitle" class="form-input" required></div>
+                        <div class="form-group"><label class="form-label">Headline</label><textarea id="artHeadline" class="form-input" rows="2" required></textarea></div>
                         <div class="form-group">
-                            <label class="form-label">Judul Artikel</label>
-                            <input type="text" id="artTitle" class="form-input" placeholder="Judul utama..." required>
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Headline</label>
-                            <textarea id="artHeadline" class="form-input" rows="2" placeholder="Teks singkat..." required></textarea>
-                        </div>
-
-                        <div class="form-group" style="background:#f8fafc; padding:15px; border-radius:8px; border:1px solid #e2e8f0;">
-                            <label class="form-label">Foto Utama</label>
-                            
+                            <label class="form-label">Gambar</label>
                             <div class="img-option">
-                                <label class="radio-label"><input type="radio" name="imgSource" value="url" checked onclick="toggleImgInput('url')"> Pakai URL Link</label>
-                                <label class="radio-label"><input type="radio" name="imgSource" value="local" onclick="toggleImgInput('local')"> Upload dari Komputer</label>
+                                <label><input type="radio" name="imgSource" value="url" checked onclick="toggleImgInput('url')"> URL</label>
+                                <label><input type="radio" name="imgSource" value="local" onclick="toggleImgInput('local')"> Upload</label>
                             </div>
-
-                            <div id="inputUrlBox">
-                                <input type="text" id="artMainImg" class="form-input" placeholder="https://..." onchange="previewUrl(this.value)">
-                            </div>
-
-                            <div id="inputLocalBox" style="display:none;">
-                                <input type="file" id="artLocalFile" class="form-input" accept="image/*" onchange="handleFileSelect(event)">
-                            </div>
-
-                            <div class="file-preview" id="imgPreview">
-                                <span>Preview Gambar</span>
-                            </div>
+                            <div id="inputUrlBox"><input type="text" id="artMainImg" class="form-input" placeholder="https://..." onchange="previewUrl(this.value)"></div>
+                            <div id="inputLocalBox" style="display:none;"><input type="file" id="artLocalFile" class="form-input" accept="image/*" onchange="handleFileSelect(event)"></div>
+                            <div class="file-preview" id="imgPreview"><span>Preview</span></div>
                             <input type="hidden" id="finalImageBase64">
                         </div>
-
-                        <div class="form-group">
-                            <label class="form-label">Isi Berita</label>
-                            <textarea id="artContent" class="form-input" rows="8" placeholder="Isi artikel..." required></textarea>
-                        </div>
-
-                        <button type="submit" class="btn btn-blue" style="width:100%">Publish Artikel</button>
+                        <div class="form-group"><label class="form-label">Konten</label><textarea id="artContent" class="form-input" rows="6" required></textarea></div>
+                        <button type="submit" class="btn btn-blue" style="width:100%">Publish</button>
                     </form>
                 </div>
-
                 <div class="card">
-                    <h3 style="margin-bottom: 20px;">Daftar Artikel</h3>
-                    <table id="tableArtikel">
-                        <thead><tr><th>Judul</th><th>Aksi</th></tr></thead>
-                        <tbody><tr><td colspan="2">Memuat...</td></tr></tbody>
-                    </table>
+                    <h3 class="card-title" style="margin-bottom:20px;">Arsip</h3>
+                    <table id="tableArtikel"><thead><tr><th>Judul</th><th>Aksi</th></tr></thead><tbody></tbody></table>
                 </div>
             </div>
         </div>
 
         <div id="forum" class="section">
             <div class="header"><h1 class="page-title">Moderasi Forum</h1></div>
-            <div class="card"><table id="tableForum"><thead><tr><th>Topik</th><th>Penulis</th><th>Aksi</th></tr></thead><tbody></tbody></table></div>
+            <div class="card">
+                <table id="tableForum">
+                    <thead><tr><th>Topik</th><th>Kategori</th><th>Penulis</th><th>Aksi</th></tr></thead>
+                    <tbody><tr><td colspan="4" align="center">Memuat data...</td></tr></tbody>
+                </table>
+            </div>
         </div>
 
         <div id="users" class="section">
-            <div class="header"><h1 class="page-title">Manajemen User</h1></div>
-            <div class="card"><table id="tableUsers"><thead><tr><th>Nama</th><th>Email</th><th>Aksi</th></tr></thead><tbody></tbody></table></div>
+            <div class="header"><h1 class="page-title">Data Pengguna</h1></div>
+            <div class="card">
+                <table id="tableUsers">
+                    <thead><tr><th>Nama</th><th>Email</th><th>Nama Usaha</th><th>Role</th><th>Aksi</th></tr></thead>
+                    <tbody><tr><td colspan="5" align="center">Memuat data...</td></tr></tbody>
+                </table>
+            </div>
         </div>
 
     </main>
@@ -173,9 +194,8 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, query, orderBy, where, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, getDocs, deleteDoc, updateDoc, doc, query, orderBy, where, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        // CONFIG
         const firebaseConfig = {
             apiKey: "AIzaSyBIaLzkNM0KqPVKxuMNmardLqcrr2kYTWQ",
             authDomain: "database-idbm.firebaseapp.com",
@@ -190,169 +210,288 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
+        // VARS
+        let isEditingCourse = false;
+        let editingCourseId = null;
+
         // AUTH
         onAuthStateChanged(auth, async (user) => {
             if(user) {
                 const snap = await getDoc(doc(db, "users_umkm", user.uid));
-                if (snap.data().role !== 'admin') window.location.href = "dashboard.html";
-                else loadAllData();
+                if (snap.exists() && snap.data().role === 'admin') {
+                    loadAllData();
+                } else {
+                    window.location.href = "dashboard.html";
+                }
             } else {
                 window.location.href = "login.html";
             }
         });
 
         function loadAllData() {
+            loadCourses(); 
             loadArticles();
-            loadValidasi();
-            loadForum();
+            loadValidasi(); 
+            loadForum(); 
             loadUsers();
         }
 
-        // --- IMAGE HANDLING LOGIC ---
-        window.toggleImgInput = (type) => {
-            if(type === 'url') {
-                document.getElementById('inputUrlBox').style.display = 'block';
-                document.getElementById('inputLocalBox').style.display = 'none';
-            } else {
-                document.getElementById('inputUrlBox').style.display = 'none';
-                document.getElementById('inputLocalBox').style.display = 'block';
-            }
-            // Reset preview
-            document.getElementById('imgPreview').innerHTML = '<span>Preview Gambar</span>';
-            document.getElementById('finalImageBase64').value = '';
-        }
-
-        window.previewUrl = (url) => {
-            if(url) {
-                document.getElementById('imgPreview').innerHTML = `<img src="${url}">`;
-                document.getElementById('finalImageBase64').value = url; // Simpan URL sebagai final value
-            }
-        }
-
-        window.handleFileSelect = (event) => {
-            const file = event.target.files[0];
-            if (file) {
-                if(file.size > 5 * 1024 * 1024) { // Cek awal 5MB
-                    alert("File terlalu besar! Maksimum 5MB.");
-                    event.target.value = "";
-                    return;
-                }
+        // --- 1. LOAD VALIDASI (FIXED) ---
+        async function loadValidasi() {
+            const tbody = document.querySelector('#tableValidasi tbody');
+            tbody.innerHTML = '<tr><td colspan="5" align="center">Memuat...</td></tr>';
+            try {
+                // Asumsi: UMKM yang perlu validasi ada di 'users_umkm' atau collection khusus
+                const q = query(collection(db, "users_umkm"), where("role", "==", "umkm")); // Contoh filter
+                const snap = await getDocs(q);
                 
-                // Kompresi Gambar
-                const reader = new FileReader();
-                reader.readAsDataURL(file);
-                reader.onload = (e) => {
-                    const img = new Image();
-                    img.src = e.target.result;
-                    img.onload = () => {
-                        const canvas = document.createElement('canvas');
-                        const ctx = canvas.getContext('2d');
-                        
-                        // Resize logic (Max width 800px)
-                        const maxWidth = 800;
-                        const scaleSize = maxWidth / img.width;
-                        canvas.width = maxWidth;
-                        canvas.height = img.height * scaleSize;
+                if(snap.empty) { tbody.innerHTML = '<tr><td colspan="5" align="center">Tidak ada data UMKM.</td></tr>'; return; }
+                
+                tbody.innerHTML = "";
+                snap.forEach(doc => {
+                    const d = doc.data();
+                    const status = d.is_verified ? 
+                        '<span style="background:#dcfce7; color:#166534; padding:2px 8px; border-radius:5px; font-size:0.8rem;">Terverifikasi</span>' : 
+                        '<span style="background:#fee2e2; color:#b91c1c; padding:2px 8px; border-radius:5px; font-size:0.8rem;">Pending</span>';
+                    
+                    const btnAction = d.is_verified ? 
+                        `<button class="btn-red" onclick="toggleVerify('${doc.id}', false)">Batal</button>` : 
+                        `<button class="btn-green" style="padding:5px 10px; font-size:0.8rem;" onclick="toggleVerify('${doc.id}', true)">Validasi</button>`;
 
-                        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                        
-                        // Convert to compressed Base64 (JPEG quality 0.7)
-                        const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7);
-                        
-                        // Tampilkan Preview & Simpan ke Hidden Input
-                        document.getElementById('imgPreview').innerHTML = `<img src="${compressedBase64}">`;
-                        document.getElementById('finalImageBase64').value = compressedBase64;
-                    }
-                };
+                    tbody.innerHTML += `
+                    <tr>
+                        <td><strong>${d.nama_usaha || "-"}</strong></td>
+                        <td>${d.nama_lengkap || "-"}</td>
+                        <td>${d.nib || "Belum ada"}</td>
+                        <td>${status}</td>
+                        <td>${btnAction}</td>
+                    </tr>`;
+                });
+            } catch(e) { console.error(e); tbody.innerHTML = '<tr><td colspan="5" align="center">Error memuat data.</td></tr>'; }
+        }
+
+        window.toggleVerify = async (uid, status) => {
+            if(confirm(status ? "Validasi UMKM ini?" : "Batalkan validasi?")) {
+                await updateDoc(doc(db, "users_umkm", uid), { is_verified: status });
+                loadValidasi();
             }
         }
 
-        // --- CRUD ARTIKEL ---
+        // --- 2. LOAD FORUM (FIXED) ---
+        async function loadForum() {
+            const tbody = document.querySelector('#tableForum tbody');
+            try {
+                const q = query(collection(db, "forum_threads"), orderBy("timestamp", "desc"));
+                const snap = await getDocs(q);
+                tbody.innerHTML = "";
+                
+                if(snap.empty) { tbody.innerHTML = '<tr><td colspan="4" align="center">Belum ada diskusi.</td></tr>'; return; }
+
+                snap.forEach(doc => {
+                    const d = doc.data();
+                    tbody.innerHTML += `
+                    <tr>
+                        <td>${d.title}</td>
+                        <td><span style="background:#e0f2fe; color:#0284c7; padding:2px 8px; border-radius:5px; font-size:0.8rem;">${d.category}</span></td>
+                        <td>${d.author_name}</td>
+                        <td><button class="btn-red" onclick="deleteData('forum_threads', '${doc.id}')"><i class="fas fa-trash"></i></button></td>
+                    </tr>`;
+                });
+            } catch(e) { console.error(e); }
+        }
+
+        // --- 3. LOAD USERS (FIXED) ---
+        async function loadUsers() {
+            const tbody = document.querySelector('#tableUsers tbody');
+            try {
+                const snap = await getDocs(collection(db, "users_umkm"));
+                tbody.innerHTML = "";
+                
+                snap.forEach(doc => {
+                    const d = doc.data();
+                    tbody.innerHTML += `
+                    <tr>
+                        <td>${d.nama_lengkap}</td>
+                        <td>${d.email}</td>
+                        <td>${d.nama_usaha || "-"}</td>
+                        <td>${d.role}</td>
+                        <td><button class="btn-red" onclick="deleteData('users_umkm', '${doc.id}')"><i class="fas fa-trash"></i></button></td>
+                    </tr>`;
+                });
+            } catch(e) { console.error(e); }
+        }
+
+        // --- CMS & ARTIKEL (LOGIC LAMA TAPI DIIMPLEMENTASIKAN ULANG) ---
+        window.addQuestion = (data = null) => {
+            const container = document.getElementById('quizBuilder');
+            const qCount = container.children.length + 1;
+            const qVal = data ? data.question : "";
+            const opts = data ? data.options : ["", "", "", ""];
+            const corr = data ? data.correct : 0;
+
+            const html = `
+            <div class="quiz-item" id="q-${qCount}">
+                <div class="quiz-delete" onclick="this.parentElement.remove()"><i class="fas fa-trash"></i></div>
+                <div class="form-group" style="margin-bottom:10px;">
+                    <label style="font-size:0.85rem;">Pertanyaan</label>
+                    <input type="text" class="form-input q-text" value="${qVal}" required>
+                </div>
+                <div class="option-row">
+                    ${opts.map((o, i) => `<input type="text" class="form-input q-opt-${i}" placeholder="Opsi ${String.fromCharCode(65+i)}" value="${o}" required>`).join('')}
+                </div>
+                <div style="margin-top:10px;">
+                    <label style="font-size:0.8rem;">Jawaban Benar:</label>
+                    <select class="form-input q-correct" style="width:100px;">
+                        ${[0,1,2,3].map(i => `<option value="${i}" ${corr === i ? 'selected' : ''}>${String.fromCharCode(65+i)}</option>`).join('')}
+                    </select>
+                </div>
+            </div>`;
+            container.insertAdjacentHTML('beforeend', html);
+        }
+
+        window.handleCourseSubmit = async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('btnSubmitCourse');
+            const quizData = [];
+            document.querySelectorAll('.quiz-item').forEach(item => {
+                quizData.push({
+                    question: item.querySelector('.q-text').value,
+                    options: [0,1,2,3].map(i => item.querySelector(`.q-opt-${i}`).value),
+                    correct: parseInt(item.querySelector('.q-correct').value)
+                });
+            });
+
+            if (quizData.length === 0) { alert("Buat minimal 1 soal!"); return; }
+            btn.innerHTML = "Memproses..."; btn.disabled = true;
+
+            const payload = {
+                title: document.getElementById('c_title').value,
+                sector: document.getElementById('c_sector').value,
+                level: document.getElementById('c_level').value,
+                desc: document.getElementById('c_desc').value,
+                url: document.getElementById('c_url').value,
+                file_url: document.getElementById('c_file').value || "",
+                quiz_data: quizData,
+                timestamp: new Date()
+            };
+
+            try {
+                if (isEditingCourse) {
+                    await updateDoc(doc(db, "courses", editingCourseId), payload);
+                    alert("Updated!"); cancelEditMode();
+                } else {
+                    await addDoc(collection(db, "courses"), payload);
+                    alert("Created!"); e.target.reset(); document.getElementById('quizBuilder').innerHTML = "";
+                }
+                loadCourses();
+            } catch(e) { alert(e.message); }
+            finally { btn.innerHTML = isEditingCourse ? "Update" : "Simpan & Publish"; btn.disabled = false; }
+        }
+
+        window.editCourse = async (id) => {
+            const snap = await getDoc(doc(db, "courses", id));
+            if(snap.exists()) {
+                const d = snap.data();
+                document.getElementById('c_title').value = d.title;
+                document.getElementById('c_sector').value = d.sector;
+                document.getElementById('c_level').value = d.level;
+                document.getElementById('c_desc').value = d.desc;
+                document.getElementById('c_url').value = d.url;
+                document.getElementById('c_file').value = d.file_url || "";
+                
+                const qb = document.getElementById('quizBuilder'); qb.innerHTML = "";
+                if(d.quiz_data) d.quiz_data.forEach(q => addQuestion(q));
+
+                isEditingCourse = true; editingCourseId = id;
+                document.getElementById('formTitle').innerText = "Edit Modul";
+                document.getElementById('btnSubmitCourse').innerText = "Update Course";
+                document.getElementById('btnCancelEdit').style.display = "block";
+                document.getElementById('cms').scrollIntoView();
+            }
+        }
+
+        window.cancelEditMode = () => {
+            isEditingCourse = false; editingCourseId = null;
+            document.querySelector('#cms form').reset();
+            document.getElementById('quizBuilder').innerHTML = "";
+            document.getElementById('formTitle').innerText = "Buat Modul Baru";
+            document.getElementById('btnSubmitCourse').innerText = "Simpan & Publish";
+            document.getElementById('btnCancelEdit').style.display = "none";
+        }
+
+        async function loadCourses() {
+            const tbody = document.querySelector('#tableCourses tbody');
+            const q = query(collection(db, "courses"), orderBy("timestamp", "desc"));
+            const snap = await getDocs(q);
+            tbody.innerHTML = "";
+            snap.forEach(doc => {
+                const d = doc.data();
+                tbody.innerHTML += `
+                <tr>
+                    <td><strong>${d.title}</strong><br><small>${d.sector}</small></td>
+                    <td>${d.level}</td>
+                    <td>
+                        <button class="btn-warning" style="padding:5px;" onclick="editCourse('${doc.id}')"><i class="fas fa-edit"></i></button>
+                        <button class="btn-red" style="padding:5px;" onclick="deleteData('courses', '${doc.id}')"><i class="fas fa-trash"></i></button>
+                    </td>
+                </tr>`;
+            });
+        }
+
+        // --- ARTIKEL ---
         window.handleAddArticle = async (e) => {
             e.preventDefault();
-            const btn = e.target.querySelector('button');
-            const finalImg = document.getElementById('finalImageBase64').value;
-            
-            if(!finalImg) {
-                alert("Harap masukkan URL gambar atau upload foto!");
-                return;
-            }
-
-            btn.innerText = "Menyimpan...";
-            btn.disabled = true;
-            
-            try {
-                await addDoc(collection(db, "articles"), {
-                    title: document.getElementById('artTitle').value,
-                    headline: document.getElementById('artHeadline').value,
-                    mainImage: finalImg, // Menyimpan URL atau Base64 string
-                    content: document.getElementById('artContent').value,
-                    timestamp: new Date()
-                });
-                
-                alert("Artikel berhasil diterbitkan!");
-                e.target.reset();
-                document.getElementById('imgPreview').innerHTML = '<span>Preview Gambar</span>';
-                loadArticles();
-            } catch(err) { 
-                console.error(err);
-                alert("Gagal (Mungkin gambar terlalu besar): " + err.message); 
-            } finally {
-                btn.innerText = "Publish Artikel";
-                btn.disabled = false;
-            }
+            const img = document.getElementById('finalImageBase64').value;
+            if(!img) { alert("Gambar wajib!"); return; }
+            await addDoc(collection(db, "articles"), {
+                title: document.getElementById('artTitle').value,
+                headline: document.getElementById('artHeadline').value,
+                content: document.getElementById('artContent').value,
+                mainImage: img,
+                timestamp: new Date()
+            });
+            alert("Artikel Publish!"); e.target.reset(); loadArticles();
         }
 
         async function loadArticles() {
             const tbody = document.querySelector('#tableArtikel tbody');
-            tbody.innerHTML = '';
-            
-            try {
-                const q = query(collection(db, "articles"), orderBy("timestamp", "desc"));
-                const snapshot = await getDocs(q);
-                
-                if(snapshot.empty) {
-                    tbody.innerHTML = '<tr><td colspan="2" style="text-align:center">Belum ada artikel.</td></tr>';
-                    return;
-                }
-
-                snapshot.forEach(d => {
-                    const data = d.data();
-                    tbody.innerHTML += `
-                    <tr>
-                        <td>
-                            <strong>${data.title}</strong><br>
-                            <small style="color:#64748b">${data.headline.substring(0, 40)}...</small>
-                        </td>
-                        <td><button class="btn btn-red" onclick="deleteArticle('${d.id}')">Hapus</button></td>
-                    </tr>`;
-                });
-            } catch(e) { console.log(e); }
+            const q = query(collection(db, "articles"), orderBy("timestamp", "desc"));
+            const snap = await getDocs(q);
+            tbody.innerHTML = "";
+            snap.forEach(d => {
+                tbody.innerHTML += `<tr><td>${d.data().title}</td><td><button class="btn-red" onclick="deleteData('articles', '${d.id}')"><i class="fas fa-trash"></i></button></td></tr>`;
+            });
         }
 
-        window.deleteArticle = async (id) => {
-            if(confirm("Hapus artikel ini?")) {
-                await deleteDoc(doc(db, "articles", id));
-                loadArticles();
+        // --- UTILS ---
+        window.toggleImgInput = (type) => {
+            document.getElementById('inputUrlBox').style.display = type === 'url' ? 'block' : 'none';
+            document.getElementById('inputLocalBox').style.display = type === 'local' ? 'block' : 'none';
+        }
+        window.previewUrl = (url) => { if(url) { document.getElementById('imgPreview').innerHTML = `<img src="${url}">`; document.getElementById('finalImageBase64').value = url; } }
+        window.handleFileSelect = (e) => {
+            const file = e.target.files[0];
+            if(file) {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = (ev) => {
+                    document.getElementById('imgPreview').innerHTML = `<img src="${ev.target.result}">`;
+                    document.getElementById('finalImageBase64').value = ev.target.result;
+                }
             }
         }
 
-        // --- FUNGSI LAIN (Placeholder) ---
-        async function loadValidasi() { /* Logic lama... */ }
-        async function loadForum() { /* Logic lama... */ }
-        async function loadUsers() { /* Logic lama... */ }
-        window.handleAddCourse = async (e) => { e.preventDefault(); alert("Fitur Training CMS"); }
+        window.deleteData = async (col, id) => {
+            if(confirm("Hapus data ini?")) {
+                await deleteDoc(doc(db, col, id));
+                loadAllData();
+            }
+        }
 
-        // --- UTILS (PERBAIKAN SIDEBAR HIGHLIGHT) ---
         window.switchTab = (id, el) => {
-            // Hide all contents
             document.querySelectorAll('.section').forEach(e => e.classList.remove('active'));
-            // Show selected content
             document.getElementById(id).classList.add('active');
-            
-            // Remove active from all nav items
             document.querySelectorAll('.nav-item').forEach(e => e.classList.remove('active'));
-            // Add active to clicked nav item
             el.classList.add('active');
         }
         

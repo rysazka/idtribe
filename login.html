@@ -7,187 +7,116 @@
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Plus+Jakarta+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     
     <script type="module" src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
     <script type="module" src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js"></script>
+    <script type="module" src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"></script>
 
     <style>
         :root {
-            /* ID-TRIBE Palette */
-            --forest-green: #2E5C48;
-            --forest-green-dark: #1e3d2f;
-            --golden-orange: #F2994A;
-            --golden-orange-dark: #e88a38;
-            --text-dark: #1a1a1a;
-            --text-muted: #64748b;
-            --error-red: #ef4444;
-            
-            /* Glass Effect */
-            --glass-bg: rgba(255, 255, 255, 0.85); /* Lebih solid agar teks terbaca jelas */
-            --glass-border: rgba(255, 255, 255, 0.5);
-            --glass-blur: blur(20px);
-            --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+            --primary: #059669; --primary-dark: #047857;
+            --accent: #f59e0b; --dark: #0f172a; --error: #ef4444;
+            --font-head: 'Outfit', sans-serif;
+            --font-body: 'Plus Jakarta Sans', sans-serif;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
-            font-family: 'Lato', sans-serif;
+            font-family: var(--font-body);
             min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background-color: var(--forest-green);
-            position: relative;
-            overflow: hidden;
+            display: flex; align-items: center; justify-content: center;
+            background-color: #ecfdf5; position: relative; overflow: hidden;
         }
 
-        /* --- BACKGROUND --- */
-        .bg-image {
-            position: absolute; inset: 0;
-            background-image: url('https://images.unsplash.com/photo-1619338098121-5925681fc9ab?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1920');
-            background-size: cover; background-position: center;
-            z-index: -2;
-        }
-        .bg-overlay {
-            position: absolute; inset: 0;
-            background: linear-gradient(135deg, rgba(46, 92, 72, 0.9), rgba(46, 92, 72, 0.7));
-            z-index: -1;
-        }
+        /* --- ORNAMENTS --- */
+        .bg-shapes { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none; }
+        .blob { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.6; animation: float 10s infinite alternate; }
+        .blob-1 { top: -10%; left: -10%; width: 500px; height: 500px; background: #d1fae5; }
+        .blob-2 { bottom: 10%; right: -5%; width: 400px; height: 400px; background: #fef3c7; animation-delay: -5s; }
+        @keyframes float { 0% { transform: translate(0, 0); } 100% { transform: translate(30px, 50px); } }
 
         /* --- LOGIN CARD --- */
         .login-card {
-            background: var(--glass-bg);
-            backdrop-filter: var(--glass-blur);
-            border: 1px solid var(--glass-border);
-            border-radius: 24px;
-            padding: 40px;
-            width: 100%;
-            max-width: 420px;
-            box-shadow: var(--glass-shadow);
-            text-align: center;
-            margin: 20px;
-            animation: slideUp 0.6s ease-out;
+            background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.5); border-radius: 24px;
+            padding: 40px; width: 100%; max-width: 420px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.05); text-align: center;
+            position: relative; z-index: 10;
         }
 
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(30px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* --- BRANDING --- */
         .brand-logo {
-            width: 60px; height: 60px;
-            background: var(--forest-green);
-            color: white;
-            font-size: 1.5rem; font-weight: bold;
-            display: flex; align-items: center; justify-content: center;
-            border-radius: 16px;
-            margin: 0 auto 20px;
-            box-shadow: 0 4px 10px rgba(46, 92, 72, 0.3);
+            width: 60px; height: 60px; background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white; font-size: 1.5rem; font-weight: 800; border-radius: 16px;
+            display: flex; align-items: center; justify-content: center; margin: 0 auto 20px;
+            box-shadow: 0 10px 20px rgba(5, 150, 105, 0.3); font-family: var(--font-head);
         }
 
-        h2 { color: var(--text-dark); margin-bottom: 8px; font-weight: 700; font-size: 1.8rem; }
-        p.subtitle { color: var(--text-muted); margin-bottom: 30px; font-size: 0.95rem; }
+        h2 { font-family: var(--font-head); color: var(--dark); margin-bottom: 5px; font-weight: 800; font-size: 1.8rem; }
+        p.subtitle { color: #64748b; margin-bottom: 30px; font-size: 0.95rem; }
 
         /* --- FORM --- */
         .form-group { margin-bottom: 20px; text-align: left; }
-        .form-label { display: block; font-size: 0.9rem; font-weight: 600; color: var(--text-dark); margin-bottom: 8px; }
+        .form-label { display: block; font-size: 0.9rem; font-weight: 700; color: var(--dark); margin-bottom: 8px; }
         
         .form-input {
-            width: 100%;
-            padding: 12px 16px;
-            border-radius: 12px;
-            border: 2px solid #e2e8f0;
-            background: rgba(255, 255, 255, 0.8);
-            font-family: 'Lato', sans-serif;
-            font-size: 1rem;
-            color: var(--text-dark);
-            transition: all 0.3s ease;
+            width: 100%; padding: 14px; border-radius: 12px;
+            border: 2px solid #e2e8f0; background: #f8fafc;
+            font-family: inherit; font-size: 1rem; color: var(--dark); transition: 0.3s;
         }
-
-        .form-input:focus {
-            outline: none;
-            border-color: var(--forest-green);
-            background: white;
-            box-shadow: 0 0 0 4px rgba(46, 92, 72, 0.1);
-        }
+        .form-input:focus { outline: none; border-color: var(--primary); background: white; box-shadow: 0 0 0 4px rgba(5, 150, 105, 0.1); }
 
         /* --- BUTTONS --- */
         .btn-primary {
-            width: 100%;
-            padding: 14px;
-            border: none;
-            border-radius: 12px;
-            background: var(--golden-orange);
-            color: white;
-            font-size: 1rem; font-weight: 700;
-            cursor: pointer;
-            transition: all 0.3s;
-            box-shadow: 0 4px 12px rgba(242, 153, 74, 0.3);
+            width: 100%; padding: 15px; border: none; border-radius: 12px;
+            background: linear-gradient(135deg, var(--accent), #d97706);
+            color: white; font-size: 1rem; font-weight: 700; cursor: pointer;
+            transition: 0.3s; box-shadow: 0 10px 20px rgba(245, 158, 11, 0.3);
         }
-        .btn-primary:hover {
-            background: var(--golden-orange-dark);
-            transform: translateY(-2px);
-        }
-        .btn-primary:active { transform: translateY(0); }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 15px 30px rgba(245, 158, 11, 0.4); }
+        .btn-primary:disabled { background: #cbd5e1; cursor: not-allowed; transform: none; box-shadow: none; }
 
-        .auth-footer { margin-top: 25px; font-size: 0.9rem; color: var(--text-muted); }
-        .auth-link { color: var(--forest-green); text-decoration: none; font-weight: 600; }
+        .auth-footer { margin-top: 25px; font-size: 0.9rem; color: #64748b; }
+        .auth-link { color: var(--primary); text-decoration: none; font-weight: 700; }
         .auth-link:hover { text-decoration: underline; }
 
         .back-home {
-            display: inline-block;
-            margin-top: 20px;
-            color: rgba(255,255,255,0.8);
-            text-decoration: none;
-            font-size: 0.9rem;
-            transition: color 0.3s;
+            display: inline-block; margin-top: 20px; color: var(--primary-dark);
+            text-decoration: none; font-size: 0.9rem; font-weight: 600;
         }
-        .back-home:hover { color: white; }
 
-        /* --- ERROR MESSAGE --- */
+        /* --- ERROR & LOADING --- */
         #errorMessage {
-            color: var(--error-red);
-            font-size: 0.9rem;
-            margin-bottom: 15px;
-            background: rgba(239, 68, 68, 0.1);
-            padding: 10px;
-            border-radius: 8px;
-            display: none;
-            border: 1px solid rgba(239, 68, 68, 0.2);
+            color: var(--error); font-size: 0.9rem; margin-bottom: 20px;
+            background: #fef2f2; padding: 10px; border-radius: 8px;
+            display: none; border: 1px solid #fecaca;
         }
-
-        /* Loading Spinner */
-        .spinner {
-            display: none; width: 20px; height: 20px;
-            border: 3px solid rgba(255,255,255,0.3);
-            border-radius: 50%; border-top-color: white;
-            animation: spin 1s ease-in-out infinite; margin: 0 auto;
-        }
+        .spinner { display: none; width: 20px; height: 20px; border: 3px solid rgba(255,255,255,0.3); border-radius: 50%; border-top-color: white; animation: spin 1s infinite; margin: 0 auto; }
         @keyframes spin { to { transform: rotate(360deg); } }
-
     </style>
 </head>
 <body>
 
-    <div class="bg-image"></div>
-    <div class="bg-overlay"></div>
+    <div class="bg-shapes">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+    </div>
 
     <div style="z-index: 10; width: 100%; display:flex; flex-direction:column; align-items:center;">
         
         <div class="login-card">
             <div class="brand-logo">ID</div>
             <h2>Selamat Datang</h2>
-            <p class="subtitle">Masuk untuk mengelola bisnis UMKM Anda</p>
+            <p class="subtitle">Masuk untuk mengakses ekosistem ID-TRIBE</p>
 
             <div id="errorMessage">Email atau password salah.</div>
 
             <form id="loginForm">
                 <div class="form-group">
                     <label class="form-label">Email</label>
-                    <input type="email" id="email" class="form-input" placeholder="contoh@bisnis.com" required>
+                    <input type="email" id="email" class="form-input" placeholder="contoh@email.com" required>
                 </div>
                 
                 <div class="form-group">
@@ -202,7 +131,7 @@
             </form>
 
             <div class="auth-footer">
-                Belum punya akun? <a href="register.html" class="auth-link">Daftar Gratis</a>
+                Belum punya akun? <a href="register.html" class="auth-link">Daftar di sini</a>
             </div>
         </div>
 
@@ -214,7 +143,6 @@
     import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
     import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-    // Konfigurasi Firebase (PASTIKAN SAMA DENGAN SEBELUMNYA)
     const firebaseConfig = {
         apiKey: "AIzaSyBIaLzkNM0KqPVKxuMNmardLqcrr2kYTWQ",
         authDomain: "database-idbm.firebaseapp.com",
@@ -260,8 +188,10 @@
                     // --- LOGIC REDIRECT ROLE ---
                     if (userData.role === 'admin') {
                         window.location.href = "admin-dashboard.html";
+                    } else if (userData.role === 'coach') {
+                        window.location.href = "coach-dashboard.html";
                     } else {
-                        // Cek apakah sudah setup profil
+                        // Role UMKM
                         if(userData.status_setup === "completed") {
                             window.location.href = "dashboard.html";
                         } else {
@@ -269,13 +199,13 @@
                         }
                     }
                 } else {
-                    // Jika user ada di Auth tapi tidak ada di Firestore (Jaga-jaga)
+                    // Fallback jika data user tidak ditemukan
                     window.location.href = "setup-umkm.html";
                 }
             })
             .catch((error) => {
                 console.error(error);
-                errorMsg.innerText = "Email atau password salah / Akun diblokir.";
+                errorMsg.innerText = "Email atau password salah / Akun tidak ditemukan.";
                 errorMsg.style.display = 'block';
                 
                 btnSubmit.disabled = false;
@@ -283,6 +213,6 @@
                 btnSpinner.style.display = 'none';
             });
     });
-</script>
+    </script>
 </body>
 </html>

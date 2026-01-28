@@ -3,192 +3,247 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Training Hub - ID-TRIBE</title>
+    <title>Training Hub - ID-TRIBE Academy</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Plus+Jakarta+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     
     <script type="module" src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
     <script type="module" src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js"></script>
     <script type="module" src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"></script>
 
     <style>
-        /* --- DESIGN SYSTEM --- */
+        /* --- 1. MODERN VARIABLES --- */
         :root {
-            --forest-green: #2E5C48;
-            --forest-green-dark: #1e3d2f;
-            --forest-green-light: #e6f0eb;
-            --golden-orange: #F2994A;
-            --golden-orange-dark: #e88a38;
-            --text-dark: #1a1a1a;
-            --text-muted: #64748b;
+            --primary: #059669;
+            --primary-dark: #047857;
+            --primary-light: #d1fae5;
+            --accent: #f59e0b;
+            --dark: #0f172a;
+            --text-gray: #64748b;
             
-            /* Glass Effect */
-            --glass-bg: rgba(255, 255, 255, 0.95);
-            --glass-border: rgba(255, 255, 255, 0.5);
-            --glass-blur: blur(20px);
-            --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.1);
+            --glass-bg: rgba(255, 255, 255, 0.9);
+            --glass-border: 1px solid rgba(255, 255, 255, 0.6);
+            --shadow-soft: 0 10px 30px rgba(0, 0, 0, 0.05);
+            
+            --font-head: 'Outfit', sans-serif;
+            --font-body: 'Plus Jakarta Sans', sans-serif;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
-            font-family: 'Lato', sans-serif;
-            background-color: var(--forest-green);
-            color: var(--text-dark);
+            font-family: var(--font-body);
+            background-color: #f0fdf4;
+            color: var(--dark);
             min-height: 100vh;
             overflow-x: hidden;
+            /* Pola Latar Belakang Halus */
+            background-image: 
+                radial-gradient(at 0% 0%, hsla(152,100%,93%,1) 0, transparent 50%), 
+                radial-gradient(at 100% 100%, hsla(43,100%,93%,1) 0, transparent 50%);
         }
 
-        /* --- BACKGROUND --- */
-        .bg-image {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background-image: url('https://images.unsplash.com/photo-1619338098121-5925681fc9ab?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1920');
-            background-size: cover; background-position: center;
-            z-index: -2;
-        }
-        .bg-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(135deg, rgba(46, 92, 72, 0.95), rgba(46, 92, 72, 0.8));
-            z-index: -1;
-        }
+        /* --- 2. ORNAMENTS --- */
+        .bg-shapes { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none; }
+        .blob { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.6; animation: float 10s infinite alternate; }
+        .blob-1 { top: -10%; left: -10%; width: 500px; height: 500px; background: #d1fae5; }
+        .blob-2 { bottom: 10%; right: -5%; width: 400px; height: 400px; background: #fef3c7; animation-delay: -5s; }
+        @keyframes float { 0% { transform: translate(0, 0); } 100% { transform: translate(20px, 30px); } }
 
-        /* --- LAYOUT --- */
-        .container { max-width: 1100px; margin: 0 auto; padding: 40px 20px; position: relative; z-index: 10; }
+        /* --- 3. CONTAINER --- */
+        .container { max-width: 1200px; margin: 0 auto; padding: 30px 20px; position: relative; z-index: 10; }
 
-        /* Navigation */
-        .nav-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        /* HEADER & NAVIGATION */
+        .nav-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; }
         .back-btn {
-            display: flex; align-items: center; gap: 8px; color: white; text-decoration: none;
-            background: rgba(255,255,255,0.2); padding: 8px 16px; border-radius: 50px;
-            font-weight: 600; font-size: 0.9rem; transition: all 0.2s; backdrop-filter: blur(5px);
+            display: flex; align-items: center; gap: 8px; color: var(--primary-dark); text-decoration: none;
+            background: white; padding: 10px 20px; border-radius: 50px;
+            font-weight: 700; font-size: 0.95rem; transition: all 0.3s; 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
         }
-        .back-btn:hover { background: rgba(255,255,255,0.3); transform: translateX(-3px); }
+        .back-btn:hover { transform: translateX(-5px); box-shadow: 0 8px 20px rgba(0,0,0,0.1); }
+        .brand-logo { font-family: var(--font-head); font-weight: 800; font-size: 1.5rem; color: var(--primary); }
 
-        /* Hero Card */
+        /* HERO SECTION */
         .hero-hub {
-            background: var(--glass-bg); backdrop-filter: var(--glass-blur);
-            border-radius: 20px; padding: 40px; margin-bottom: 30px;
-            box-shadow: var(--glass-shadow); border: 1px solid var(--glass-border);
-            text-align: center;
+            text-align: center; margin-bottom: 50px; position: relative;
         }
-        .hero-hub h1 { color: var(--forest-green); font-size: 2rem; margin-bottom: 10px; font-weight: 800; }
-        .hero-hub p { color: var(--text-muted); max-width: 600px; margin: 0 auto; }
+        .hero-hub h1 { 
+            font-family: var(--font-head); font-size: 2.5rem; margin-bottom: 10px; font-weight: 800; 
+            color: var(--dark); letter-spacing: -1px;
+        }
+        .hero-hub p { color: var(--text-gray); max-width: 600px; margin: 0 auto; font-size: 1.1rem; line-height: 1.6; }
 
-        /* TABS & FILTERS */
-        .tabs-container { display: flex; justify-content: center; gap: 15px; margin-bottom: 30px; flex-wrap: wrap; }
+        /* TABS (NAVIGATION) */
+        .tabs-container { display: flex; justify-content: center; gap: 15px; margin-bottom: 40px; flex-wrap: wrap; }
         .tab-btn {
-            padding: 10px 24px; border-radius: 50px; border: none; cursor: pointer;
-            font-weight: 600; font-family: inherit; transition: all 0.3s;
-            background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3);
+            padding: 12px 30px; border-radius: 12px; border: none; cursor: pointer;
+            font-weight: 700; font-family: var(--font-body); transition: all 0.3s;
+            background: white; color: var(--text-gray); text-decoration: none; display: inline-block;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.02);
         }
-        .tab-btn.active { background: var(--golden-orange); color: white; border-color: var(--golden-orange); box-shadow: 0 4px 15px rgba(242, 153, 74, 0.4); }
-        .tab-btn:hover:not(.active) { background: rgba(255,255,255,0.4); }
+        .tab-btn.active { 
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark)); 
+            color: white; box-shadow: 0 10px 20px rgba(5, 150, 105, 0.3); transform: translateY(-2px);
+        }
+        .tab-btn:hover:not(.active) { transform: translateY(-2px); color: var(--primary); }
 
+        /* FILTER CHIPS (SCROLLABLE) */
         .filter-scroll {
-            display: flex; gap: 10px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 30px;
-            scrollbar-width: none; /* Hide scrollbar Firefox */
+            display: flex; gap: 12px; overflow-x: auto; padding-bottom: 20px; margin-bottom: 10px;
+            justify-content: center; /* Center on desktop */
+            scrollbar-width: none; /* Firefox hide scrollbar */
         }
-        .filter-scroll::-webkit-scrollbar { display: none; } /* Hide scrollbar Chrome */
+        .filter-scroll::-webkit-scrollbar { display: none; } /* Chrome hide scrollbar */
         
         .filter-chip {
-            padding: 8px 16px; border-radius: 12px; background: white;
-            border: 1px solid #e2e8f0; color: var(--text-muted); cursor: pointer;
-            white-space: nowrap; transition: all 0.2s; font-size: 0.9rem; font-weight: 500;
+            padding: 10px 20px; border-radius: 50px; background: white;
+            border: 1px solid #e2e8f0; color: var(--text-gray); cursor: pointer;
+            white-space: nowrap; transition: all 0.2s; font-size: 0.9rem; font-weight: 600;
+            display: flex; align-items: center; gap: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.02);
         }
-        .filter-chip.active { background: var(--forest-green); color: white; border-color: var(--forest-green); }
-        .filter-chip:hover:not(.active) { border-color: var(--forest-green); color: var(--forest-green); }
+        .filter-chip.active { 
+            background: var(--accent); color: white; border-color: var(--accent); 
+            box-shadow: 0 5px 15px rgba(245, 158, 11, 0.3); 
+        }
+        .filter-chip:hover:not(.active) { border-color: var(--primary); color: var(--primary); }
 
-        /* COURSE GRID */
-        .course-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 25px; }
+        /* COURSE GRID SYSTEM */
+        .course-grid { 
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); 
+            gap: 30px; padding-bottom: 50px; 
+        }
         
         .course-card {
-            background: white; border-radius: 16px; overflow: hidden;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05); border: 1px solid #e2e8f0;
-            transition: transform 0.2s; cursor: pointer; display: flex; flex-direction: column;
-            position: relative;
+            background: white; border-radius: 24px; overflow: hidden;
+            box-shadow: var(--shadow-soft); border: 1px solid white;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer; 
+            display: flex; flex-direction: column; position: relative; height: 100%;
         }
-        .course-card:hover { transform: translateY(-5px); border-color: var(--forest-green); }
+        .course-card:hover { 
+            transform: translateY(-10px); 
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1); 
+        }
         
+        /* Thumbnail Area */
         .card-thumb {
-            height: 160px; position: relative;
-            background: linear-gradient(135deg, #cbd5e1, #94a3b8);
+            height: 180px; position: relative;
+            background: linear-gradient(135deg, #e2e8f0, #cbd5e1);
             display: flex; align-items: center; justify-content: center;
+            overflow: hidden;
         }
+        .card-thumb::after { /* Shine Effect */
+            content: ''; position: absolute; top: 0; left: -100%; width: 50%; height: 100%;
+            background: linear-gradient(to right, transparent, rgba(255,255,255,0.3), transparent);
+            transform: skewX(-25deg); transition: 0.5s;
+        }
+        .course-card:hover .card-thumb::after { left: 150%; }
+
+        /* Category Colors Gradients */
+        .thumb-digital { background: linear-gradient(135deg, #3b82f6, #1d4ed8); } 
+        .thumb-finance { background: linear-gradient(135deg, #10b981, #047857); } 
+        .thumb-legal   { background: linear-gradient(135deg, #8b5cf6, #6d28d9); } 
+        .thumb-ops     { background: linear-gradient(135deg, #f59e0b, #b45309); } 
+        .thumb-network { background: linear-gradient(135deg, #ec4899, #be185d); } 
+
+        .thumb-icon { font-size: 3.5rem; color: rgba(255,255,255,0.9); filter: drop-shadow(0 4px 6px rgba(0,0,0,0.2)); }
         
-        /* Dynamic Thumb Colors */
-        .thumb-digital { background: linear-gradient(135deg, #e0f2fe, #7dd3fc); }
-        .thumb-finance { background: linear-gradient(135deg, #dcfce7, #86efac); }
-        .thumb-legal { background: linear-gradient(135deg, #fae8ff, #e879f9); }
-        .thumb-ops { background: linear-gradient(135deg, #fff7ed, #fdba74); }
-
-        .thumb-icon { font-size: 3rem; opacity: 0.5; }
         .status-overlay {
-            position: absolute; inset: 0; background: rgba(0,0,0,0.6);
+            position: absolute; inset: 0; background: rgba(15, 23, 42, 0.7);
             display: flex; align-items: center; justify-content: center;
-            color: white; font-weight: bold; flex-direction: column; gap: 5px;
-            backdrop-filter: blur(2px);
+            color: white; font-weight: 800; flex-direction: column; gap: 8px;
+            backdrop-filter: blur(4px); z-index: 2;
         }
 
-        .card-body { padding: 20px; flex: 1; display: flex; flex-direction: column; }
-        .badges { display: flex; gap: 8px; margin-bottom: 10px; }
-        .badge { padding: 4px 10px; border-radius: 6px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; }
-        .badge-level { background: #f1f5f9; color: var(--text-muted); }
-        .badge-sector { background: var(--forest-green-light); color: var(--forest-green); }
+        /* Card Content */
+        .card-body { padding: 25px; flex: 1; display: flex; flex-direction: column; }
+        
+        .badges { display: flex; gap: 8px; margin-bottom: 15px; flex-wrap: wrap; }
+        .badge { 
+            padding: 5px 12px; border-radius: 50px; font-size: 0.7rem; 
+            font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
+        }
+        .badge-sector { background: #ecfdf5; color: var(--primary); }
+        .badge-level { background: #f1f5f9; color: var(--text-gray); }
 
-        .card-title { font-size: 1.1rem; font-weight: 700; color: var(--text-dark); margin-bottom: 8px; line-height: 1.4; }
-        .card-desc { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 20px; flex: 1; }
+        .card-title { 
+            font-family: var(--font-head); font-size: 1.25rem; font-weight: 800; 
+            color: var(--dark); margin-bottom: 10px; line-height: 1.4;
+        }
+        .card-desc { 
+            font-size: 0.95rem; color: var(--text-gray); margin-bottom: 25px; 
+            flex: 1; line-height: 1.6;
+            display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+        }
 
-        .progress-bar { width: 100%; height: 6px; background: #e2e8f0; border-radius: 10px; overflow: hidden; }
-        .progress-fill { height: 100%; background: var(--golden-orange); width: 0%; }
+        .card-footer { margin-top: auto; }
+        .progress-container { display: flex; align-items: center; gap: 10px; }
+        .progress-bar { flex: 1; height: 8px; background: #f1f5f9; border-radius: 10px; overflow: hidden; }
+        .progress-fill { height: 100%; background: var(--accent); width: 0%; border-radius: 10px; }
+        .start-text { font-size: 0.85rem; font-weight: 700; color: var(--primary); display: flex; align-items: center; gap: 5px; }
 
         /* Locked State */
-        .course-card.locked { opacity: 0.7; filter: grayscale(0.8); cursor: not-allowed; }
-        .course-card.locked:hover { transform: none; border-color: #e2e8f0; }
+        .course-card.locked { opacity: 0.8; filter: grayscale(0.8); cursor: not-allowed; }
+        .course-card.locked:hover { transform: none; box-shadow: none; }
 
         /* Loader */
-        .loader { text-align: center; color: white; padding: 40px; font-size: 1.2rem; }
+        .loader-container { 
+            grid-column: 1 / -1; text-align: center; padding: 60px; 
+            background: white; border-radius: 20px; box-shadow: var(--shadow-soft);
+        }
+        .spinner { font-size: 2rem; color: var(--primary); animation: spin 1s linear infinite; }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
 
+        /* Responsive Fixes */
         @media (max-width: 768px) {
-            .hero-hub { padding: 25px; }
-            .hero-hub h1 { font-size: 1.5rem; }
+            .hero-hub h1 { font-size: 2rem; }
+            .filter-scroll { justify-content: flex-start; padding-left: 5px; } /* Align left on mobile */
+            .course-grid { grid-template-columns: 1fr; } /* Single column mobile */
         }
     </style>
 </head>
 <body>
 
-    <div class="bg-image"></div>
-    <div class="bg-overlay"></div>
+    <div class="bg-shapes">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+    </div>
 
     <div class="container">
         
         <div class="nav-header">
-            <a href="dashboard.html" class="back-btn">&larr; Dashboard</a>
-            <div style="color: white; font-weight: bold;">ID-TRIBE Academy</div>
+            <a href="dashboard.html" class="back-btn"><i class="fas fa-arrow-left"></i> Dashboard</a>
+            <div class="brand-logo">ID-TRIBE <span style="color:var(--accent);">ACADEMY</span></div>
         </div>
 
         <div class="hero-hub">
             <h1>Pusat Pelatihan UMKM</h1>
-            <p>Tingkatkan kapasitas bisnis Anda melalui modul terstruktur. Selesaikan kursus untuk membuka fitur pembiayaan dan kemitraan.</p>
+            <p>Tingkatkan kapasitas bisnis Anda melalui modul terstruktur. Pilih kategori pembelajaran sesuai kebutuhan pertumbuhan bisnis Anda saat ini.</p>
         </div>
 
         <div class="tabs-container">
-            <button class="tab-btn active" onclick="alert('Anda sedang di halaman ini')">📚 Modul Belajar</button>
-            <a href="coaching.html" class="tab-btn" style="text-decoration:none; display:inline-block;">👨‍🏫 Expert Coaching</a>
-            <a href="forum.html" class="tab-btn" style="text-decoration:none; display:inline-block;">💬 Forum Diskusi</a>
+            <button class="tab-btn active"><i class="fas fa-book-open"></i> Modul Belajar</button>
+            <a href="coaching.html" class="tab-btn"><i class="fas fa-chalkboard-teacher"></i> Expert Coaching</a>
+            <a href="community-forum.html" class="tab-btn"><i class="fas fa-comments"></i> Forum Diskusi</a>
         </div>
 
         <div class="filter-scroll">
-            <button class="filter-chip active" onclick="filterCourses('all', this)">Semua</button>
-            <button class="filter-chip" onclick="filterCourses('digital', this)">📱 Digital</button>
-            <button class="filter-chip" onclick="filterCourses('finance', this)">💰 Keuangan</button>
-            <button class="filter-chip" onclick="filterCourses('legal', this)">⚖️ Legalitas</button>
-            <button class="filter-chip" onclick="filterCourses('ops', this)">⚙️ Operasional</button>
+            <button class="filter-chip active" onclick="filterCourses('all', this)">Semua Modul</button>
+            <button class="filter-chip" onclick="filterCourses('digital', this)"><i class="fas fa-laptop-code"></i> Digital & Marketing</button>
+            <button class="filter-chip" onclick="filterCourses('finance', this)"><i class="fas fa-chart-line"></i> Financial Mgmt</button>
+            <button class="filter-chip" onclick="filterCourses('legal', this)"><i class="fas fa-balance-scale"></i> Legal & Compliance</button>
+            <button class="filter-chip" onclick="filterCourses('ops', this)"><i class="fas fa-cogs"></i> Ops & Productivity</button>
+            <button class="filter-chip" onclick="filterCourses('network', this)"><i class="fas fa-users"></i> Networking</button>
         </div>
 
         <div id="courseContainer" class="course-grid">
-            <div class="loader">Memuat materi pembelajaran...</div>
+            <div class="loader-container">
+                <i class="fas fa-circle-notch spinner"></i>
+                <p style="margin-top:15px; color:#64748b;">Sedang memuat materi pembelajaran...</p>
+            </div>
         </div>
 
     </div>
@@ -196,10 +251,8 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        // FIX: Import 'query', 'collection', 'getDocs' ditambahkan di sini
         import { getFirestore, doc, getDoc, query, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        // FIREBASE CONFIG
         const firebaseConfig = {
             apiKey: "AIzaSyBIaLzkNM0KqPVKxuMNmardLqcrr2kYTWQ",
             authDomain: "database-idbm.firebaseapp.com",
@@ -217,14 +270,12 @@
         let userData = {};
         let coursesDB = [];
 
-        // CHECK AUTH
-        // FIX: Typo 'onAutonAuthStateChanged' diperbaiki menjadi 'onAuthStateChanged'
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 const docSnap = await getDoc(doc(db, "users_umkm", user.uid));
                 if (docSnap.exists()) {
                     userData = docSnap.data();
-                    await loadCoursesFromFirestore(); // Ambil data dulu baru render
+                    await loadCoursesFromFirestore();
                 }
             } else {
                 window.location.href = "login.html";
@@ -233,150 +284,105 @@
 
         async function loadCoursesFromFirestore() {
             try {
-                // FIX: Menggunakan query dan collection yang sudah diimport
                 const q = query(collection(db, "courses")); 
                 const snapshot = await getDocs(q);
                 
-                coursesDB = []; // Reset array
+                coursesDB = []; 
                 
                 if (!snapshot.empty) {
                     snapshot.forEach(doc => {
-                        const data = doc.data();
-                        coursesDB.push({
-                            id: doc.id, // Gunakan ID dokumen sebagai Course ID
-                            ...data
-                        });
+                        coursesDB.push({ id: doc.id, ...doc.data() });
                     });
                 } 
 
-                // OPTIONAL: Data Manual jika database kosong (agar tidak blank saat demo)
+                // Fallback Data if empty
                 if (coursesDB.length === 0) {
                     coursesDB = [
-                        {
-                            id: "digital_beginner",
-                            title: "Setup Profil Digital",
-                            sector: "digital",
-                            level: "Beginner",
-                            desc: "Optimasi WhatsApp Business & Google Maps.",
-                            url: "course-player.html",
-                            icon: "📱"
-                        },
-                        {
-                            id: "digital_intermediate",
-                            title: "Konten & Social Media",
-                            sector: "digital",
-                            level: "Intermediate",
-                            desc: "Strategi konten Instagram & TikTok untuk jualan.",
-                            url: "course-player-intermediate.html",
-                            icon: "📸"
-                        },
-                        {
-                            id: "digital_advanced",
-                            title: "Ads & Website",
-                            sector: "digital",
-                            level: "Advanced",
-                            desc: "Facebook Ads dan membuat website toko online.",
-                            url: "course-player-advanced.html",
-                            icon: "🚀"
-                        },
-                        {
-                            id: "finance_beginner",
-                            title: "Pencatatan Keuangan Dasar",
-                            sector: "finance",
-                            level: "Beginner",
-                            desc: "Memisahkan uang pribadi & bisnis.",
-                            url: "#",
-                            icon: "💰"
-                        }
+                        { id: "d1", title: "Digital Branding Dasar", sector: "digital", level: "Beginner", desc: "Pelajari cara membangun identitas visual yang kuat di Instagram & TikTok.", icon: "📱" },
+                        { id: "f1", title: "Pencatatan Keuangan", sector: "finance", level: "Beginner", desc: "Pisahkan uang pribadi & usaha agar cashflow lebih sehat.", icon: "💰" },
+                        { id: "l1", title: "Urus NIB & PIRT", sector: "legal", level: "Intermediate", desc: "Panduan lengkap legalitas usaha makanan.", icon: "⚖️" },
+                        { id: "o1", title: "SOP Operasional Toko", sector: "ops", level: "Advanced", desc: "Standarisasi kerja karyawan agar auto-pilot.", icon: "⚙️" },
+                        { id: "n1", title: "Teknik Negosiasi B2B", sector: "network", level: "Intermediate", desc: "Cara deal dengan supplier besar.", icon: "🤝" }
                     ];
                 }
 
                 renderCourses('all');
             } catch (e) {
                 console.error("Gagal memuat course:", e);
-                document.getElementById('courseContainer').innerHTML = `<div style="text-align:center; color:white;">Error memuat data: ${e.message}</div>`;
+                document.getElementById('courseContainer').innerHTML = `<div style="text-align:center; color:red;">Gagal memuat data.</div>`;
             }
         }
 
-        // FILTER FUNCTION
         window.filterCourses = function(category, btn) {
-            // Update UI Button
             document.querySelectorAll('.filter-chip').forEach(el => el.classList.remove('active'));
             btn.classList.add('active');
-            
             renderCourses(category);
         }
 
-        // RENDER FUNCTION
         function renderCourses(category) {
             const container = document.getElementById('courseContainer');
             container.innerHTML = "";
 
             const completedList = userData.completed_courses || [];
 
-            // Filter Data
             let filtered = coursesDB;
             if(category !== 'all') {
                 filtered = coursesDB.filter(c => c.sector === category);
             }
 
             if(filtered.length === 0) {
-                container.innerHTML = `<div style="grid-column:1/-1; text-align:center; color:white;">Belum ada materi untuk kategori ini.</div>`;
+                container.innerHTML = `<div style="grid-column:1/-1; text-align:center; color:#64748b; padding:40px;">Belum ada materi untuk kategori ini.</div>`;
                 return;
             }
 
             filtered.forEach(course => {
-                // --- LOGIC LOCK ---
                 let isLocked = false;
                 let lockReason = "";
+                
+                // Logic Lock (Contoh: Intermediate butuh Beginner)
+                // if (course.level === "Intermediate" && !completedList.includes(course.sector + "_beginner")) { isLocked = true; lockReason = "Selesaikan Level Beginner Dulu"; }
 
-                // Intermediate butuh Beginner selesai
-                if (course.level === "Intermediate" && !completedList.includes(course.sector + "_beginner")) {
-                    isLocked = true;
-                    lockReason = "Selesaikan Level Beginner Dulu";
-                }
-                // Advanced butuh Intermediate selesai
-                else if (course.level === "Advanced" && !completedList.includes(course.sector + "_intermediate")) {
-                    isLocked = true;
-                    lockReason = "Selesaikan Level Intermediate Dulu";
-                }
-
-                // Check is Completed
                 const isCompleted = completedList.includes(course.id);
-
-                // Style Classes
                 const lockedClass = isLocked ? "locked" : "";
+                
+                // Color Mapping
                 let thumbColor = "thumb-digital";
-                if(course.sector === 'finance') thumbColor = "thumb-finance";
-                if(course.sector === 'legal') thumbColor = "thumb-legal";
-                if(course.sector === 'ops') thumbColor = "thumb-ops";
+                let badgeName = "Digital";
+                
+                if(course.sector === 'finance') { thumbColor = "thumb-finance"; badgeName = "Finance"; }
+                if(course.sector === 'legal')   { thumbColor = "thumb-legal"; badgeName = "Legal"; }
+                if(course.sector === 'ops')     { thumbColor = "thumb-ops"; badgeName = "Ops"; }
+                if(course.sector === 'network') { thumbColor = "thumb-network"; badgeName = "Network"; }
+                if(course.sector === 'digital') { badgeName = "Marketing"; }
 
-                // HTML Structure
+                const linkUrl = isLocked ? '#' : `course-player.html?id=${course.id}`;
+
                 const html = `
-                <div class="course-card ${lockedClass}" onclick="${isLocked ? `alert('${lockReason}')` : `window.location.href='${course.url}'`}">
+                <div class="course-card ${lockedClass}" onclick="${isLocked ? `alert('${lockReason}')` : `window.location.href='${linkUrl}'`}">
                     
                     <div class="card-thumb ${thumbColor}">
-                        <div class="thumb-icon">${course.icon}</div>
-                        ${isLocked ? `<div class="status-overlay">🔒 <span>Terkunci</span></div>` : ''}
-                        ${isCompleted ? `<div class="status-overlay" style="background:rgba(46, 92, 72, 0.8)">✅ <span>Selesai</span></div>` : ''}
+                        <div class="thumb-icon">${course.icon || '🎓'}</div>
+                        ${isLocked ? `<div class="status-overlay"><i class="fas fa-lock fa-2x"></i><span>Terkunci</span></div>` : ''}
+                        ${isCompleted ? `<div class="status-overlay" style="background:rgba(5, 150, 105, 0.85);"><i class="fas fa-check-circle fa-2x"></i><span>Selesai</span></div>` : ''}
                     </div>
 
                     <div class="card-body">
                         <div class="badges">
-                            <span class="badge badge-sector">${course.sector}</span>
+                            <span class="badge badge-sector">${badgeName}</span>
                             <span class="badge badge-level">${course.level}</span>
                         </div>
                         <div class="card-title">${course.title}</div>
                         <div class="card-desc">${isLocked ? lockReason : course.desc}</div>
                         
-                        ${!isLocked && !isCompleted ? `
-                            <div class="progress-bar"><div class="progress-fill" style="width:0%"></div></div>
-                            <div style="font-size:0.75rem; color:#94a3b8; margin-top:5px;">Mulai Belajar</div>
-                        ` : ''}
-                        
-                        ${isCompleted ? `
-                            <div style="font-size:0.8rem; color:var(--forest-green); font-weight:bold;">Telah Diselesaikan</div>
-                        ` : ''}
+                        <div class="card-footer">
+                            ${!isLocked && !isCompleted ? `
+                                <div class="start-text">Mulai Belajar <i class="fas fa-arrow-right"></i></div>
+                            ` : ''}
+                            
+                            ${isCompleted ? `
+                                <div style="font-size:0.85rem; color:#059669; font-weight:700; display:flex; align-items:center; gap:5px;"><i class="fas fa-award"></i> Kompetensi Dikuasai</div>
+                            ` : ''}
+                        </div>
                     </div>
                 </div>
                 `;

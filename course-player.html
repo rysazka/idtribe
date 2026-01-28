@@ -3,11 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kelas Digital Beginner - ID-TRIBE</title>
+    <title>Kelas Online - ID-TRIBE Academy</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Playfair+Display:ital,wght@0,600;1,600&family=Plus+Jakarta+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     
@@ -16,245 +17,285 @@
     <script type="module" src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"></script>
 
     <style>
-        /* --- DESIGN SYSTEM --- */
+        /* --- 1. MODERN THEME VARIABLES --- */
         :root {
-            --forest-green: #2E5C48;
-            --forest-green-dark: #1e3d2f;
-            --golden-orange: #F2994A;
-            --golden-orange-dark: #e88a38;
-            --text-dark: #1a1a1a;
-            --text-muted: #64748b;
+            --primary: #059669;
+            --primary-dark: #047857;
+            --primary-light: #d1fae5;
+            --accent: #f59e0b;
+            --accent-glow: #fbbf24;
+            --dark: #0f172a;
+            --text-gray: #64748b;
             
-            /* Glass Effect */
-            --glass-bg: rgba(255, 255, 255, 0.95);
-            --glass-border: rgba(255, 255, 255, 0.5);
-            --glass-blur: blur(20px);
-            --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.1);
+            /* Glassmorphism */
+            --glass-bg: rgba(255, 255, 255, 0.85);
+            --glass-border: 1px solid rgba(255, 255, 255, 0.6);
+            --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.05);
+            
+            --font-head: 'Outfit', sans-serif;
+            --font-body: 'Plus Jakarta Sans', sans-serif;
+            --font-serif: 'Playfair Display', serif;
         }
 
-        body { font-family: 'Lato', sans-serif; background: var(--forest-green); color: var(--text-dark); margin: 0; padding-bottom: 50px; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         
-        /* --- BACKGROUND --- */
-        .bg-image {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background-image: url('https://images.unsplash.com/photo-1619338098121-5925681fc9ab?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1920');
-            background-size: cover; background-position: center;
-            z-index: -2;
-        }
-        .bg-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(135deg, rgba(46, 92, 72, 0.95), rgba(46, 92, 72, 0.8));
-            z-index: -1;
+        body {
+            font-family: var(--font-body);
+            background-color: #f0fdf4;
+            color: var(--dark);
+            min-height: 100vh;
+            overflow-x: hidden;
+            background-image: radial-gradient(at 0% 0%, hsla(152,100%,90%,1) 0, transparent 50%), radial-gradient(at 100% 100%, hsla(43,100%,90%,1) 0, transparent 50%);
         }
 
-        /* --- LAYOUT --- */
-        .nav-top { padding: 20px 20px 0; max-width: 1100px; margin: 0 auto; position: relative; z-index: 10; }
-        .nav-top a { color: rgba(255,255,255,0.8); text-decoration: none; font-weight: 600; display: flex; align-items: center; gap: 8px; }
-        .nav-top a:hover { color: white; }
-
-        .container { max-width: 1100px; margin: 0 auto; padding: 20px; display: grid; grid-template-columns: 2fr 1fr; gap: 30px; position: relative; z-index: 10; }
-
-        /* --- VIDEO SECTION --- */
-        .video-section { position: sticky; top: 20px; height: fit-content; }
-        
-        .video-box {
-            width: 100%; aspect-ratio: 16/9; background: black; border-radius: 16px; 
-            display: flex; flex-direction: column; align-items: center; justify-content: center; 
-            border: 4px solid rgba(255,255,255,0.1); overflow: hidden; position: relative;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+        /* --- 2. ORNAMENTS & ANIMATIONS --- */
+        .bg-shapes {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none;
         }
-        
-        .progress-bar-container { position: absolute; bottom: 0; left: 0; width: 100%; height: 6px; background: rgba(255,255,255,0.2); }
-        .progress-bar-fill { height: 100%; background: var(--golden-orange); width: 0%; transition: width 0.2s linear; }
-
-        .info-card {
-            background: var(--glass-bg); padding: 25px; border-radius: 16px; border: 1px solid var(--glass-border); 
-            margin-top: 20px; box-shadow: var(--glass-shadow); backdrop-filter: var(--glass-blur);
+        .blob {
+            position: absolute; border-radius: 50%; filter: blur(60px); opacity: 0.5;
+            animation: float 8s infinite ease-in-out alternate;
         }
+        .blob-1 { top: -5%; left: -5%; width: 400px; height: 400px; background: var(--primary-light); }
+        .blob-2 { bottom: 10%; right: -5%; width: 300px; height: 300px; background: #fef3c7; animation-delay: -4s; }
+        
+        @keyframes float { 0% { transform: translateY(0); } 100% { transform: translateY(30px); } }
 
-        /* --- SYLLABUS --- */
-        .syllabus-card { background: white; border-radius: 16px; padding: 20px; box-shadow: var(--glass-shadow); }
-        .syllabus-item { display: flex; align-items: center; gap: 12px; padding: 12px; border-bottom: 1px solid #f1f5f9; color: var(--text-muted); font-size: 0.9rem; }
-        .syllabus-item.active { background: #f0fdf4; border-radius: 8px; border-bottom: none; color: var(--forest-green); font-weight: 600; }
-        .icon-type { width: 24px; text-align: center; font-size: 1.1rem; }
-
-        /* --- BUTTONS --- */
-        .btn { padding: 12px 25px; border-radius: 10px; cursor: pointer; border: none; font-weight: 700; width: 100%; margin-top: 15px; transition: all 0.3s; font-size: 0.95rem; }
-        
-        .btn-primary { background: var(--forest-green); color: white; }
-        .btn-primary:hover { background: var(--forest-green-dark); }
-        
-        .btn-success { background: #10b981; color: white; }
-        .btn-warning { background: var(--golden-orange); color: white; }
-        .btn-warning:hover { background: var(--golden-orange-dark); }
-        
-        .btn-disabled { background: #e2e8f0; color: #94a3b8; cursor: not-allowed; }
-        
-        .btn-cert { background: linear-gradient(135deg, #F2994A, #e88a38); color: white; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 15px rgba(242, 153, 74, 0.4); }
-
-        /* --- QUIZ MODAL --- */
-        .quiz-modal {
-            display: none; position: fixed; top:0; left:0; width:100%; height:100%;
-            background: rgba(0, 0, 0, 0.8); z-index: 100;
-            align-items: center; justify-content: center; backdrop-filter: blur(5px);
+        /* --- 3. LAYOUT --- */
+        .navbar {
+            padding: 20px 5%; display: flex; align-items: center; justify-content: space-between;
+            backdrop-filter: blur(10px); position: sticky; top: 0; z-index: 100;
         }
-        .quiz-card {
-            background: white; padding: 40px; border-radius: 20px; max-width: 700px; width: 90%;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.2); max-height: 90vh; overflow-y: auto;
+        .nav-back {
+            text-decoration: none; color: var(--primary-dark); font-weight: 700;
+            display: flex; align-items: center; gap: 8px; transition: 0.3s;
+            background: white; padding: 8px 20px; border-radius: 50px; box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+        .nav-back:hover { transform: translateX(-5px); box-shadow: 0 6px 15px rgba(0,0,0,0.1); }
+
+        .container {
+            max-width: 1200px; margin: 0 auto; padding: 20px;
+            display: grid; grid-template-columns: 2.5fr 1fr; gap: 30px;
         }
 
-        .question-item { margin-bottom: 25px; border-bottom: 1px solid #f1f5f9; padding-bottom: 20px; }
-        .question-text { font-weight: 700; margin-bottom: 15px; font-size: 1rem; color: var(--text-dark); }
-        
-        .option-label {
-            display: flex; align-items: center; gap: 10px;
-            padding: 12px; border: 2px solid #e2e8f0; border-radius: 10px; 
-            margin-bottom: 8px; cursor: pointer; transition: all 0.2s; background: white;
+        /* --- 4. VIDEO PLAYER CARD --- */
+        .player-card {
+            background: var(--glass-bg); backdrop-filter: blur(16px);
+            border-radius: 24px; border: var(--glass-border); padding: 25px;
+            box-shadow: var(--glass-shadow);
         }
-        .option-label:hover { border-color: var(--golden-orange); background: #fff7ed; }
-        .option-label input:checked + span { color: var(--forest-green); font-weight: bold; }
-        .option-label:has(input:checked) { border-color: var(--forest-green); background: #f0fdf4; }
+        
+        .video-wrapper {
+            position: relative; width: 100%; padding-top: 56.25%; /* 16:9 Aspect Ratio */
+            border-radius: 16px; overflow: hidden; background: #000;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.2); margin-bottom: 25px;
+        }
+        .video-wrapper iframe, .video-wrapper div {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;
+        }
 
-        /* --- RESULTS --- */
-        .result-screen { text-align: center; display: none; }
-        .emoji-result { font-size: 4rem; margin-bottom: 10px; display: block; }
+        .course-header h1 {
+            font-family: var(--font-head); font-size: 1.8rem; font-weight: 800; color: var(--dark); margin-bottom: 10px;
+        }
+        .tags { display: flex; gap: 10px; margin-bottom: 20px; }
+        .tag {
+            padding: 5px 12px; border-radius: 8px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
+        }
+        .tag-level { background: #e0e7ff; color: #4338ca; }
+        .tag-status { background: #fee2e2; color: #b91c1c; display: flex; align-items: center; gap: 5px; }
+        .tag-status.completed { background: #dcfce7; color: #15803d; }
+
+        .desc-box { font-size: 1rem; color: var(--text-gray); line-height: 1.7; margin-bottom: 30px; }
+
+        .btn-main {
+            width: 100%; padding: 16px; border: none; border-radius: 12px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white; font-weight: 700; font-size: 1rem; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+            transition: 0.3s; box-shadow: 0 10px 20px rgba(5, 150, 105, 0.25);
+        }
+        .btn-main:hover { transform: translateY(-3px); box-shadow: 0 15px 30px rgba(5, 150, 105, 0.35); }
+        .btn-main i { font-size: 1.2rem; }
+
+        /* --- 5. SIDEBAR (SYLLABUS) --- */
+        .sidebar { display: flex; flex-direction: column; gap: 20px; }
+        .syllabus-card {
+            background: white; border-radius: 20px; padding: 25px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.03); border: 1px solid #f1f5f9;
+        }
+        .menu-title { font-family: var(--font-head); font-weight: 800; font-size: 1.1rem; margin-bottom: 20px; color: var(--dark); }
+        
+        .menu-item {
+            display: flex; align-items: center; gap: 15px; padding: 15px;
+            border-radius: 12px; margin-bottom: 8px; text-decoration: none; color: var(--dark);
+            transition: 0.2s; border: 1px solid transparent;
+        }
+        .menu-item:hover { background: #f8fafc; border-color: #e2e8f0; }
+        .menu-item.active { background: #ecfdf5; border-color: var(--primary-light); }
+        .menu-item.active .icon-box { background: var(--primary); color: white; }
+        
+        .icon-box {
+            width: 40px; height: 40px; border-radius: 10px; background: #f1f5f9;
+            display: flex; align-items: center; justify-content: center; color: #64748b;
+            font-size: 1.1rem; transition: 0.2s; flex-shrink: 0;
+        }
+        .menu-text h4 { font-size: 0.95rem; font-weight: 700; margin-bottom: 2px; }
+        .menu-text span { font-size: 0.75rem; color: var(--text-gray); }
+
+        /* --- 6. QUIZ MODAL --- */
+        .modal {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(8px);
+            z-index: 999; align-items: center; justify-content: center;
+        }
+        .modal-content {
+            background: white; width: 90%; max-width: 650px; padding: 40px;
+            border-radius: 24px; position: relative;
+            animation: popUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            max-height: 90vh; overflow-y: auto;
+        }
+        @keyframes popUp { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+        .quiz-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; border-bottom: 1px solid #e2e8f0; padding-bottom: 15px; }
+        .q-card { background: #f8fafc; padding: 20px; border-radius: 12px; margin-bottom: 15px; border: 1px solid #e2e8f0; }
+        .q-text { font-weight: 700; margin-bottom: 15px; font-size: 1rem; }
+        .opt-label {
+            display: flex; align-items: center; gap: 10px; padding: 12px; border: 2px solid white;
+            background: white; border-radius: 10px; margin-bottom: 8px; cursor: pointer; transition: 0.2s;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+        }
+        .opt-label:hover { border-color: var(--accent); }
+        .opt-label:has(input:checked) { border-color: var(--primary); background: #ecfdf5; color: var(--primary-dark); font-weight: 600; }
+        input[type="radio"] { accent-color: var(--primary); transform: scale(1.2); }
+
+        /* RESULT SCREEN */
+        .result-view { text-align: center; display: none; padding: 20px 0; }
+        .score-ring {
+            width: 120px; height: 120px; border-radius: 50%; margin: 0 auto 20px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 2.5rem; font-weight: 800; color: white;
+            background: conic-gradient(var(--primary) 0%, var(--primary) 100%);
+            box-shadow: 0 10px 30px rgba(5, 150, 105, 0.3); position: relative;
+        }
+        .score-ring::before {
+            content: ''; position: absolute; width: 100px; height: 100px; background: white; border-radius: 50%;
+        }
+        .score-num { position: relative; z-index: 2; color: var(--dark); font-family: var(--font-head); }
 
         @media (max-width: 768px) {
             .container { grid-template-columns: 1fr; }
-            .video-section { position: relative; top: 0; }
+            .video-wrapper { margin-bottom: 20px; }
         }
     </style>
 </head>
 <body>
 
-    <div class="bg-image"></div>
-    <div class="bg-overlay"></div>
+    <div class="bg-shapes">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+    </div>
 
-    <div class="nav-top">
-        <a href="training-hub.html">&larr; Kembali ke Library</a>
+    <div class="navbar">
+        <a href="training-hub.html" class="nav-back">
+            <i class="fas fa-chevron-left"></i> Kembali ke Materi
+        </a>
+        <div style="font-weight: 800; font-family: var(--font-head); color: var(--primary-dark); font-size: 1.2rem;">ID-TRIBE <span style="color:var(--accent);">ACADEMY</span></div>
     </div>
 
     <div class="container">
         
-        <div class="video-section">
-            <div class="video-box" id="videoScreen">
-                <div style="text-align: center; z-index: 2; padding: 20px;">
-                    <h2 style="margin-bottom: 5px; color: white;">🎥 Webinar: Digital Branding</h2>
-                    <p style="color: rgba(255,255,255,0.8); font-size: 0.9rem; margin-bottom: 20px;">Optimasi Profil WA & IG Business</p>
-                    <button class="btn btn-warning" style="width: auto; padding: 10px 30px;" onclick="playVideo()">Putar Video</button>
+        <div class="main-content">
+            <div class="player-card">
+                <div class="video-wrapper" id="videoContainer">
+                    <div style="display:flex; align-items:center; justify-content:center; height:100%; color:white; flex-direction:column; background: linear-gradient(135deg, #1e293b, #0f172a);">
+                        <i class="fas fa-spinner fa-spin fa-3x" style="color:var(--accent);"></i>
+                        <p style="margin-top:15px; font-weight:600; letter-spacing:1px;">MEMUAT MATERI...</p>
+                    </div>
                 </div>
-                <div class="progress-bar-container">
-                    <div class="progress-bar-fill" id="videoProgress"></div>
-                </div>
-            </div>
 
-            <div class="info-card">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                    <span style="color: var(--text-muted); font-size: 0.9rem;">Status Belajar</span>
-                    <strong id="statusLabel" style="color: var(--golden-orange);">Sedang Berlangsung...</strong>
+                <div class="course-header">
+                    <div class="tags">
+                        <span class="tag tag-level" id="levelBadge">Loading...</span>
+                        <span class="tag tag-status" id="statusBadge"><i class="fas fa-circle-notch fa-spin"></i> Belum Selesai</span>
+                    </div>
+                    <h1 id="courseTitleDisplay">Memuat Judul...</h1>
+                    <p class="desc-box" id="courseDescDisplay">Memuat deskripsi materi pembelajaran...</p>
+                    
+                    <button class="btn-main" id="btnQuiz" onclick="openQuiz()">
+                        <i class="fas fa-file-signature"></i> Ambil Ujian Validasi & Sertifikat
+                    </button>
                 </div>
-                <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 15px; line-height: 1.5;">
-                    💡 <strong>Aturan 90%:</strong> Tonton materi minimal 90% durasi untuk membuka Kuis Validasi. Sertifikat akan diterbitkan jika lulus kuis.
-                </p>
-                <button id="btnQuiz" class="btn btn-disabled" disabled onclick="openQuiz()">
-                    🔒 Ambil Kuis Validasi
-                </button>
             </div>
         </div>
 
-        <div>
+        <div class="sidebar">
             <div class="syllabus-card">
-                <h3 style="margin-bottom: 20px; color: var(--text-dark); font-size: 1.1rem;">📚 Materi Digital Beginner</h3>
+                <h3 class="menu-title">Daftar Isi Modul</h3>
                 
-                <div class="syllabus-item active">
-                    <span class="icon-type">🎥</span>
-                    <div>
-                        <div style="font-weight: 600;">Video Materi Utama</div>
-                        <div style="font-size: 0.75rem; color: var(--forest-green);">Sedang Diputar</div>
+                <div class="menu-item active">
+                    <div class="icon-box"><i class="fas fa-play"></i></div>
+                    <div class="menu-text">
+                        <h4>Video Pembelajaran</h4>
+                        <span>Wajib Tonton (Main Material)</span>
                     </div>
                 </div>
-                <div class="syllabus-item"><span class="icon-type">📘</span><div><div style="font-weight: 600;">Playbook: Panduan Profil</div><a href="#" style="font-size: 0.75rem; color: var(--golden-orange);">Download PDF</a></div></div>
-                <div class="syllabus-item"><span class="icon-type">👥</span><div><div style="font-weight: 600;">Forum Diskusi</div><a href="#" style="font-size: 0.75rem; color: var(--golden-orange);">Gabung Grup</a></div></div>
-                <div class="syllabus-item"><span class="icon-type">💡</span><div><div style="font-weight: 600;">Studi Kasus</div><div style="font-size: 0.75rem;">Contoh Profil Sukses</div></div></div>
+
+                <a id="fileLink" href="#" target="_blank" class="menu-item" style="opacity: 0.6; pointer-events: none;">
+                    <div class="icon-box"><i class="fas fa-file-alt"></i></div>
+                    <div class="menu-text">
+                        <h4>Dokumen Pendukung</h4>
+                        <span id="fileStatus">Tidak ada file</span>
+                    </div>
+                </a>
+
+                <a href="#" class="menu-item">
+                    <div class="icon-box"><i class="fas fa-users"></i></div>
+                    <div class="menu-text">
+                        <h4>Diskusi Komunitas</h4>
+                        <span>Tanya Mentor & Peers</span>
+                    </div>
+                </a>
+            </div>
+
+            <div class="syllabus-card" style="background: linear-gradient(135deg, #059669, #047857); color: white; text-align: center;">
+                <i class="fas fa-award fa-3x" style="color: var(--accent-glow); margin-bottom: 15px;"></i>
+                <h4 style="font-family: var(--font-head); margin-bottom: 10px;">Sertifikat Kompetensi</h4>
+                <p style="font-size: 0.85rem; opacity: 0.9; margin-bottom: 0;">Selesaikan video dan lulus ujian dengan skor min. 70 untuk mendapatkan sertifikat resmi.</p>
             </div>
         </div>
 
     </div>
 
-    <div class="quiz-modal" id="quizModal">
-        <div class="quiz-card">
-            
+    <div class="modal" id="quizModal">
+        <div class="modal-content">
+            <div class="quiz-header">
+                <h2 style="font-family:var(--font-head); font-weight:800; color:var(--primary-dark);">Ujian Kompetensi</h2>
+                <button onclick="closeQuiz()" style="border:none; background:none; font-size:1.5rem; cursor:pointer; color:#94a3b8;"><i class="fas fa-times"></i></button>
+            </div>
+
             <div id="quizContent">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <h3 style="color: var(--forest-green);">📝 Ujian Kompetensi</h3>
-                    <span style="color: var(--text-muted); font-size: 0.9rem; background: #f1f5f9; padding: 5px 10px; border-radius: 8px;">Min. Skor: 70</span>
-                </div>
-                <div style="height: 1px; background: #e2e8f0; margin: 15px 0 25px;"></div>
-
-                <div class="question-item">
-                    <p class="question-text">1. Fitur WhatsApp Business mana yang paling efektif untuk mengelompokkan pelanggan?</p>
-                    <label class="option-label"><input type="radio" name="q1" value="wrong"><span>Fitur Pin Chat</span></label>
-                    <label class="option-label"><input type="radio" name="q1" value="correct"><span>Fitur Label Chat</span></label>
-                    <label class="option-label"><input type="radio" name="q1" value="wrong"><span>Fitur Broadcast</span></label>
-                </div>
-
-                <div class="question-item">
-                    <p class="question-text">2. Agar toko responsif saat tutup, fitur apa yang harus diaktifkan?</p>
-                    <label class="option-label"><input type="radio" name="q2" value="wrong"><span>Quick Reply</span></label>
-                    <label class="option-label"><input type="radio" name="q2" value="correct"><span>Away Message</span></label>
-                    <label class="option-label"><input type="radio" name="q2" value="wrong"><span>Greeting Message</span></label>
-                </div>
-
-                <div class="question-item">
-                    <p class="question-text">3. Apa elemen terpenting di Bio Instagram Bisnis?</p>
-                    <label class="option-label"><input type="radio" name="q3" value="correct"><span>Link CTA (Call to Action)</span></label>
-                    <label class="option-label"><input type="radio" name="q3" value="wrong"><span>Quotes Motivasi</span></label>
-                    <label class="option-label"><input type="radio" name="q3" value="wrong"><span>Emoji yang banyak</span></label>
-                </div>
-
-                <div class="question-item">
-                    <p class="question-text">4. Mengapa sebaiknya menggunakan Katalog di WA Business?</p>
-                    <label class="option-label"><input type="radio" name="q4" value="wrong"><span>Agar memori HP penuh</span></label>
-                    <label class="option-label"><input type="radio" name="q4" value="correct"><span>Profesional & Pelanggan bisa lihat harga sendiri</span></label>
-                    <label class="option-label"><input type="radio" name="q4" value="wrong"><span>Agar chat terlihat panjang</span></label>
-                </div>
-
-                <div class="question-item">
-                    <p class="question-text">5. Langkah pertama mengubah IG Pribadi ke Bisnis?</p>
-                    <label class="option-label"><input type="radio" name="q5" value="wrong"><span>Private Akun (Gembok)</span></label>
-                    <label class="option-label"><input type="radio" name="q5" value="correct"><span>Setting ke Professional Account & Pilih Kategori</span></label>
-                    <label class="option-label"><input type="radio" name="q5" value="wrong"><span>Hapus semua foto lama</span></label>
-                </div>
-
-                <div style="display:flex; gap:10px; margin-top:30px;">
-                    <button class="btn btn-disabled" style="background:transparent; border:1px solid #cbd5e1; color:#64748b;" onclick="closeQuiz()">Batal</button>
-                    <button class="btn btn-primary" onclick="submitQuiz()">Kirim Jawaban</button>
-                </div>
+                <div id="dynamicQuestions"></div>
+                <button class="btn-main" onclick="submitQuiz()" style="margin-top:20px;">Kirim Jawaban <i class="fas fa-paper-plane"></i></button>
             </div>
 
-            <div id="resultSuccess" class="result-screen">
-                <span class="emoji-result">🎉</span>
-                <h2 style="color: var(--forest-green);">LULUS! (Skor: <span id="scoreValSuccess"></span>)</h2>
-                <p style="color: var(--text-muted);">Selamat! Kompetensi Digital Dasar Anda telah tervalidasi.</p>
-                
-                <button class="btn btn-cert" onclick="generateCertificate()">
-                    📜 Download Sertifikat Digital
+            <div id="resultSuccess" class="result-view">
+                <div class="score-ring"><span class="score-num" id="scoreValSuccess">100</span></div>
+                <h2 style="color:var(--primary); font-weight:800; margin-bottom:10px;">LULUS KOMPETENSI!</h2>
+                <p style="color:#64748b; margin-bottom:30px;">Selamat! Anda telah membuktikan pemahaman materi ini.</p>
+                <button class="btn-main" onclick="generateCertificate()" style="background: var(--accent); color: var(--dark);">
+                    <i class="fas fa-download"></i> Download Sertifikat Resmi
                 </button>
-
-                <div style="height: 1px; background: #e2e8f0; margin: 20px 0;"></div>
-                
-                <p style="font-size: 0.9rem; color: var(--text-muted);">Fitur Digital Tools telah dibuka di Dashboard Anda.</p>
-                <button class="btn btn-success" onclick="finishCourse()">Kembali ke Training Hub &rarr;</button>
+                <button onclick="finishCourse()" style="margin-top:15px; background:none; border:none; color:var(--text-gray); cursor:pointer; text-decoration:underline;">Kembali ke Dashboard</button>
             </div>
 
-            <div id="resultFail" class="result-screen">
-                <span class="emoji-result">📝</span>
-                <h2 style="color: var(--golden-orange);">Belum Lulus</h2>
-                <p style="color: var(--text-muted);">Skor Anda: <span id="scoreValFail"></span>/100</p>
-                <p style="font-size: 0.9rem; margin-top: 10px;">Anda membutuhkan minimal skor 70.<br>Silakan pelajari kembali materi video.</p>
-                <button class="btn btn-warning" onclick="retryCourse()">🔄 Ulangi Materi</button>
+            <div id="resultFail" class="result-view">
+                <div class="score-ring" style="background: conic-gradient(var(--accent) 0%, var(--accent) 100%);"><span class="score-num" id="scoreValFail">50</span></div>
+                <h2 style="color:var(--accent); font-weight:800; margin-bottom:10px;">BELUM LULUS</h2>
+                <p style="color:#64748b; margin-bottom:30px;">Skor minimum adalah 70. Silakan pelajari materi lagi.</p>
+                <button class="btn-main" onclick="retryCourse()">
+                    <i class="fas fa-redo"></i> Coba Ujian Lagi
+                </button>
             </div>
-
         </div>
     </div>
 
@@ -277,164 +318,247 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        let currentUserName = "Peserta UMKM";
+        let currentUserName = "Peserta";
+        let courseId = "";
+        let currentQuizData = [];
 
-        onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                const docSnap = await getDoc(doc(db, "users_umkm", user.uid));
+        // 1. LOAD COURSE DATA & VIDEO (VERSI FIX ERROR 153 - HAPUS RESTRIKSI)
+        async function loadCourseData() {
+            const params = new URLSearchParams(window.location.search);
+            courseId = params.get('id');
+            if(!courseId) return;
+
+            try {
+                const docRef = doc(db, "courses", courseId);
+                const docSnap = await getDoc(docRef);
+
                 if (docSnap.exists()) {
-                    currentUserName = docSnap.data().nama_lengkap;
+                    const data = docSnap.data();
+                    
+                    document.getElementById('courseTitleDisplay').innerText = data.title;
+                    document.getElementById('levelBadge').innerText = data.level;
+                    document.getElementById('courseDescDisplay').innerText = data.desc;
+                    document.title = `${data.title} - ID-TRIBE`;
+
+                    // --- VIDEO FIX (ANTI ERROR 153) ---
+                    // Menggunakan referrerpolicy="no-referrer" agar jalan di local file
+                    let videoId = extractVideoID(data.url);
+                    if (videoId) {
+                        document.getElementById('videoContainer').innerHTML = `
+                            <iframe 
+                                src="https://www.youtube.com/embed/${videoId}?rel=0&modestbranding=1" 
+                                title="Materi" 
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                                allowfullscreen
+                                referrerpolicy="no-referrer"
+                            ></iframe>`;
+                    } else {
+                        document.getElementById('videoContainer').innerHTML = `<div style="display:flex;justify-content:center;align-items:center;height:100%;color:white;text-align:center;">Link Video Tidak Valid</div>`;
+                    }
+
+                    // FILE MATERI
+                    if(data.file_url) {
+                        const fileBtn = document.getElementById('fileLink');
+                        fileBtn.href = data.file_url;
+                        fileBtn.style.opacity = "1";
+                        fileBtn.style.pointerEvents = "auto";
+                        document.getElementById('fileStatus').innerText = "Klik untuk download PDF";
+                        document.getElementById('fileStatus').style.color = "var(--primary)";
+                        fileBtn.classList.add('active'); // Highlight
+                    }
+
+                    currentQuizData = data.quiz_data || [];
                 }
-            }
-        });
-
-        // --- VIDEO SIMULATION ---
-        let videoDuration = 5; // 5 detik simulasi
-        let currentTime = 0;
-        let videoInterval;
-
-        window.playVideo = function() {
-            const screen = document.getElementById('videoScreen');
-            const btn = screen.querySelector('button');
-            const title = screen.querySelector('h2');
-            
-            btn.style.display = 'none';
-            title.innerText = "▶ Sedang Memutar...";
-            title.style.color = "var(--golden-orange)";
-
-            videoInterval = setInterval(() => {
-                currentTime++;
-                const percentage = (currentTime / videoDuration) * 100;
-                document.getElementById('videoProgress').style.width = `${percentage}%`;
-
-                if (percentage >= 90) unlockQuizButton();
-
-                if (currentTime >= videoDuration) {
-                    clearInterval(videoInterval);
-                    title.innerText = "✅ Materi Selesai";
-                    title.style.color = "#10b981"; // Green
-                }
-            }, 1000);
+            } catch (e) { console.error(e); }
         }
 
-        function unlockQuizButton() {
-            const btnQuiz = document.getElementById('btnQuiz');
-            const label = document.getElementById('statusLabel');
-            
-            if (btnQuiz.disabled) {
-                btnQuiz.disabled = false;
-                btnQuiz.classList.remove('btn-disabled');
-                btnQuiz.classList.add('btn-primary');
-                btnQuiz.innerHTML = "📝 Ambil Kuis Validasi";
-                label.innerText = "Siap Validasi";
-                label.style.color = "#10b981";
-            }
+        // Helper Regex Youtube
+        function extractVideoID(url) {
+            if (!url) return null;
+            const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+            const match = url.match(regExp);
+            return (match && match[2].length === 11) ? match[2] : null;
         }
 
-        // --- QUIZ LOGIC ---
-        window.openQuiz = () => document.getElementById('quizModal').style.display = 'flex';
+        // 2. QUIZ LOGIC
+        window.openQuiz = () => {
+            const container = document.getElementById('dynamicQuestions');
+            container.innerHTML = "";
+            
+            if(currentQuizData.length === 0) {
+                container.innerHTML = "<p style='text-align:center; color:#64748b;'>Belum ada soal ujian untuk materi ini.</p>";
+            } else {
+                currentQuizData.forEach((q, index) => {
+                    const html = `
+                    <div class="q-card">
+                        <p class="q-text"><span style="color:var(--primary);">#${index+1}</span> ${q.question}</p>
+                        ${q.options.map((opt, i) => `
+                            <label class="opt-label">
+                                <input type="radio" name="q${index}" value="${i}">
+                                <span>${opt}</span>
+                            </label>
+                        `).join('')}
+                    </div>`;
+                    container.innerHTML += html;
+                });
+            }
+            document.getElementById('quizModal').style.display = 'flex';
+        };
+
         window.closeQuiz = () => document.getElementById('quizModal').style.display = 'none';
 
         window.submitQuiz = function() {
+            if(currentQuizData.length === 0) return;
+            
             let score = 0;
-            const answers = [
-                document.querySelector('input[name="q1"]:checked')?.value,
-                document.querySelector('input[name="q2"]:checked')?.value,
-                document.querySelector('input[name="q3"]:checked')?.value,
-                document.querySelector('input[name="q4"]:checked')?.value,
-                document.querySelector('input[name="q5"]:checked')?.value
-            ];
+            let answered = 0;
 
-            if(answers.some(a => !a)) {
-                alert("Mohon jawab semua pertanyaan.");
-                return;
-            }
+            currentQuizData.forEach((q, index) => {
+                const selected = document.querySelector(`input[name="q${index}"]:checked`);
+                if(selected) {
+                    answered++;
+                    if(parseInt(selected.value) === q.correct) score++;
+                }
+            });
 
-            answers.forEach(ans => { if(ans === 'correct') score += 20; });
+            if(answered < currentQuizData.length) { alert("Mohon jawab semua pertanyaan!"); return; }
 
+            const finalScore = Math.round((score / currentQuizData.length) * 100);
             document.getElementById('quizContent').style.display = 'none';
 
-            if (score >= 70) {
+            if (finalScore >= 70) {
                 document.getElementById('resultSuccess').style.display = 'block';
-                document.getElementById('scoreValSuccess').innerText = score;
-                saveProgressToFirebase(true);
+                document.getElementById('scoreValSuccess').innerText = finalScore;
+                saveProgress(true);
             } else {
                 document.getElementById('resultFail').style.display = 'block';
-                document.getElementById('scoreValFail').innerText = score;
+                document.getElementById('scoreValFail').innerText = finalScore;
             }
         }
 
-        window.retryCourse = function() {
-            document.getElementById('quizModal').style.display = 'none';
+        window.retryCourse = () => {
             document.getElementById('quizContent').style.display = 'block';
             document.getElementById('resultFail').style.display = 'none';
-            document.querySelectorAll('input[type="radio"]').forEach(el => el.checked = false);
         }
+        window.finishCourse = () => window.location.href = "training-hub.html";
 
-        window.finishCourse = function() {
-            window.location.href = "training-hub.html";
-        }
-
-        // --- GENERATE CERTIFICATE ---
+        // 3. SERTIFIKAT GENERATOR PREMIUM
         window.generateCertificate = function() {
             const { jsPDF } = window.jspdf;
-            const doc = new jsPDF({ orientation: 'landscape' });
+            
+            // Format A4 Landscape (297mm x 210mm)
+            const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+            const w = doc.internal.pageSize.getWidth();
+            const h = doc.internal.pageSize.getHeight();
 
-            doc.setDrawColor(46, 92, 72); // Forest Green
-            doc.setLineWidth(3);
-            doc.rect(10, 10, 277, 190);
+            // --- A. BACKGROUND & BORDER ---
+            // Background Putih Gading
+            doc.setFillColor(252, 252, 250); 
+            doc.rect(0, 0, w, h, 'F');
 
-            doc.setFont("helvetica", "bold");
-            doc.setFontSize(24);
-            doc.setTextColor(46, 92, 72);
-            doc.text("SERTIFIKAT KOMPETENSI", 148.5, 40, null, null, "center");
+            // Ornamen Sudut (Hijau Tua)
+            doc.setFillColor(6, 78, 59); // Forest Green
+            doc.circle(0, 0, 40, 'F');
+            doc.circle(w, h, 40, 'F');
+            
+            // Ornamen Sudut (Emas)
+            doc.setFillColor(245, 158, 11); // Gold
+            doc.circle(w, 0, 25, 'F');
+            doc.circle(0, h, 25, 'F');
 
+            // Border Ganda Klasik
+            doc.setDrawColor(6, 78, 59); // Border Luar Hijau
+            doc.setLineWidth(1.5);
+            doc.rect(10, 10, w-20, h-20);
+
+            doc.setDrawColor(245, 158, 11); // Border Dalam Emas
+            doc.setLineWidth(0.8);
+            doc.rect(13, 13, w-26, h-26);
+
+            // --- B. KONTEN TEKS ---
+            
+            // Judul Sertifikat (Serif Font)
+            doc.setTextColor(6, 78, 59);
+            doc.setFont("times", "bold");
+            doc.setFontSize(32);
+            doc.text("SERTIFIKAT KOMPETENSI", w/2, 50, { align: "center" });
+
+            // Sub Judul
+            doc.setFont("helvetica", "normal");
             doc.setFontSize(12);
             doc.setTextColor(100);
-            doc.text("ID-TRIBE Training Hub", 148.5, 50, null, null, "center");
+            doc.text("No: IDTRIBE/" + Date.now().toString().substr(-6), w/2, 60, { align: "center" });
 
-            doc.setFont("helvetica", "normal");
-            doc.setFontSize(16);
-            doc.setTextColor(0);
-            doc.text("Diberikan kepada:", 148.5, 80, null, null, "center");
+            doc.setFontSize(14);
+            doc.text("Diberikan sebagai bukti kelulusan kepada:", w/2, 75, { align: "center" });
 
-            doc.setFont("times", "bolditalic");
-            doc.setFontSize(36);
-            doc.setTextColor(242, 153, 74); // Golden Orange
-            doc.text(currentUserName, 148.5, 100, null, null, "center");
+            // NAMA PESERTA (Besar & Elegan)
+            doc.setTextColor(15, 23, 42); // Dark Blue
+            doc.setFont("times", "italic"); // Italic Serif
+            doc.setFontSize(42);
+            doc.text(currentUserName, w/2, 95, { align: "center" });
 
+            // Garis Bawah Nama
+            doc.setDrawColor(200);
+            doc.setLineWidth(0.5);
+            doc.line(w/2 - 70, 100, w/2 + 70, 100);
+
+            // Deskripsi Course
+            const courseTitle = document.getElementById('courseTitleDisplay').innerText;
             doc.setFont("helvetica", "normal");
             doc.setFontSize(14);
-            doc.setTextColor(0);
-            doc.text("Telah lulus ujian validasi materi:", 148.5, 125, null, null, "center");
-
+            doc.setTextColor(80);
+            doc.text("Telah menyelesaikan pelatihan dan lulus ujian kompetensi pada modul:", w/2, 115, { align: "center" });
+            
+            // Judul Course
             doc.setFont("helvetica", "bold");
             doc.setFontSize(20);
-            doc.text("DIGITAL & MARKETING EMPOWERMENT (BEGINNER)", 148.5, 140, null, null, "center");
+            doc.setTextColor(245, 158, 11); // Gold
+            doc.text(courseTitle.toUpperCase(), w/2, 128, { align: "center" });
 
-            const date = new Date().toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' });
+            // --- C. FOOTER & TANDA TANGAN ---
+            const date = new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+            
+            // Kiri: Tanggal
             doc.setFontSize(12);
+            doc.setTextColor(60);
             doc.setFont("helvetica", "normal");
-            doc.text(`Jakarta, ${date}`, 148.5, 165, null, null, "center");
+            doc.text(`Jakarta, ${date}`, 50, 160, { align: "center" });
+            doc.text("( Ditandatangani secara elektronik )", 50, 185, { align: "center" });
+            
+            // Kanan: Penyelenggara
+            doc.text("ID-TRIBE Academy", w-50, 160, { align: "center" });
+            
+            // Stempel / Seal (Simulasi dengan Lingkaran)
+            doc.setDrawColor(245, 158, 11);
+            doc.setLineWidth(1);
+            doc.circle(w-50, 175, 12);
+            doc.setFontSize(8);
+            doc.setTextColor(245, 158, 11);
+            doc.text("OFFICIAL", w-50, 174, { align: "center" });
+            doc.text("SEAL", w-50, 178, { align: "center" });
 
             doc.save(`Sertifikat_${currentUserName}.pdf`);
         }
 
-        // --- SAVE TO FIREBASE ---
-        async function saveProgressToFirebase(isPassed) {
+        async function saveProgress(passed) {
             const user = auth.currentUser;
-            if (user && isPassed) {
-                try {
-                    await updateDoc(doc(db, "users_umkm", user.uid), {
-                        completed_courses: arrayUnion("digital_beginner"),
-                        unlocked_features: arrayUnion("digital_tools")
-                    });
-                    console.log("Database Updated");
-                } catch (e) {
-                    console.error("Error saving:", e);
-                }
+            if(user && passed) {
+                await updateDoc(doc(db, "users_umkm", user.uid), {
+                    completed_courses: arrayUnion(courseId)
+                });
+                document.getElementById('statusBadge').innerHTML = '<i class="fas fa-check-circle"></i> Selesai';
+                document.getElementById('statusBadge').classList.add('completed');
             }
         }
+
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                const snap = await getDoc(doc(db, "users_umkm", user.uid));
+                if (snap.exists()) currentUserName = snap.data().nama_lengkap;
+                loadCourseData();
+            } else { window.location.href = "login.html"; }
+        });
     </script>
 </body>
 </html>
