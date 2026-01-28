@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Business Health Check - ID-TRIBE</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <script type="module" src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
+    <script type="module" src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js"></script>
+    <script type="module" src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"></script>
+
+    <style>
+        /* --- DESIGN SYSTEM (ID-TRIBE) --- */
+        :root {
+            --forest-green: #2E5C48;
+            --forest-green-dark: #1e3d2f;
+            --golden-orange: #F2994A;
+            --golden-orange-dark: #e88a38;
+            --text-dark: #1a1a1a;
+            --text-muted: #64748b;
+            
+            /* Glass Effect */
+            --glass-bg: rgba(255, 255, 255, 0.95);
+            --glass-border: rgba(255, 255, 255, 0.5);
+            --glass-blur: blur(20px);
+            --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Lato', sans-serif;
+            background-color: var(--forest-green);
+            color: var(--text-dark);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            padding: 40px 20px;
+        }
+
+        /* --- BACKGROUND --- */
+        .bg-image {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-image: url('https://images.unsplash.com/photo-1619338098121-5925681fc9ab?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1920');
+            background-size: cover; background-position: center;
+            z-index: -2;
+        }
+        .bg-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(135deg, rgba(46, 92, 72, 0.9), rgba(46, 92, 72, 0.8));
+            z-index: -1;
+        }
+
+        /* --- CONTAINER --- */
+        .quiz-container { width: 100%; max-width: 800px; position: relative; z-index: 10; }
+
+        .glass-card {
+            background: var(--glass-bg);
+            backdrop-filter: var(--glass-blur);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 40px;
+            box-shadow: var(--glass-shadow);
+            position: relative; overflow: hidden;
+        }
+
+        /* --- HEADER & PROGRESS --- */
+        .header-section { margin-bottom: 30px; text-align: center; }
+        
+        .sector-badge {
+            display: inline-block; padding: 6px 16px; border-radius: 50px;
+            background: rgba(46, 92, 72, 0.1); border: 1px solid rgba(46, 92, 72, 0.2);
+            font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 15px;
+            color: var(--forest-green); font-weight: 700;
+        }
+        
+        .header-section h2 { font-size: 1.8rem; color: var(--text-dark); font-weight: 700; margin-bottom: 5px; }
+
+        .progress-bar-container {
+            width: 100%; height: 8px; background: #e2e8f0;
+            border-radius: 10px; margin-bottom: 40px; overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%; background: linear-gradient(90deg, var(--forest-green), var(--golden-orange));
+            width: 20%; transition: width 0.5s ease;
+        }
+
+        /* --- QUESTIONS & OPTIONS --- */
+        .question-block { display: none; animation: slideIn 0.4s ease; }
+        .question-block.active { display: block; }
+        @keyframes slideIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+
+        .question-text { font-size: 1.25rem; margin-bottom: 25px; line-height: 1.5; font-weight: 600; color: var(--text-dark); }
+        
+        .options-grid { display: flex; flex-direction: column; gap: 15px; }
+        
+        .option-card {
+            display: flex; align-items: flex-start; gap: 15px;
+            padding: 20px; background: white;
+            border: 2px solid #e2e8f0; border-radius: 16px;
+            cursor: pointer; transition: all 0.2s; position: relative;
+        }
+        
+        .option-card:hover { border-color: var(--golden-orange); transform: translateY(-2px); }
+        
+        .option-input { display: none; } /* Hide radio button */
+
+        /* Style saat dipilih */
+        .option-input:checked + .option-card {
+            background: #f0fdf4; /* Hijau muda sangat pudar */
+            border-color: var(--forest-green);
+            box-shadow: 0 4px 12px rgba(46, 92, 72, 0.1);
+        }
+        
+        .option-letter {
+            width: 32px; height: 32px; background: #f1f5f9;
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            font-weight: bold; flex-shrink: 0; transition: background 0.2s; color: var(--text-muted);
+        }
+        
+        .option-input:checked + .option-card .option-letter { 
+            background: var(--forest-green); color: white; 
+        }
+
+        /* --- BUTTONS --- */
+        .nav-buttons { display: flex; justify-content: space-between; margin-top: 40px; border-top: 1px solid #e2e8f0; padding-top: 20px; }
+        .btn {
+            padding: 12px 30px; border-radius: 12px; font-weight: 700; cursor: pointer; border: none; font-family: inherit; font-size: 1rem;
+        }
+        .btn-prev { background: #f1f5f9; color: var(--text-muted); }
+        .btn-prev:hover { background: #e2e8f0; color: var(--text-dark); }
+        .btn-prev:disabled { opacity: 0.5; cursor: not-allowed; }
+        
+        .btn-next { background: var(--golden-orange); color: white; box-shadow: 0 4px 15px rgba(242, 153, 74, 0.4); }
+        .btn-next:hover { background: var(--golden-orange-dark); transform: translateY(-2px); }
+
+        /* --- LOADER --- */
+        .analyzing-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(5px);
+            display: none; align-items: center; justify-content: center; flex-direction: column; z-index: 50;
+        }
+        .loader-spinner {
+            width: 50px; height: 50px; border: 4px solid #e2e8f0;
+            border-top: 4px solid var(--forest-green); border-radius: 50%;
+            animation: spin 1s linear infinite; margin-bottom: 20px;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        @media (max-width: 600px) {
+            .quiz-container { padding: 0 10px; }
+            .glass-card { padding: 25px; }
+            .question-text { font-size: 1.1rem; }
+            .header-section h2 { font-size: 1.5rem; }
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="bg-image"></div>
+    <div class="bg-overlay"></div>
+
+    <div class="quiz-container">
+        <div class="glass-card">
+            
+            <div class="header-section">
+                <span class="sector-badge" id="sectorBadge">Sektor 1: Financial Management</span>
+                <h2 id="sectorTitle">Manajemen Keuangan</h2>
+                <div style="margin-top: 10px; font-size: 0.9rem; color: var(--text-muted);">
+                    Pertanyaan <span id="qIndex">1</span> dari 5 Sektor
+                </div>
+            </div>
+
+            <div class="progress-bar-container">
+                <div class="progress-fill" id="progressBar" style="width: 20%;"></div>
+            </div>
+
+            <form id="healthCheckForm">
+                
+                <div class="sector-block active" id="sector-1">
+                    <div class="question-block active" data-q="1">
+                        <p class="question-text">Bagaimana Anda memisahkan uang bisnis dan uang pribadi?</p>
+                        <div class="options-grid">
+                            <label>
+                                <input type="radio" name="q1" value="1" class="option-input">
+                                <div class="option-card">
+                                    <div class="option-letter">A</div>
+                                    <div>Masih campur dalam satu dompet/rekening.</div>
+                                </div>
+                            </label>
+                            <label>
+                                <input type="radio" name="q1" value="3" class="option-input">
+                                <div class="option-card">
+                                    <div class="option-letter">B</div>
+                                    <div>Sudah beda rekening, tapi kadang masih terpakai urusan pribadi.</div>
+                                </div>
+                            </label>
+                            <label>
+                                <input type="radio" name="q1" value="5" class="option-input">
+                                <div class="option-card">
+                                    <div class="option-letter">C</div>
+                                    <div>Terpisah total. Saya menggaji diri sendiri dari bisnis.</div>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="question-block" data-q="2">
+                        <p class="question-text">Alat apa yang Anda gunakan untuk mencatat keuangan?</p>
+                        <div class="options-grid">
+                            <label><input type="radio" name="q2" value="1" class="option-input"><div class="option-card"><div class="option-letter">A</div><div>Ingatan atau catatan kertas seadanya.</div></div></label>
+                            <label><input type="radio" name="q2" value="3" class="option-input"><div class="option-card"><div class="option-letter">B</div><div>Spreadsheet (Excel/Google Sheets) rutin.</div></div></label>
+                            <label><input type="radio" name="q2" value="5" class="option-input"><div class="option-card"><div class="option-letter">C</div><div>Aplikasi Kasir (POS) atau Software Akuntansi.</div></div></label>
+                        </div>
+                    </div>
+                    <div class="question-block" data-q="3">
+                        <p class="question-text">Laporan keuangan apa yang bisa Anda sajikan HARI INI jika diminta Bank?</p>
+                        <div class="options-grid">
+                            <label><input type="radio" name="q3" value="1" class="option-input"><div class="option-card"><div class="option-letter">A</div><div>Tidak ada / Hanya catatan penjualan harian.</div></div></label>
+                            <label><input type="radio" name="q3" value="3" class="option-input"><div class="option-card"><div class="option-letter">B</div><div>Laporan Arus Kas (Cashflow) sederhana.</div></div></label>
+                            <label><input type="radio" name="q3" value="5" class="option-input"><div class="option-card"><div class="option-letter">C</div><div>Laba Rugi & Neraca lengkap standar akuntansi.</div></div></label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="sector-block" id="sector-2" style="display:none;">
+                    <div class="question-block" data-q="4">
+                        <p class="question-text">Di mana pelanggan bisa membeli produk Anda saat ini?</p>
+                        <div class="options-grid">
+                            <label><input type="radio" name="q4" value="1" class="option-input"><div class="option-card"><div class="option-letter">A</div><div>Beli langsung di tempat / Chat WA pribadi.</div></div></label>
+                            <label><input type="radio" name="q4" value="3" class="option-input"><div class="option-card"><div class="option-letter">B</div><div>Marketplace (Shopee/Tokped) atau GoFood/GrabFood.</div></div></label>
+                            <label><input type="radio" name="q4" value="5" class="option-input"><div class="option-card"><div class="option-letter">C</div><div>Website sendiri (.com) atau Aplikasi khusus.</div></div></label>
+                        </div>
+                    </div>
+                    <div class="question-block" data-q="5">
+                        <p class="question-text">Bagaimana cara Anda mendatangkan pelanggan baru (Traffic)?</p>
+                        <div class="options-grid">
+                            <label><input type="radio" name="q5" value="1" class="option-input"><div class="option-card"><div class="option-letter">A</div><div>Posting status WA/IG Story organik (gratisan).</div></div></label>
+                            <label><input type="radio" name="q5" value="3" class="option-input"><div class="option-card"><div class="option-letter">B</div><div>Sesekali "Promote/Boost Post" atau endorse.</div></div></label>
+                            <label><input type="radio" name="q5" value="5" class="option-input"><div class="option-card"><div class="option-letter">C</div><div>Rutin beriklan (Ads Manager) dengan target spesifik.</div></div></label>
+                        </div>
+                    </div>
+                    <div class="question-block" data-q="6">
+                        <p class="question-text">Bagaimana Anda mengelola database pelanggan?</p>
+                        <div class="options-grid">
+                            <label><input type="radio" name="q6" value="1" class="option-input"><div class="option-card"><div class="option-letter">A</div><div>Tidak disimpan / Hanya kontak HP.</div></div></label>
+                            <label><input type="radio" name="q6" value="3" class="option-input"><div class="option-card"><div class="option-letter">B</div><div>Dicatat manual di buku/Excel.</div></div></label>
+                            <label><input type="radio" name="q6" value="5" class="option-input"><div class="option-card"><div class="option-letter">C</div><div>Menggunakan CRM / Email Marketing / Tools WA.</div></div></label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="sector-block" id="sector-3" style="display:none;">
+                    <div class="question-block" data-q="7">
+                        <p class="question-text">Dokumen legalitas apa yang sudah Anda miliki?</p>
+                        <div class="options-grid">
+                            <label><input type="radio" name="q7" value="1" class="option-input"><div class="option-card"><div class="option-letter">A</div><div>Belum ada sama sekali.</div></div></label>
+                            <label><input type="radio" name="q7" value="3" class="option-input"><div class="option-card"><div class="option-letter">B</div><div>Sudah ada NIB (Nomor Induk Berusaha).</div></div></label>
+                            <label><input type="radio" name="q7" value="5" class="option-input"><div class="option-card"><div class="option-letter">C</div><div>NIB + Sertifikat Halal/PIRT/BPOM + NPWP Badan.</div></div></label>
+                        </div>
+                    </div>
+                    <div class="question-block" data-q="8">
+                        <p class="question-text">Apakah Anda memiliki rencana bisnis (Business Plan)?</p>
+                        <div class="options-grid">
+                            <label><input type="radio" name="q8" value="1" class="option-input"><div class="option-card"><div class="option-letter">A</div><div>Hanya di kepala, jalan mengalir saja.</div></div></label>
+                            <label><input type="radio" name="q8" value="3" class="option-input"><div class="option-card"><div class="option-letter">B</div><div>Punya catatan target omzet tahunan.</div></div></label>
+                            <label><input type="radio" name="q8" value="5" class="option-input"><div class="option-card"><div class="option-letter">C</div><div>Dokumen Business Plan lengkap (Visi, Strategi, Proyeksi).</div></div></label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="sector-block" id="sector-4" style="display:none;">
+                    <div class="question-block" data-q="9">
+                        <p class="question-text">Bagaimana sistem manajemen stok (Inventory) Anda?</p>
+                        <div class="options-grid">
+                            <label><input type="radio" name="q9" value="1" class="option-input"><div class="option-card"><div class="option-letter">A</div><div>Cek manual/dilihat mata saja kalau habis.</div></div></label>
+                            <label><input type="radio" name="q9" value="3" class="option-input"><div class="option-card"><div class="option-letter">B</div><div>Dicatat di kartu stok / buku stok manual.</div></div></label>
+                            <label><input type="radio" name="q9" value="5" class="option-input"><div class="option-card"><div class="option-letter">C</div><div>Terintegrasi sistem (Otomatis berkurang saat terjual).</div></div></label>
+                        </div>
+                    </div>
+                    <div class="question-block" data-q="10">
+                        <p class="question-text">Siapa yang menangani operasional harian?</p>
+                        <div class="options-grid">
+                            <label><input type="radio" name="q10" value="1" class="option-input"><div class="option-card"><div class="option-letter">A</div><div>Saya sendiri (CEO = Chief Everything Officer).</div></div></label>
+                            <label><input type="radio" name="q10" value="3" class="option-input"><div class="option-card"><div class="option-letter">B</div><div>Dibantu keluarga atau pegawai lepas.</div></div></label>
+                            <label><input type="radio" name="q10" value="5" class="option-input"><div class="option-card"><div class="option-letter">C</div><div>Tim tetap dengan pembagian tugas (Jobdesk) & SOP.</div></div></label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="sector-block" id="sector-5" style="display:none;">
+                    <div class="question-block" data-q="11">
+                        <p class="question-text">Dari mana Anda mendapatkan bahan baku/suplier?</p>
+                        <div class="options-grid">
+                            <label><input type="radio" name="q11" value="1" class="option-input"><div class="option-card"><div class="option-letter">A</div><div>Beli eceran di pasar/toko terdekat.</div></div></label>
+                            <label><input type="radio" name="q11" value="3" class="option-input"><div class="option-card"><div class="option-letter">B</div><div>Langganan tetap tapi belum ada kontrak.</div></div></label>
+                            <label><input type="radio" name="q11" value="5" class="option-input"><div class="option-card"><div class="option-letter">C</div><div>Kontrak langsung dengan pabrik/distributor utama.</div></div></label>
+                        </div>
+                    </div>
+                    <div class="question-block" data-q="12">
+                        <p class="question-text">Apakah bisnis Anda pernah melakukan kerjasama B2B?</p>
+                        <div class="options-grid">
+                            <label><input type="radio" name="q12" value="1" class="option-input"><div class="option-card"><div class="option-letter">A</div><div>Belum, hanya jual ke perorangan (B2C).</div></div></label>
+                            <label><input type="radio" name="q12" value="3" class="option-input"><div class="option-card"><div class="option-letter">B</div><div>Pernah, titip jual (konsinyasi) di toko lain.</div></div></label>
+                            <label><input type="radio" name="q12" value="5" class="option-input"><div class="option-card"><div class="option-letter">C</div><div>Rutin, suplai ke kantor/hotel/pabrik atau ekspor.</div></div></label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="nav-buttons">
+                    <button type="button" class="btn btn-prev" id="prevBtn" onclick="moveQ(-1)" disabled>Kembali</button>
+                    <button type="button" class="btn btn-next" id="nextBtn" onclick="moveQ(1)">Selanjutnya</button>
+                </div>
+
+            </form>
+
+            <div class="analyzing-overlay" id="analyzing">
+                <div class="loader-spinner"></div>
+                <h3 style="color: var(--text-dark); margin-bottom: 5px;">Menganalisis Jawaban...</h3>
+                <p style="color: var(--text-muted);">Menentukan Roadmap Bisnis Anda</p>
+            </div>
+
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        // CONFIG
+        const firebaseConfig = {
+            apiKey: "AIzaSyBIaLzkNM0KqPVKxuMNmardLqcrr2kYTWQ",
+            authDomain: "database-idbm.firebaseapp.com",
+            projectId: "database-idbm",
+            storageBucket: "database-idbm.firebasestorage.app",
+            messagingSenderId: "1052290789133",
+            appId: "1:1052290789133:web:36b513630b7a87154eca44",
+            measurementId: "G-EQLBB94DY2"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        let currentUser = null;
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) currentUser = user;
+            else window.location.href = 'login.html';
+        });
+
+        // --- LOGIC KUESIONER ---
+        const sectors = [
+            { id: 1, name: "Financial Management", qCount: 3, qs: [1,2,3] },
+            { id: 2, name: "Digital & Marketing", qCount: 3, qs: [4,5,6] },
+            { id: 3, name: "Business Logic", qCount: 2, qs: [7,8] },
+            { id: 4, name: "Productivity & Ops", qCount: 2, qs: [9,10] },
+            { id: 5, name: "Networking", qCount: 2, qs: [11,12] }
+        ];
+
+        let currentSectorIdx = 0;
+        let currentQIdx = 0;
+        let allAnswers = {};
+
+        window.moveQ = function(dir) {
+            const currentSec = sectors[currentSectorIdx];
+            const globalQNum = currentSec.qs[currentQIdx];
+
+            if (dir === 1) {
+                const selected = document.querySelector(`input[name="q${globalQNum}"]:checked`);
+                if (!selected) {
+                    alert("Mohon pilih salah satu jawaban.");
+                    return;
+                }
+                allAnswers[`q${globalQNum}`] = parseInt(selected.value);
+            }
+
+            if (dir === 1) {
+                if (currentQIdx < currentSec.qCount - 1) {
+                    changeQVisibility(currentSec.qs[currentQIdx], currentSec.qs[currentQIdx + 1]);
+                    currentQIdx++;
+                } else {
+                    if (currentSectorIdx < sectors.length - 1) {
+                        changeSector(currentSectorIdx + 1);
+                    } else {
+                        finishQuiz();
+                        return;
+                    }
+                }
+            } else {
+                if (currentQIdx > 0) {
+                    changeQVisibility(currentSec.qs[currentQIdx], currentSec.qs[currentQIdx - 1]);
+                    currentQIdx--;
+                } else {
+                    if (currentSectorIdx > 0) {
+                        changeSector(currentSectorIdx - 1, true);
+                    }
+                }
+            }
+            updateUI();
+        };
+
+        function changeQVisibility(hideNum, showNum) {
+            document.querySelector(`div[data-q="${hideNum}"]`).classList.remove('active');
+            document.querySelector(`div[data-q="${showNum}"]`).classList.add('active');
+        }
+
+        function changeSector(newSecIdx, fromBack = false) {
+            document.getElementById(`sector-${sectors[currentSectorIdx].id}`).style.display = 'none';
+            document.querySelectorAll(`#sector-${sectors[currentSectorIdx].id} .question-block`).forEach(el => el.classList.remove('active'));
+
+            currentSectorIdx = newSecIdx;
+            const newSec = sectors[currentSectorIdx];
+
+            document.getElementById(`sector-${newSec.id}`).style.display = 'block';
+            
+            if (fromBack) {
+                currentQIdx = newSec.qCount - 1;
+            } else {
+                currentQIdx = 0;
+            }
+            
+            document.querySelector(`div[data-q="${newSec.qs[currentQIdx]}"]`).classList.add('active');
+            document.getElementById('sectorBadge').innerText = `Sektor ${newSec.id}: ${newSec.name}`;
+            document.getElementById('sectorTitle').innerText = getSectorIndoName(newSec.id);
+        }
+
+        function getSectorIndoName(id) {
+            const names = ["", "Manajemen Keuangan", "Digital & Marketing", "Legalitas & Logika Bisnis", "Operasional & Kapasitas", "Jejaring & Kolaborasi"];
+            return names[id];
+        }
+
+        function updateUI() {
+            const totalQ = 12;
+            const currentSec = sectors[currentSectorIdx];
+            const currentGlobalQ = currentSec.qs[currentQIdx];
+            
+            const pct = (currentGlobalQ / totalQ) * 100;
+            document.getElementById('progressBar').style.width = `${pct}%`;
+            document.getElementById('qIndex').innerText = currentSectorIdx + 1;
+
+            document.getElementById('prevBtn').disabled = (currentGlobalQ === 1);
+            
+            if (currentGlobalQ === 12) {
+                document.getElementById('nextBtn').innerText = "Selesai & Analisis";
+                document.getElementById('nextBtn').style.background = "var(--forest-green)";
+            } else {
+                document.getElementById('nextBtn').innerText = "Selanjutnya";
+                document.getElementById('nextBtn').style.background = "var(--golden-orange)";
+            }
+        }
+
+        async function finishQuiz() {
+            document.getElementById('analyzing').style.display = 'flex';
+
+            let reportCard = {};
+            
+            sectors.forEach(sec => {
+                let score = 0;
+                let maxScore = sec.qCount * 5;
+                sec.qs.forEach(qNum => { score += allAnswers[`q${qNum}`]; });
+
+                let percentage = (score / maxScore) * 100;
+                let level = "Beginner";
+                if (percentage > 75) level = "Advanced";
+                else if (percentage > 40) level = "Intermediate";
+
+                reportCard[sec.name] = { score: score, max: maxScore, level: level };
+            });
+
+            let unlockedFeatures = ["digital_tools"];
+            
+            if (reportCard["Financial Management"].level === "Advanced" && 
+               (reportCard["Business Logic"].level === "Intermediate" || reportCard["Business Logic"].level === "Advanced")) {
+                unlockedFeatures.push("financing");
+            }
+
+            if (reportCard["Networking"].level !== "Beginner" && 
+                reportCard["Productivity & Ops"].level === "Advanced") {
+                unlockedFeatures.push("partnership");
+            }
+
+            try {
+                await updateDoc(doc(db, "users_umkm", currentUser.uid), {
+                    health_check_result: reportCard,
+                    unlocked_features: unlockedFeatures,
+                    status_healthcheck: "completed",
+                    last_updated: new Date()
+                });
+
+                setTimeout(() => {
+                    // Redirect ke DASHBOARD (Bukan index)
+                    window.location.href = "dashboard.html";
+                }, 2000);
+
+            } catch (error) {
+                console.error("Error saving:", error);
+                alert("Gagal menyimpan hasil.");
+                document.getElementById('analyzing').style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>

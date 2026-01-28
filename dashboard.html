@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Dashboard - ID-TRIBE</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <script type="module" src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
+    <script type="module" src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js"></script>
+    <script type="module" src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"></script>
+
+    <style>
+        /* --- DESIGN SYSTEM --- */
+        :root {
+            --forest-green: #2E5C48;
+            --forest-green-light: #e6f0eb;
+            --golden-orange: #F2994A;
+            --golden-orange-dark: #e88a38;
+            --bg-light: #f8fafc;
+            --text-dark: #1e293b;
+            --text-muted: #64748b;
+            
+            /* Glass Effect */
+            --glass-bg: rgba(255, 255, 255, 0.95);
+            --glass-border: rgba(255, 255, 255, 0.8);
+            --glass-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            --card-radius: 16px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            font-family: 'Lato', sans-serif;
+            background-color: var(--bg-light);
+            color: var(--text-dark);
+            min-height: 100vh;
+            padding-top: 70px; 
+            padding-bottom: 40px;
+            overflow-x: hidden; /* Mencegah scroll samping global */
+        }
+
+        /* --- 1. TOP NAVIGATION --- */
+        .top-nav {
+            position: fixed; top: 0; left: 0; width: 100%; height: 70px;
+            background: var(--glass-bg); backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--glass-border);
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 40px; z-index: 1000; box-shadow: var(--glass-shadow);
+        }
+
+        .brand {
+            font-size: 1.5rem; font-weight: 800; color: var(--text-dark);
+            display: flex; align-items: center; gap: 5px; text-decoration: none;
+        }
+        .brand span { color: var(--forest-green); }
+
+        .desktop-menu { display: flex; gap: 30px; align-items: center; }
+        .nav-link {
+            text-decoration: none; color: var(--text-muted); font-weight: 600; font-size: 0.95rem;
+            transition: color 0.3s; position: relative;
+        }
+        .nav-link:hover, .nav-link.active { color: var(--forest-green); }
+        .nav-link.active::after {
+            content: ''; position: absolute; bottom: -24px; left: 0; width: 100%; height: 3px;
+            background: var(--golden-orange); border-radius: 3px 3px 0 0;
+        }
+
+        .user-section { display: flex; align-items: center; gap: 15px; }
+        .avatar {
+            width: 36px; height: 36px; background: var(--golden-orange);
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            color: white; font-weight: bold; font-size: 0.9rem;
+        }
+        .logout-btn {
+            border: 1px solid #e2e8f0; background: white; padding: 6px 16px;
+            border-radius: 8px; cursor: pointer; color: var(--text-muted); font-weight: 600;
+            font-size: 0.85rem; transition: 0.3s;
+        }
+        .logout-btn:hover { border-color: #ef4444; color: #ef4444; }
+
+        /* --- 2. BOTTOM NAVIGATION (MOBILE) --- */
+        .bottom-nav {
+            display: none; position: fixed; bottom: 0; left: 0; width: 100%; height: 65px;
+            background: white; border-top: 1px solid #e2e8f0;
+            z-index: 1000; justify-content: space-around; align-items: center;
+            padding-bottom: 5px; box-shadow: 0 -4px 20px rgba(0,0,0,0.05);
+        }
+        .bottom-item {
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            text-decoration: none; color: #94a3b8; font-size: 0.7rem; font-weight: 600;
+            width: 100%; height: 100%; gap: 4px; transition: 0.2s;
+        }
+        .bottom-item svg { width: 22px; height: 22px; stroke-width: 2.5; }
+        .bottom-item.active { color: var(--forest-green); }
+        .bottom-item.active svg { stroke: var(--forest-green); fill: rgba(46, 92, 72, 0.1); }
+
+        /* --- 3. MAIN LAYOUT --- */
+        .main-content { width: 100%; max-width: 1200px; margin: 0 auto; }
+
+        .hero {
+            height: 280px;
+            background-image: url('https://images.unsplash.com/photo-1619338098121-5925681fc9ab?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080');
+            background-size: cover; background-position: center;
+            position: relative; border-radius: 0 0 24px 24px;
+            display: flex; align-items: center; padding: 0 40px;
+            margin-bottom: 60px; box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        .hero-overlay {
+            position: absolute; inset: 0; border-radius: 0 0 24px 24px;
+            background: linear-gradient(to right, rgba(46, 92, 72, 0.95), rgba(46, 92, 72, 0.7));
+        }
+        .hero-content { position: relative; z-index: 10; width: 100%; color: white; }
+        
+        .level-badge {
+            display: inline-block; padding: 6px 14px; background: rgba(255,255,255,0.2);
+            backdrop-filter: blur(5px); border-radius: 50px; border: 1px solid rgba(255,255,255,0.3);
+            font-size: 0.85rem; margin-bottom: 15px; font-weight: 600;
+        }
+        
+        .progress-wrapper { max-width: 350px; margin-top: 20px; }
+        .progress-bg { height: 8px; background: rgba(255,255,255,0.2); border-radius: 10px; overflow: hidden; }
+        .progress-fill { height: 100%; background: var(--golden-orange); width: 0%; transition: width 1s ease; }
+
+        .dashboard-container {
+            padding: 0 40px; margin-top: -80px; position: relative; z-index: 20;
+        }
+
+        .matrix-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 24px; margin-bottom: 40px;
+        }
+
+        .card {
+            background: white; border-radius: var(--card-radius);
+            padding: 24px; box-shadow: var(--glass-shadow);
+            border: 1px solid #e2e8f0; transition: transform 0.2s, box-shadow 0.2s;
+            display: flex; flex-direction: column; height: 100%;
+            overflow: hidden; /* Mencegah konten melebar */
+        }
+        .card:hover { transform: translateY(-5px); border-color: var(--forest-green); box-shadow: 0 10px 25px rgba(0,0,0,0.08); }
+
+        .card.locked { opacity: 0.8; background: #fcfcfc; border-style: dashed; }
+        .card.unlocked { border-top: 4px solid var(--forest-green); }
+
+        .icon-box {
+            width: 50px; height: 50px; border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.6rem; margin-bottom: 16px;
+        }
+        .locked .icon-box { background: #f1f5f9; color: var(--text-muted); }
+        .unlocked .icon-box { background: var(--forest-green-light); color: var(--forest-green); }
+
+        .card h3 { font-size: 1.1rem; margin-bottom: 8px; color: var(--text-dark); font-weight: 700; }
+        .card p { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 24px; flex-grow: 1; line-height: 1.5; }
+
+        .btn-card {
+            width: 100%; padding: 12px; border-radius: 10px;
+            text-align: center; text-decoration: none; font-size: 0.9rem; font-weight: 600;
+            transition: all 0.2s;
+        }
+        .btn-locked { background: #e2e8f0; color: var(--text-muted); cursor: not-allowed; }
+        .btn-active { background: var(--forest-green); color: white; box-shadow: 0 4px 10px rgba(46, 92, 72, 0.2); }
+        .btn-active:hover { background: #254b3a; transform: translateY(-2px); }
+        .btn-learn { background: var(--golden-orange); color: white; }
+        .btn-learn:hover { background: var(--golden-orange-dark); }
+
+        /* Split Section */
+        .split-section { display: grid; grid-template-columns: 2fr 1fr; gap: 30px; }
+
+        .section-title { font-size: 1.2rem; font-weight: 700; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
+        
+        /* List Item Styling */
+        .list-item {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 15px 0; border-bottom: 1px solid #f1f5f9;
+            gap: 15px; width: 100%; /* Pastikan tidak melebar */
+        }
+        .list-item:last-child { border-bottom: none; }
+        
+        .list-text-wrapper {
+            flex: 1; min-width: 0; /* PENTING: Agar text-overflow jalan di flex */
+            margin-right: 10px;
+        }
+        .list-title {
+            font-size: 0.9rem; font-weight: 700; color: var(--text-dark);
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block;
+        }
+        .list-subtitle {
+            font-size: 0.75rem; color: var(--text-muted);
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; margin-top: 2px;
+        }
+        
+        .tag { padding: 4px 10px; border-radius: 50px; font-size: 0.75rem; font-weight: 700; white-space: nowrap; }
+        .tag-orange { background: #fff7ed; color: var(--golden-orange); border: 1px solid #ffedd5; }
+        .tag-green { background: #f0fdf4; color: var(--forest-green); border: 1px solid #dcfce7; }
+
+        /* Chart Container */
+        .chart-container { position: relative; height: 300px; width: 100%; }
+
+        /* --- MOBILE RESPONSIVE TWEAKS --- */
+        @media (max-width: 768px) {
+            body { padding-top: 60px; padding-bottom: 80px; }
+            
+            /* Header */
+            .top-nav { padding: 0 20px; height: 60px; justify-content: space-between; }
+            .brand { font-size: 1.3rem; }
+            .desktop-menu { display: none; }
+            .logout-btn { padding: 6px 12px; font-size: 0.75rem; }
+            .user-section .avatar { width: 32px; height: 32px; font-size: 0.8rem; }
+            
+            /* Bottom Nav Visible */
+            .bottom-nav { display: flex; }
+            
+            /* Hero */
+            .hero { 
+                margin-bottom: 30px; padding: 0 20px; height: auto; padding-top: 30px; padding-bottom: 50px;
+                border-radius: 0 0 20px 20px; 
+            }
+            .hero-overlay { border-radius: 0 0 20px 20px; }
+            .hero h1 { font-size: 1.6rem; } /* Font judul hero dikecilkan dikit */
+            
+            /* Main Container */
+            .dashboard-container { padding: 0 20px; margin-top: -40px; width: 100%; }
+            
+            /* 1 Kolom Full di HP */
+            .matrix-grid { grid-template-columns: 1fr; gap: 15px; margin-bottom: 30px; }
+            .split-section { grid-template-columns: 1fr; gap: 20px; display: flex; flex-direction: column; }
+            
+            /* FONT SIZE FIXES DI HP */
+            .section-title { font-size: 1rem; margin-bottom: 15px; } /* Judul section dikecilkan */
+            
+            .card { padding: 15px; width: 100%; } /* Padding card dikurangi */
+            
+            /* List Item di HP */
+            .list-item { padding: 10px 0; gap: 10px; }
+            .list-title { font-size: 0.85rem; } /* Font isi list dikecilkan */
+            .list-subtitle { font-size: 0.7rem; }
+            .tag { padding: 3px 8px; font-size: 0.7rem; } /* Tag dikecilkan */
+            
+            /* Chart di HP */
+            .chart-container { height: 220px !important; } /* Tinggi chart dikurangi agar proporsional */
+
+            /* Kartu Fitur di HP (Horizontal Layout) */
+            .card h3 { font-size: 1rem; margin-bottom: 4px; }
+            .card p { display: none; } /* Deskripsi disembunyikan di HP biar ringkas */
+            .matrix-grid .card {
+                flex-direction: row; align-items: center; min-height: auto;
+            }
+            .matrix-grid .icon-box { margin-bottom: 0; margin-right: 15px; width: 40px; height: 40px; font-size: 1.2rem; flex-shrink: 0; }
+            .matrix-grid .btn-card { width: auto; padding: 6px 12px; font-size: 0.75rem; margin-left: auto; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="top-nav">
+        <a href="#" class="brand">ID<span>TRIBE</span></a>
+        
+        <div class="desktop-menu">
+            <a href="dashboard.html" class="nav-link active">Dashboard</a>
+        </div>
+
+        <div class="user-section">
+            <div class="avatar" id="userAvatar">U</div>
+            <button class="logout-btn" onclick="logout()">Keluar</button>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        
+        <div class="hero">
+            <div class="hero-overlay"></div>
+            <div class="hero-content">
+                <span class="level-badge" id="levelBadge">Loading...</span>
+                <h1 style="font-size: 2.2rem; margin-bottom: 5px;">Halo, <span id="userName">Partner</span> 👋</h1>
+                <p style="opacity: 0.9;" id="userBusiness">Memuat data...</p>
+                
+                <div class="progress-wrapper">
+                    <div style="display: flex; justify-content: space-between; font-size: 0.8rem; margin-bottom: 5px;">
+                        <span>Kesehatan Bisnis</span>
+                        <span id="progressText">0%</span>
+                    </div>
+                    <div class="progress-bg">
+                        <div class="progress-fill" id="levelProgress"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="dashboard-container">
+            
+            <div class="matrix-grid">
+                
+                <div class="card locked" id="cardCapacity">
+                    <div class="icon-box">🎓</div>
+                    <div class="card-content">
+                        <h3>Incubation</h3>
+                        <p>Program mentoring & modul belajar.</p>
+                    </div>
+                    <a href="training-hub.html" class="btn-card btn-locked">Terkunci</a>
+                </div>
+
+                <div class="card locked" id="cardDigital">
+                    <div class="icon-box">🚀</div>
+                    <div class="card-content">
+                        <h3>Digital Tools</h3>
+                        <p>Diskon software & ads credit.</p>
+                    </div>
+                    <a href="training-hub.html" class="btn-card btn-locked">Terkunci</a>
+                </div>
+
+                <div class="card locked" id="cardPartnership">
+                    <div class="icon-box">🤝</div>
+                    <div class="card-content">
+                        <h3>Partnership</h3>
+                        <p>Akses supply chain B2B.</p>
+                    </div>
+                    <a href="training-hub.html" class="btn-card btn-locked">Terkunci</a>
+                </div>
+
+                <div class="card locked" id="cardFinancing">
+                    <div class="icon-box">💰</div>
+                    <div class="card-content">
+                        <h3>Financing Hub</h3>
+                        <p>Akses permodalan dari investor.</p>
+                    </div>
+                    <a href="training-hub.html" class="btn-card btn-locked">Terkunci</a>
+                </div>
+
+            </div>
+
+            <div class="split-section">
+                
+                <div class="card">
+                    <div class="section-title">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--forest-green)" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                        Analisis Bisnis
+                    </div>
+                    <div class="chart-container" style="position: relative; height: 300px; width: 100%;">
+                        <canvas id="healthRadar"></canvas>
+                    </div>
+                </div>
+
+                <div style="display: flex; flex-direction: column; gap: 24px;">
+                    
+                    <div class="card">
+                        <div class="section-title">Rekomendasi Belajar</div>
+                        <div id="learningList">
+                            <p class="text-muted" style="text-align:center;">Memuat data...</p>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="section-title">🏆 Top UMKM</div>
+                        <div id="leaderboardList">
+                            </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, collection, query, limit, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBIaLzkNM0KqPVKxuMNmardLqcrr2kYTWQ",
+            authDomain: "database-idbm.firebaseapp.com",
+            projectId: "database-idbm",
+            storageBucket: "database-idbm.firebasestorage.app",
+            messagingSenderId: "1052290789133",
+            appId: "1:1052290789133:web:36b513630b7a87154eca44",
+            measurementId: "G-EQLBB94DY2"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                const docRef = doc(db, "users_umkm", user.uid);
+                const docSnap = await getDoc(docRef);
+
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    renderDashboard(data);
+                    loadLeaderboard(data.nama_usaha);
+                } else {
+                    window.location.href = "setup-umkm.html";
+                }
+            } else {
+                window.location.href = "login.html";
+            }
+        });
+
+        window.logout = function() {
+            signOut(auth).then(() => window.location.href = "index.html");
+        }
+
+        function renderDashboard(data) {
+            document.getElementById('userName').innerText = data.nama_lengkap.split(' ')[0];
+            document.getElementById('userAvatar').innerText = data.nama_lengkap.charAt(0).toUpperCase();
+            document.getElementById('userBusiness').innerText = data.nama_usaha + " • " + data.kategori;
+
+            let results = data.health_check_result || {};
+            if(!data.health_check_result) {
+                window.location.href = "business-health.html";
+                return;
+            }
+
+            let totalScore = 0;
+            let count = 0;
+            for(let key in results) { totalScore += results[key].score; count++; }
+            let avgScore = count > 0 ? (totalScore / (count * 15) * 100) : 0; 
+
+            let levelLabel = "Beginner";
+            if(avgScore > 75) levelLabel = "Advanced";
+            else if(avgScore > 40) levelLabel = "Intermediate";
+
+            document.getElementById('levelBadge').innerText = levelLabel + " Level";
+            document.getElementById('levelProgress').style.width = `${Math.round(avgScore)}%`;
+            document.getElementById('progressText').innerText = `${Math.round(avgScore)}%`;
+
+            const unlocked = data.unlocked_features || [];
+
+            const unlockUI = (id, title, desc, link) => {
+                const card = document.getElementById(id);
+                card.classList.remove('locked');
+                card.classList.add('unlocked');
+                
+                const btn = card.querySelector('a');
+                btn.classList.remove('btn-locked');
+                btn.classList.add('btn-active');
+                btn.innerText = "Akses";
+                btn.href = link;
+            };
+
+            unlockUI('cardCapacity', 'Incubation', 'Program Aktif', 'training-hub.html');
+            if(unlocked.includes('digital_tools')) unlockUI('cardDigital', 'Digital', 'Tools Aktif', '#');
+            if(unlocked.includes('partnership')) unlockUI('cardPartnership', 'Partnership', 'Kolaborasi Aktif', '#');
+            if(unlocked.includes('financing')) unlockUI('cardFinancing', 'Financing', 'Akses Modal', '#');
+            else {
+                const btn = document.querySelector('#cardFinancing a');
+                btn.classList.remove('btn-locked');
+                btn.classList.add('btn-learn');
+                btn.innerText = "Pelajari";
+            }
+
+            renderChart(results);
+            generateLearningPath(results, unlocked);
+        }
+
+        function renderChart(results) {
+            const ctx = document.getElementById('healthRadar').getContext('2d');
+            const dataScores = [
+                results["Financial Management"]?.score || 0,
+                results["Digital & Marketing"]?.score || 0,
+                results["Business Logic"]?.score || 0,
+                results["Productivity & Ops"]?.score || 0,
+                results["Networking"]?.score || 0
+            ];
+            const normalizedScores = dataScores.map(s => (s/15)*100);
+
+            if(window.myRadar) window.myRadar.destroy();
+
+            window.myRadar = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: ["Finance", "Digital", "Legal", "Ops", "Network"],
+                    datasets: [{
+                        label: 'Skor',
+                        data: normalizedScores,
+                        fill: true,
+                        backgroundColor: 'rgba(46, 92, 72, 0.2)',
+                        borderColor: '#2E5C48',
+                        pointBackgroundColor: '#2E5C48',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: '#2E5C48'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            ticks: { display: false, max: 100 },
+                            pointLabels: { color: '#64748b', font: {size: 11, family: 'Lato'} },
+                            grid: { color: '#e2e8f0' }
+                        }
+                    },
+                    plugins: { legend: { display: false } }
+                }
+            });
+        }
+
+        function generateLearningPath(results, unlocked) {
+            const container = document.getElementById('learningList');
+            container.innerHTML = "";
+            let modules = [];
+
+            if(!unlocked.includes('financing')) modules.push({ title: "Manajemen Keuangan", tag: "PENTING", color: "tag-orange" });
+            if(!unlocked.includes('partnership')) modules.push({ title: "Legalitas Usaha", tag: "SYARAT", color: "tag-orange" });
+            
+            if((results["Digital & Marketing"]?.score || 0) < 10) {
+                modules.push({ title: "Digital Marketing Dasar", tag: "SKILL", color: "tag-green" });
+            }
+
+            if(modules.length === 0) {
+                 container.innerHTML = `<div class="list-item"><span style="font-size:0.9rem;">Selamat! Anda sudah mahir.</span></div>`;
+            } else {
+                modules.forEach(mod => {
+                    container.innerHTML += `
+                    <div class="list-item" onclick="window.location.href='training-hub.html'" style="cursor: pointer;">
+                        <div class="list-text-wrapper">
+                            <span class="list-title">${mod.title}</span>
+                        </div>
+                        <span class="tag ${mod.color}">${mod.tag}</span>
+                    </div>`;
+                });
+            }
+        }
+
+        async function loadLeaderboard(currentUserBusiness) {
+            const listEl = document.getElementById('leaderboardList');
+            listEl.innerHTML = '<div style="text-align:center; font-size:0.8rem; color:#64748b;">Memuat...</div>';
+
+            try {
+                const q = query(collection(db, "users_umkm")); 
+                const querySnapshot = await getDocs(q);
+                let leaderboardData = [];
+
+                querySnapshot.forEach((doc) => {
+                    const d = doc.data();
+                    let realScore = 0;
+                    if(d.health_check_result) {
+                        let total = 0;
+                        let count = 0;
+                        for(let key in d.health_check_result) {
+                            total += d.health_check_result[key].score;
+                            count++;
+                        }
+                        realScore = count > 0 ? Math.round((total / (count * 15)) * 100) : 0;
+                    }
+                    leaderboardData.push({ data: d, score: realScore });
+                });
+
+                leaderboardData.sort((a, b) => b.score - a.score);
+                const top5 = leaderboardData.slice(0, 5);
+
+                listEl.innerHTML = ""; 
+                let rank = 1;
+
+                top5.forEach((item) => {
+                    const d = item.data;
+                    const score = item.score;
+                    const isMe = d.nama_usaha === currentUserBusiness;
+                    const bgStyle = isMe ? "background: #f0fdf4;" : "";
+                    const nameStyle = isMe ? "color: var(--forest-green); font-weight:bold;" : "color: var(--text-dark);";
+                    
+                    let rankIcon = `<div style="width:24px; height:24px; background:#e2e8f0; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:0.8rem; font-weight:bold; color:var(--text-muted); flex-shrink:0;">${rank}</div>`;
+                    if(rank === 1) rankIcon = "🥇";
+                    if(rank === 2) rankIcon = "🥈";
+                    if(rank === 3) rankIcon = "🥉";
+
+                    const html = `
+                    <div class="list-item" style="${bgStyle}">
+                        <div style="display:flex; align-items:center; gap:12px; flex:1; min-width:0;">
+                            ${rankIcon}
+                            <div class="list-text-wrapper">
+                                <div class="list-title" style="${nameStyle}">${d.nama_usaha}</div>
+                                <div class="list-subtitle">${d.kategori}</div>
+                            </div>
+                        </div>
+                        <div style="font-weight:bold; font-size:0.9rem; color:var(--golden-orange); white-space:nowrap;">${score} Poin</div>
+                    </div>`;
+                    listEl.innerHTML += html;
+                    rank++;
+                });
+            } catch (e) {
+                console.error(e);
+            }
+        }
+    </script>
+</body>
+</html>

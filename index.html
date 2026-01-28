@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ID-TRIBE - Platform UMKM Naik Kelas</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
+    
+    <script type="module" src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
+    <script type="module" src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"></script>
+
+    <style>
+        /* CSS SAMA SEPERTI SEBELUMNYA */
+        :root {
+            --forest-green: #2E5C48;
+            --forest-green-dark: #1e3d2f;
+            --forest-green-light: #3d7a5f;
+            --golden-orange: #F2994A;
+            --golden-orange-dark: #e88a38;
+            --golden-orange-light: #f5a961;
+            --bg-main: #e2fef0;
+            --text-primary: #1a1a1a;
+            --text-secondary: #4a4a4a;
+            --glass-bg: rgba(255, 255, 255, 0.65);
+            --glass-border: rgba(255, 255, 255, 0.4);
+            --glass-blur: blur(16px);
+            --glass-shadow: 0 8px 32px 0 rgba(46, 92, 72, 0.1);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Lato', sans-serif; background-color: var(--bg-main); color: var(--text-primary); min-height: 100vh; overflow-x: hidden; line-height: 1.6; }
+        .background { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; background: var(--bg-main); }
+        .orb { position: fixed; border-radius: 50%; filter: blur(90px); opacity: 0.5; z-index: -1; animation: float 10s infinite ease-in-out; }
+        .orb-1 { width: 500px; height: 500px; background: #a7f3d0; top: -150px; left: -150px; }
+        .orb-2 { width: 400px; height: 400px; background: #fde68a; bottom: -100px; right: -100px; animation-delay: -2s; opacity: 0.6; }
+        @keyframes float { 0%, 100% { transform: translate(0, 0); } 50% { transform: translate(30px, 50px); } }
+        
+        .navbar { display: flex; justify-content: space-between; align-items: center; padding: 15px 40px; background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(46, 92, 72, 0.1); position: sticky; top: 0; z-index: 100; box-shadow: 0 4px 20px rgba(0,0,0,0.03); }
+        .brand-logo { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+        .brand-icon { width: 40px; height: 40px; background-color: var(--forest-green); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 900; font-size: 1.1rem; }
+        .brand-text { font-size: 1.4rem; font-weight: 900; color: var(--forest-green); letter-spacing: -0.5px; }
+        .nav-links { display: flex; gap: 30px; }
+        .nav-links a { text-decoration: none; color: var(--text-secondary); font-weight: 600; font-size: 1rem; transition: color 0.3s; }
+        .nav-links a:hover, .nav-links a.active { color: var(--forest-green); }
+        .btn-login-nav { padding: 8px 24px; border: 2px solid var(--forest-green); border-radius: 50px; text-decoration: none; color: var(--forest-green); font-weight: 700; transition: all 0.3s; }
+        .btn-login-nav:hover { background-color: var(--forest-green); color: white; }
+
+        .hero-section { position: relative; height: 500px; background-image: url('https://images.unsplash.com/photo-1556761175-5973dc0f32e7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1920'); background-size: cover; background-position: center; display: flex; align-items: center; border-bottom: 4px solid var(--golden-orange); }
+        .hero-overlay { position: absolute; inset: 0; background: linear-gradient(to right, rgba(30, 61, 47, 0.95) 0%, rgba(46, 92, 72, 0.85) 50%, rgba(46, 92, 72, 0.4) 100%); }
+        .hero-content { position: relative; z-index: 10; max-width: 1200px; margin: 0 auto; width: 100%; padding: 0 40px; }
+        .hero-tagline { color: var(--golden-orange); font-weight: 700; text-transform: uppercase; letter-spacing: 2px; font-size: 0.9rem; margin-bottom: 15px; display: block; }
+        .hero-title { font-size: 3.5rem; font-weight: 900; color: white; margin-bottom: 20px; line-height: 1.2; }
+        .hero-desc { color: rgba(255, 255, 255, 0.9); font-size: 1.2rem; max-width: 650px; margin-bottom: 40px; line-height: 1.6; font-weight: 300; }
+        .btn-cta { padding: 16px 40px; background-color: var(--golden-orange); color: #0f172a; font-size: 1.1rem; font-weight: 700; border: none; border-radius: 12px; cursor: pointer; text-decoration: none; box-shadow: 0 10px 25px rgba(242, 153, 74, 0.4); transition: all 0.3s; display: inline-block; }
+        .btn-cta:hover { background-color: var(--golden-orange-light); transform: translateY(-4px); box-shadow: 0 15px 30px rgba(242, 153, 74, 0.5); }
+
+        .container { max-width: 1100px; margin: 40px auto 60px; padding: 0 20px; position: relative; z-index: 20; }
+        .glass-card { background: var(--glass-bg); backdrop-filter: var(--glass-blur); border: 1px solid var(--glass-border); border-radius: 24px; padding: 40px; margin-bottom: 40px; box-shadow: var(--glass-shadow); }
+        .section-header { margin-bottom: 40px; text-align: center; }
+        .section-title { font-size: 2rem; color: var(--forest-green); font-weight: 900; margin-bottom: 10px; }
+        .section-subtitle { font-size: 1rem; color: var(--text-secondary); max-width: 600px; margin: 0 auto; }
+
+        .timeline-container { position: relative; padding: 10px 0; }
+        .timeline-line { position: absolute; left: 24px; top: 0; bottom: 0; width: 4px; background: rgba(46, 92, 72, 0.15); border-radius: 4px; }
+        .timeline-item { position: relative; padding-left: 70px; margin-bottom: 40px; }
+        .timeline-item:last-child { margin-bottom: 0; }
+        .timeline-dot { position: absolute; left: 10px; top: 0; width: 32px; height: 32px; background: white; border: 4px solid var(--forest-green); border-radius: 50%; z-index: 10; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.8rem; color: var(--forest-green); box-shadow: 0 0 0 4px rgba(46, 92, 72, 0.1); }
+        .timeline-content { background: rgba(255, 255, 255, 0.6); border: 1px solid rgba(255, 255, 255, 0.6); border-radius: 16px; padding: 25px; transition: all 0.3s; }
+        .timeline-item:hover .timeline-content { background: white; transform: translateX(5px); border-color: var(--forest-green-light); box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
+        .phase-badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
+        .bg-phase-1 { background: #e0f2fe; color: #0284c7; } .bg-phase-2 { background: #fef9c3; color: #ca8a04; } .bg-phase-3 { background: #fae8ff; color: #a21caf; } .bg-phase-4 { background: #dcfce7; color: #166534; } .bg-phase-5 { background: #ffedd5; color: #c2410c; }
+        .timeline-content h4 { font-size: 1.3rem; color: var(--forest-green); margin-bottom: 8px; font-weight: 800; }
+        .timeline-content p { color: var(--text-secondary); font-size: 0.95rem; margin-bottom: 15px; }
+        .timeline-meta { display: flex; gap: 15px; font-size: 0.85rem; font-weight: 600; color: var(--text-primary); border-top: 1px dashed rgba(0,0,0,0.1); padding-top: 10px; }
+        .meta-icon { margin-right: 5px; color: var(--golden-orange); }
+
+        /* ARTIKEL CARD (DINAMIS) */
+        .article-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+        .article-card { padding: 25px; background: white; border: 1px solid rgba(0,0,0,0.05); border-left: 5px solid var(--forest-green); border-radius: 12px; cursor: pointer; transition: 0.3s; box-shadow: 0 4px 15px rgba(0,0,0,0.02); display: flex; flex-direction: column; overflow: hidden; }
+        .article-card:hover { transform: translateY(-5px); border-left-color: var(--golden-orange); box-shadow: 0 15px 30px rgba(0,0,0,0.08); }
+        .article-card img { width: 100%; height: 150px; object-fit: cover; border-radius: 8px; margin-bottom: 15px; background: #f1f5f9; }
+        .article-card h3 { font-size: 1.2rem; color: var(--forest-green); margin-bottom: 10px; line-height: 1.4; font-weight: 800; }
+        .article-card p { font-size: 0.95rem; color: var(--text-secondary); flex: 1; line-height: 1.6; }
+        
+        .story-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+        .story-item { background: linear-gradient(145deg, #ffffff, #f3fcf8); padding: 30px; border-radius: 20px; border: 1px solid white; box-shadow: 0 10px 30px rgba(0,0,0,0.03); }
+        .story-author { display: flex; align-items: center; margin-bottom: 20px; }
+        .avatar { width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 900; margin-right: 15px; color: white; font-size: 1rem; box-shadow: 0 5px 15px rgba(46, 92, 72, 0.2); }
+        .story-text { font-style: italic; color: var(--text-secondary); font-size: 1rem; line-height: 1.6; }
+        footer { text-align: center; padding: 40px 0; color: var(--text-secondary); border-top: 1px solid rgba(0,0,0,0.05); margin-top: 60px; font-size: 0.9rem; background: white; }
+
+        @media (max-width: 768px) {
+            .navbar { display: flex !important; flex-wrap: wrap; align-items: center; justify-content: space-between; padding: 15px 20px; gap: 10px; }
+            .brand-logo { flex-grow: 0; margin-bottom: 0; }
+            .nav-actions { flex-grow: 0; order: 2; }
+            .btn-login-nav { padding: 6px 16px; font-size: 0.85rem; }
+            .nav-links { display: flex !important; order: 3; width: 100%; justify-content: center; margin-top: 10px; padding-top: 15px; border-top: 1px solid rgba(46, 92, 72, 0.1); gap: 15px; }
+            .nav-links a { font-size: 0.9rem; padding: 5px 10px; background-color: rgba(46, 92, 72, 0.05); border-radius: 8px; }
+            .hero-section { height: auto; padding: 100px 20px 60px; text-align: center; }
+            .hero-title { font-size: 2.2rem; }
+            .hero-desc { margin-left: auto; margin-right: auto; }
+            .section-grid { grid-template-columns: 1fr; }
+            .section-grid img { margin-top: 20px; }
+            .pillars-grid { grid-template-columns: 1fr; }
+            .timeline-content { padding: 20px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="background">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+    </div>
+
+    <nav class="navbar">
+        <a href="#" class="brand-logo">
+            <div class="brand-icon">ID</div>
+            <span class="brand-text">ID-TRIBE</span>
+        </a>
+        <div class="nav-links">
+            <a href="#" class="active">Beranda</a>
+            <a href="about.html">Tentang Kami</a>
+        </div>
+        <div class="nav-actions">
+            <a href="login.html" class="btn-login-nav">Masuk / Daftar</a>
+        </div>
+    </nav>
+
+    <div class="hero-section">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+            <span class="hero-tagline">Platform Inkubasi Digital</span>
+            <h1 class="hero-title">Wujudkan UMKM <br>Naik Kelas & Berdaya</h1>
+            <p class="hero-desc">Bergabunglah dengan ekosistem pemberdayaan UMKM Indonesia. Dapatkan akses ke pelatihan, permodalan, dan kemitraan strategis.</p>
+            <a href="login.html" class="btn-cta">Mulai Perjalanan Anda &rarr;</a>
+        </div>
+    </div>
+
+    <div class="container">
+        
+        <section class="glass-card">
+            <div class="section-header">
+                <h2 class="section-title">Peta Perjalanan Anda</h2>
+                <p class="section-subtitle">Dari Diagnosa hingga Akses Modal, ikuti 5 tahap inkubasi ini.</p>
+            </div>
+            
+            <div class="timeline-container">
+                <div class="timeline-line"></div>
+                <div class="timeline-item">
+                    <div class="timeline-dot">1</div>
+                    <div class="timeline-content">
+                        <span class="phase-badge bg-phase-1">Fase 1: Diagnosa (Hari 1)</span>
+                        <h4>Check-Up Kesehatan Bisnis</h4>
+                        <p>Lakukan registrasi dan isi kuesioner "Business Health Check" untuk mengetahui level bisnis Anda saat ini.</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-dot">2</div>
+                    <div class="timeline-content">
+                        <span class="phase-badge bg-phase-2">Fase 2: Inkubasi (Minggu 1-2)</span>
+                        <h4>Capacity Building (Training Hub)</h4>
+                        <p>Akses Course Library untuk belajar teori dan selesaikan misi nyata (Real World Mission) untuk memvalidasi skill.</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-dot">3</div>
+                    <div class="timeline-content">
+                        <span class="phase-badge bg-phase-3">Fase 3: Validasi (Minggu 3)</span>
+                        <h4>Social & Expert Validation</h4>
+                        <p>Aktif di Forum Komunitas dan lakukan sesi konsultasi dengan Mentor untuk validasi dokumen usaha.</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-dot">4</div>
+                    <div class="timeline-content">
+                        <span class="phase-badge bg-phase-4">Fase 4: The Grand Unlock (Minggu 4)</span>
+                        <h4>Akses Fitur Eksklusif</h4>
+                        <p>Selamat! Gembok terbuka. Anda kini bisa mengakses Financing (Modal) dan Digital Empowerment Tools.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="glass-card">
+            <div class="section-header">
+                <h2 class="section-title">Wawasan Bisnis Terbaru</h2>
+                <p class="section-subtitle">Artikel pilihan untuk menambah wawasan sebelum memulai.</p>
+            </div>
+            
+            <div class="article-grid" id="articleList">
+                <p style="text-align:center; color:gray;">Memuat artikel...</p>
+            </div>
+        </section>
+
+        <section class="glass-card">
+            <div class="section-header">
+                <h2 class="section-title">Mereka Yang Telah Sukses</h2>
+            </div>
+            <div class="story-grid">
+                <div class="story-item">
+                    <div class="story-author">
+                        <div class="avatar" style="background: linear-gradient(135deg, var(--forest-green), var(--forest-green-light));">BS</div>
+                        <div>
+                            <strong style="color:var(--text-primary)">Bakso Sejahtera</strong><br>
+                            <span style="font-size: 0.8rem; color: var(--golden-orange); font-weight:bold;">Omzet naik 300%</span>
+                        </div>
+                    </div>
+                    <p class="story-text">"Fitur Inventory Management otomatis sangat membantu. Saya tidak perlu pusing lagi menghitung stok bakso setiap malam."</p>
+                </div>
+                <div class="story-item">
+                    <div class="story-author">
+                        <div class="avatar" style="background: linear-gradient(135deg, var(--golden-orange), #d97706);">KJ</div>
+                        <div>
+                            <strong style="color:var(--text-primary)">Keripik Juara</strong><br>
+                            <span style="font-size: 0.8rem; color: var(--golden-orange); font-weight:bold;">Ekspor ke 3 Negara</span>
+                        </div>
+                    </div>
+                    <p class="story-text">"Berkat modul Digital Marketing Advanced, produk saya sekarang dikenal sampai Singapura dan Malaysia."</p>
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+    <footer>
+        <p>Copyright © 2026 ID-TRIBE UMKM Platform.</p>
+    </footer>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        // Hapus import auth jika homepage boleh diakses publik
+        import { getFirestore, collection, query, orderBy, limit, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        // FIREBASE CONFIG (PASTIKAN SAMA PERSIS DENGAN ADMIN)
+        const firebaseConfig = {
+            apiKey: "AIzaSyBIaLzkNM0KqPVKxuMNmardLqcrr2kYTWQ",
+            authDomain: "database-idbm.firebaseapp.com",
+            projectId: "database-idbm",
+            storageBucket: "database-idbm.firebasestorage.app",
+            messagingSenderId: "1052290789133",
+            appId: "1:1052290789133:web:36b513630b7a87154eca44",
+            measurementId: "G-EQLBB94DY2"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        async function loadArticlesForHomepage() {
+            const container = document.getElementById('articleList');
+            // Reset dulu
+            container.innerHTML = '<p style="text-align:center; color:gray;">Sedang mengambil data...</p>';
+            
+            try {
+                // Query 3 artikel terbaru
+                const q = query(collection(db, "articles"), orderBy("timestamp", "desc"), limit(3));
+                const snapshot = await getDocs(q);
+
+                if (snapshot.empty) {
+                    container.innerHTML = `
+                        <div class="article-card" style="grid-column: 1/-1; text-align:center;">
+                            <h3>Belum Ada Artikel</h3>
+                            <p>Admin belum memposting artikel terbaru.</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                container.innerHTML = ""; // Bersihkan loading
+
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    const linkUrl = `article-detail.html?id=${doc.id}`; 
+                    
+                    // --- PERBAIKAN DI SINI (Safe Checks) ---
+                    
+                    // 1. Cek Gambar (Jika kosong, pakai placeholder)
+                    let imgSource = data.mainImage || 'https://via.placeholder.com/400x200?text=No+Image';
+
+                    // 2. Cek Headline (Jika kosong/undefined, pakai snippet atau teks default)
+                    // Masalah error 'substring' terjadi di sini sebelumnya
+                    let textHeadline = data.headline || data.snippet || "Klik untuk membaca selengkapnya...";
+                    
+                    // Pastikan tipe datanya String sebelum di-substring
+                    textHeadline = String(textHeadline); 
+
+                    // Render HTML
+                    const html = `
+                    <div class="article-card" onclick="window.location.href='${linkUrl}'">
+                        <img src="${imgSource}" alt="Thumbnail">
+                        <h3>${data.title || "Tanpa Judul"}</h3>
+                        <p>${textHeadline.substring(0, 80)}...</p>
+                        <small style="margin-top:10px; color:#94a3b8; font-weight:bold;">BACA SELENGKAPNYA &rarr;</small>
+                    </div>`;
+                    
+                    container.innerHTML += html;
+                });
+
+            } catch (e) {
+                console.error("Error loading articles:", e);
+                container.innerHTML = `<p style="text-align:center; color:red;">Error: ${e.message}</p>`;
+            }
+        }
+
+        // Panggil langsung tanpa menunggu Auth
+        loadArticlesForHomepage();
+    </script>
+
+</body>
+</html>

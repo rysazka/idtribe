@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Super Admin - ID-TRIBE</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <script type="module" src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
+    <script type="module" src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js"></script>
+    <script type="module" src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"></script>
+
+    <style>
+        :root { --admin-dark: #0f172a; --admin-accent: #3b82f6; --danger: #ef4444; --success: #10b981; --bg-light: #f1f5f9; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Lato', sans-serif; }
+        body { display: flex; min-height: 100vh; background: var(--bg-light); }
+        
+        .sidebar { width: 250px; background: var(--admin-dark); color: white; display: flex; flex-direction: column; padding: 20px; position: fixed; height: 100vh; overflow-y: auto; }
+        .brand { font-size: 1.5rem; font-weight: bold; margin-bottom: 40px; display: flex; align-items: center; gap: 10px; }
+        
+        .nav-item { padding: 12px 15px; cursor: pointer; border-radius: 8px; margin-bottom: 5px; display: flex; align-items: center; gap: 10px; color: #94a3b8; transition: 0.3s; }
+        /* Style untuk menu yang aktif */
+        .nav-item:hover, .nav-item.active { background: rgba(255,255,255,0.1); color: white; font-weight: bold; border-left: 4px solid var(--admin-accent); }
+        
+        .logout { margin-top: auto; color: var(--danger); }
+        
+        .main { flex: 1; margin-left: 250px; padding: 30px; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        .page-title { font-size: 1.8rem; font-weight: bold; color: var(--admin-dark); }
+        
+        .section { display: none; animation: fadeIn 0.3s ease; }
+        .section.active { display: block; }
+        @keyframes fadeIn { from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:translateY(0);} }
+        
+        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 15px; text-align: left; border-bottom: 1px solid #e2e8f0; }
+        th { font-weight: 700; color: #64748b; font-size: 0.9rem; }
+        
+        .btn { padding: 8px 16px; border-radius: 6px; border: none; cursor: pointer; font-weight: 600; font-size: 0.85rem; }
+        .btn-green { background: var(--success); color: white; }
+        .btn-red { background: var(--danger); color: white; }
+        .btn-blue { background: var(--admin-accent); color: white; }
+        
+        .form-group { margin-bottom: 15px; }
+        .form-label { display: block; margin-bottom: 5px; font-weight: 600; }
+        .form-input { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; }
+        
+        /* Image Upload Styles */
+        .img-option { display: flex; gap: 15px; margin-bottom: 10px; }
+        .radio-label { display: flex; align-items: center; gap: 5px; cursor: pointer; font-size: 0.9rem; }
+        .file-preview { margin-top: 10px; width: 100%; height: 150px; border: 2px dashed #cbd5e1; border-radius: 6px; display: flex; align-items: center; justify-content: center; overflow: hidden; background: #f8fafc; color: #94a3b8; }
+        .file-preview img { width: 100%; height: 100%; object-fit: cover; }
+        
+        /* Spec Info Box */
+        .info-box { background: #e0f2fe; border: 1px solid #bae6fd; color: #0369a1; padding: 15px; border-radius: 8px; font-size: 0.85rem; line-height: 1.5; margin-bottom: 20px; }
+        .info-box strong { display: block; margin-bottom: 5px; }
+    </style>
+</head>
+<body>
+
+    <nav class="sidebar">
+        <div class="brand"><i class="fas fa-shield-alt"></i> ID-TRIBE Admin</div>
+        
+        <div class="nav-item active" onclick="switchTab('validasi', this)"><i class="fas fa-check-circle"></i> Validasi UMKM</div>
+        <div class="nav-item" onclick="switchTab('cms', this)"><i class="fas fa-video"></i> CMS Training</div>
+        <div class="nav-item" onclick="switchTab('artikel', this)"><i class="fas fa-newspaper"></i> Manajemen Artikel</div>
+        <div class="nav-item" onclick="switchTab('forum', this)"><i class="fas fa-comments"></i> Moderasi Forum</div>
+        <div class="nav-item" onclick="switchTab('users', this)"><i class="fas fa-users"></i> Manajemen User</div>
+        
+        <div class="nav-item logout" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Keluar</div>
+    </nav>
+
+    <main class="main">
+        
+        <div id="validasi" class="section active">
+            <div class="header"><h1 class="page-title">Validasi Legalitas</h1></div>
+            <div class="card"><table id="tableValidasi"><thead><tr><th>Nama Usaha</th><th>NIB</th><th>Status</th><th>Aksi</th></tr></thead><tbody></tbody></table></div>
+        </div>
+
+        <div id="cms" class="section">
+            <div class="header"><h1 class="page-title">Upload Materi Belajar</h1></div>
+            <div class="card">
+                <form onsubmit="handleAddCourse(event)">
+                    <div class="form-group"><label class="form-label">Judul Materi</label><input type="text" id="courseTitle" class="form-input" required></div>
+                    <div class="form-group"><label class="form-label">Kategori</label><select id="courseCat" class="form-input"><option value="digital">Digital</option><option value="finance">Keuangan</option></select></div>
+                    <button type="submit" class="btn btn-blue">Upload Materi</button>
+                </form>
+            </div>
+        </div>
+
+        <div id="artikel" class="section">
+            <div class="header"><h1 class="page-title">Manajemen Artikel</h1></div>
+            
+            <div class="info-box">
+                <strong>📸 Spesifikasi Teknis Foto:</strong>
+                • <strong>Format:</strong> JPG, PNG, atau WEBP.<br>
+                • <strong>Ukuran File:</strong> Maksimal 2MB (Sistem akan otomatis mengompres jika lebih besar).<br>
+                • <strong>Dimensi:</strong> Disarankan Landscape (16:9), minimal 800x450 pixel agar tidak pecah.<br>
+                • <strong>Fitur:</strong> Sistem menggunakan Base64 Compression untuk menyimpan gambar langsung di database tanpa server storage tambahan.
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <div class="card">
+                    <h3 style="margin-bottom: 20px;">Tulis Artikel Baru</h3>
+                    <form onsubmit="handleAddArticle(event)">
+                        
+                        <div class="form-group">
+                            <label class="form-label">Judul Artikel</label>
+                            <input type="text" id="artTitle" class="form-input" placeholder="Judul utama..." required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Headline</label>
+                            <textarea id="artHeadline" class="form-input" rows="2" placeholder="Teks singkat..." required></textarea>
+                        </div>
+
+                        <div class="form-group" style="background:#f8fafc; padding:15px; border-radius:8px; border:1px solid #e2e8f0;">
+                            <label class="form-label">Foto Utama</label>
+                            
+                            <div class="img-option">
+                                <label class="radio-label"><input type="radio" name="imgSource" value="url" checked onclick="toggleImgInput('url')"> Pakai URL Link</label>
+                                <label class="radio-label"><input type="radio" name="imgSource" value="local" onclick="toggleImgInput('local')"> Upload dari Komputer</label>
+                            </div>
+
+                            <div id="inputUrlBox">
+                                <input type="text" id="artMainImg" class="form-input" placeholder="https://..." onchange="previewUrl(this.value)">
+                            </div>
+
+                            <div id="inputLocalBox" style="display:none;">
+                                <input type="file" id="artLocalFile" class="form-input" accept="image/*" onchange="handleFileSelect(event)">
+                            </div>
+
+                            <div class="file-preview" id="imgPreview">
+                                <span>Preview Gambar</span>
+                            </div>
+                            <input type="hidden" id="finalImageBase64">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Isi Berita</label>
+                            <textarea id="artContent" class="form-input" rows="8" placeholder="Isi artikel..." required></textarea>
+                        </div>
+
+                        <button type="submit" class="btn btn-blue" style="width:100%">Publish Artikel</button>
+                    </form>
+                </div>
+
+                <div class="card">
+                    <h3 style="margin-bottom: 20px;">Daftar Artikel</h3>
+                    <table id="tableArtikel">
+                        <thead><tr><th>Judul</th><th>Aksi</th></tr></thead>
+                        <tbody><tr><td colspan="2">Memuat...</td></tr></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div id="forum" class="section">
+            <div class="header"><h1 class="page-title">Moderasi Forum</h1></div>
+            <div class="card"><table id="tableForum"><thead><tr><th>Topik</th><th>Penulis</th><th>Aksi</th></tr></thead><tbody></tbody></table></div>
+        </div>
+
+        <div id="users" class="section">
+            <div class="header"><h1 class="page-title">Manajemen User</h1></div>
+            <div class="card"><table id="tableUsers"><thead><tr><th>Nama</th><th>Email</th><th>Aksi</th></tr></thead><tbody></tbody></table></div>
+        </div>
+
+    </main>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, query, orderBy, where, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        // CONFIG
+        const firebaseConfig = {
+            apiKey: "AIzaSyBIaLzkNM0KqPVKxuMNmardLqcrr2kYTWQ",
+            authDomain: "database-idbm.firebaseapp.com",
+            projectId: "database-idbm",
+            storageBucket: "database-idbm.firebasestorage.app",
+            messagingSenderId: "1052290789133",
+            appId: "1:1052290789133:web:36b513630b7a87154eca44",
+            measurementId: "G-EQLBB94DY2"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // AUTH
+        onAuthStateChanged(auth, async (user) => {
+            if(user) {
+                const snap = await getDoc(doc(db, "users_umkm", user.uid));
+                if (snap.data().role !== 'admin') window.location.href = "dashboard.html";
+                else loadAllData();
+            } else {
+                window.location.href = "login.html";
+            }
+        });
+
+        function loadAllData() {
+            loadArticles();
+            loadValidasi();
+            loadForum();
+            loadUsers();
+        }
+
+        // --- IMAGE HANDLING LOGIC ---
+        window.toggleImgInput = (type) => {
+            if(type === 'url') {
+                document.getElementById('inputUrlBox').style.display = 'block';
+                document.getElementById('inputLocalBox').style.display = 'none';
+            } else {
+                document.getElementById('inputUrlBox').style.display = 'none';
+                document.getElementById('inputLocalBox').style.display = 'block';
+            }
+            // Reset preview
+            document.getElementById('imgPreview').innerHTML = '<span>Preview Gambar</span>';
+            document.getElementById('finalImageBase64').value = '';
+        }
+
+        window.previewUrl = (url) => {
+            if(url) {
+                document.getElementById('imgPreview').innerHTML = `<img src="${url}">`;
+                document.getElementById('finalImageBase64').value = url; // Simpan URL sebagai final value
+            }
+        }
+
+        window.handleFileSelect = (event) => {
+            const file = event.target.files[0];
+            if (file) {
+                if(file.size > 5 * 1024 * 1024) { // Cek awal 5MB
+                    alert("File terlalu besar! Maksimum 5MB.");
+                    event.target.value = "";
+                    return;
+                }
+                
+                // Kompresi Gambar
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = (e) => {
+                    const img = new Image();
+                    img.src = e.target.result;
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        const ctx = canvas.getContext('2d');
+                        
+                        // Resize logic (Max width 800px)
+                        const maxWidth = 800;
+                        const scaleSize = maxWidth / img.width;
+                        canvas.width = maxWidth;
+                        canvas.height = img.height * scaleSize;
+
+                        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                        
+                        // Convert to compressed Base64 (JPEG quality 0.7)
+                        const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7);
+                        
+                        // Tampilkan Preview & Simpan ke Hidden Input
+                        document.getElementById('imgPreview').innerHTML = `<img src="${compressedBase64}">`;
+                        document.getElementById('finalImageBase64').value = compressedBase64;
+                    }
+                };
+            }
+        }
+
+        // --- CRUD ARTIKEL ---
+        window.handleAddArticle = async (e) => {
+            e.preventDefault();
+            const btn = e.target.querySelector('button');
+            const finalImg = document.getElementById('finalImageBase64').value;
+            
+            if(!finalImg) {
+                alert("Harap masukkan URL gambar atau upload foto!");
+                return;
+            }
+
+            btn.innerText = "Menyimpan...";
+            btn.disabled = true;
+            
+            try {
+                await addDoc(collection(db, "articles"), {
+                    title: document.getElementById('artTitle').value,
+                    headline: document.getElementById('artHeadline').value,
+                    mainImage: finalImg, // Menyimpan URL atau Base64 string
+                    content: document.getElementById('artContent').value,
+                    timestamp: new Date()
+                });
+                
+                alert("Artikel berhasil diterbitkan!");
+                e.target.reset();
+                document.getElementById('imgPreview').innerHTML = '<span>Preview Gambar</span>';
+                loadArticles();
+            } catch(err) { 
+                console.error(err);
+                alert("Gagal (Mungkin gambar terlalu besar): " + err.message); 
+            } finally {
+                btn.innerText = "Publish Artikel";
+                btn.disabled = false;
+            }
+        }
+
+        async function loadArticles() {
+            const tbody = document.querySelector('#tableArtikel tbody');
+            tbody.innerHTML = '';
+            
+            try {
+                const q = query(collection(db, "articles"), orderBy("timestamp", "desc"));
+                const snapshot = await getDocs(q);
+                
+                if(snapshot.empty) {
+                    tbody.innerHTML = '<tr><td colspan="2" style="text-align:center">Belum ada artikel.</td></tr>';
+                    return;
+                }
+
+                snapshot.forEach(d => {
+                    const data = d.data();
+                    tbody.innerHTML += `
+                    <tr>
+                        <td>
+                            <strong>${data.title}</strong><br>
+                            <small style="color:#64748b">${data.headline.substring(0, 40)}...</small>
+                        </td>
+                        <td><button class="btn btn-red" onclick="deleteArticle('${d.id}')">Hapus</button></td>
+                    </tr>`;
+                });
+            } catch(e) { console.log(e); }
+        }
+
+        window.deleteArticle = async (id) => {
+            if(confirm("Hapus artikel ini?")) {
+                await deleteDoc(doc(db, "articles", id));
+                loadArticles();
+            }
+        }
+
+        // --- FUNGSI LAIN (Placeholder) ---
+        async function loadValidasi() { /* Logic lama... */ }
+        async function loadForum() { /* Logic lama... */ }
+        async function loadUsers() { /* Logic lama... */ }
+        window.handleAddCourse = async (e) => { e.preventDefault(); alert("Fitur Training CMS"); }
+
+        // --- UTILS (PERBAIKAN SIDEBAR HIGHLIGHT) ---
+        window.switchTab = (id, el) => {
+            // Hide all contents
+            document.querySelectorAll('.section').forEach(e => e.classList.remove('active'));
+            // Show selected content
+            document.getElementById(id).classList.add('active');
+            
+            // Remove active from all nav items
+            document.querySelectorAll('.nav-item').forEach(e => e.classList.remove('active'));
+            // Add active to clicked nav item
+            el.classList.add('active');
+        }
+        
+        window.logout = () => signOut(auth).then(() => window.location.href = "login.html");
+    </script>
+</body>
+</html>

@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Training Hub - ID-TRIBE</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <script type="module" src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
+    <script type="module" src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js"></script>
+    <script type="module" src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"></script>
+
+    <style>
+        /* --- DESIGN SYSTEM --- */
+        :root {
+            --forest-green: #2E5C48;
+            --forest-green-dark: #1e3d2f;
+            --forest-green-light: #e6f0eb;
+            --golden-orange: #F2994A;
+            --golden-orange-dark: #e88a38;
+            --text-dark: #1a1a1a;
+            --text-muted: #64748b;
+            
+            /* Glass Effect */
+            --glass-bg: rgba(255, 255, 255, 0.95);
+            --glass-border: rgba(255, 255, 255, 0.5);
+            --glass-blur: blur(20px);
+            --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Lato', sans-serif;
+            background-color: var(--forest-green);
+            color: var(--text-dark);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* --- BACKGROUND --- */
+        .bg-image {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-image: url('https://images.unsplash.com/photo-1619338098121-5925681fc9ab?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1920');
+            background-size: cover; background-position: center;
+            z-index: -2;
+        }
+        .bg-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(135deg, rgba(46, 92, 72, 0.95), rgba(46, 92, 72, 0.8));
+            z-index: -1;
+        }
+
+        /* --- LAYOUT --- */
+        .container { max-width: 1100px; margin: 0 auto; padding: 40px 20px; position: relative; z-index: 10; }
+
+        /* Navigation */
+        .nav-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        .back-btn {
+            display: flex; align-items: center; gap: 8px; color: white; text-decoration: none;
+            background: rgba(255,255,255,0.2); padding: 8px 16px; border-radius: 50px;
+            font-weight: 600; font-size: 0.9rem; transition: all 0.2s; backdrop-filter: blur(5px);
+        }
+        .back-btn:hover { background: rgba(255,255,255,0.3); transform: translateX(-3px); }
+
+        /* Hero Card */
+        .hero-hub {
+            background: var(--glass-bg); backdrop-filter: var(--glass-blur);
+            border-radius: 20px; padding: 40px; margin-bottom: 30px;
+            box-shadow: var(--glass-shadow); border: 1px solid var(--glass-border);
+            text-align: center;
+        }
+        .hero-hub h1 { color: var(--forest-green); font-size: 2rem; margin-bottom: 10px; font-weight: 800; }
+        .hero-hub p { color: var(--text-muted); max-width: 600px; margin: 0 auto; }
+
+        /* TABS & FILTERS */
+        .tabs-container { display: flex; justify-content: center; gap: 15px; margin-bottom: 30px; flex-wrap: wrap; }
+        .tab-btn {
+            padding: 10px 24px; border-radius: 50px; border: none; cursor: pointer;
+            font-weight: 600; font-family: inherit; transition: all 0.3s;
+            background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3);
+        }
+        .tab-btn.active { background: var(--golden-orange); color: white; border-color: var(--golden-orange); box-shadow: 0 4px 15px rgba(242, 153, 74, 0.4); }
+        .tab-btn:hover:not(.active) { background: rgba(255,255,255,0.4); }
+
+        .filter-scroll {
+            display: flex; gap: 10px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 30px;
+            scrollbar-width: none; /* Hide scrollbar Firefox */
+        }
+        .filter-scroll::-webkit-scrollbar { display: none; } /* Hide scrollbar Chrome */
+        
+        .filter-chip {
+            padding: 8px 16px; border-radius: 12px; background: white;
+            border: 1px solid #e2e8f0; color: var(--text-muted); cursor: pointer;
+            white-space: nowrap; transition: all 0.2s; font-size: 0.9rem; font-weight: 500;
+        }
+        .filter-chip.active { background: var(--forest-green); color: white; border-color: var(--forest-green); }
+        .filter-chip:hover:not(.active) { border-color: var(--forest-green); color: var(--forest-green); }
+
+        /* COURSE GRID */
+        .course-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 25px; }
+        
+        .course-card {
+            background: white; border-radius: 16px; overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05); border: 1px solid #e2e8f0;
+            transition: transform 0.2s; cursor: pointer; display: flex; flex-direction: column;
+            position: relative;
+        }
+        .course-card:hover { transform: translateY(-5px); border-color: var(--forest-green); }
+        
+        .card-thumb {
+            height: 160px; position: relative;
+            background: linear-gradient(135deg, #cbd5e1, #94a3b8);
+            display: flex; align-items: center; justify-content: center;
+        }
+        
+        /* Dynamic Thumb Colors */
+        .thumb-digital { background: linear-gradient(135deg, #e0f2fe, #7dd3fc); }
+        .thumb-finance { background: linear-gradient(135deg, #dcfce7, #86efac); }
+        .thumb-legal { background: linear-gradient(135deg, #fae8ff, #e879f9); }
+        .thumb-ops { background: linear-gradient(135deg, #fff7ed, #fdba74); }
+
+        .thumb-icon { font-size: 3rem; opacity: 0.5; }
+        .status-overlay {
+            position: absolute; inset: 0; background: rgba(0,0,0,0.6);
+            display: flex; align-items: center; justify-content: center;
+            color: white; font-weight: bold; flex-direction: column; gap: 5px;
+            backdrop-filter: blur(2px);
+        }
+
+        .card-body { padding: 20px; flex: 1; display: flex; flex-direction: column; }
+        .badges { display: flex; gap: 8px; margin-bottom: 10px; }
+        .badge { padding: 4px 10px; border-radius: 6px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; }
+        .badge-level { background: #f1f5f9; color: var(--text-muted); }
+        .badge-sector { background: var(--forest-green-light); color: var(--forest-green); }
+
+        .card-title { font-size: 1.1rem; font-weight: 700; color: var(--text-dark); margin-bottom: 8px; line-height: 1.4; }
+        .card-desc { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 20px; flex: 1; }
+
+        .progress-bar { width: 100%; height: 6px; background: #e2e8f0; border-radius: 10px; overflow: hidden; }
+        .progress-fill { height: 100%; background: var(--golden-orange); width: 0%; }
+
+        /* Locked State */
+        .course-card.locked { opacity: 0.7; filter: grayscale(0.8); cursor: not-allowed; }
+        .course-card.locked:hover { transform: none; border-color: #e2e8f0; }
+
+        /* Loader */
+        .loader { text-align: center; color: white; padding: 40px; font-size: 1.2rem; }
+
+        @media (max-width: 768px) {
+            .hero-hub { padding: 25px; }
+            .hero-hub h1 { font-size: 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="bg-image"></div>
+    <div class="bg-overlay"></div>
+
+    <div class="container">
+        
+        <div class="nav-header">
+            <a href="dashboard.html" class="back-btn">&larr; Dashboard</a>
+            <div style="color: white; font-weight: bold;">ID-TRIBE Academy</div>
+        </div>
+
+        <div class="hero-hub">
+            <h1>Pusat Pelatihan UMKM</h1>
+            <p>Tingkatkan kapasitas bisnis Anda melalui modul terstruktur. Selesaikan kursus untuk membuka fitur pembiayaan dan kemitraan.</p>
+        </div>
+
+        <div class="tabs-container">
+            <button class="tab-btn active" onclick="alert('Anda sedang di halaman ini')">📚 Modul Belajar</button>
+            <a href="coaching.html" class="tab-btn" style="text-decoration:none; display:inline-block;">👨‍🏫 Expert Coaching</a>
+            <a href="forum.html" class="tab-btn" style="text-decoration:none; display:inline-block;">💬 Forum Diskusi</a>
+        </div>
+
+        <div class="filter-scroll">
+            <button class="filter-chip active" onclick="filterCourses('all', this)">Semua</button>
+            <button class="filter-chip" onclick="filterCourses('digital', this)">📱 Digital</button>
+            <button class="filter-chip" onclick="filterCourses('finance', this)">💰 Keuangan</button>
+            <button class="filter-chip" onclick="filterCourses('legal', this)">⚖️ Legalitas</button>
+            <button class="filter-chip" onclick="filterCourses('ops', this)">⚙️ Operasional</button>
+        </div>
+
+        <div id="courseContainer" class="course-grid">
+            <div class="loader">Memuat materi pembelajaran...</div>
+        </div>
+
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        // FIX: Import 'query', 'collection', 'getDocs' ditambahkan di sini
+        import { getFirestore, doc, getDoc, query, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        // FIREBASE CONFIG
+        const firebaseConfig = {
+            apiKey: "AIzaSyBIaLzkNM0KqPVKxuMNmardLqcrr2kYTWQ",
+            authDomain: "database-idbm.firebaseapp.com",
+            projectId: "database-idbm",
+            storageBucket: "database-idbm.firebasestorage.app",
+            messagingSenderId: "1052290789133",
+            appId: "1:1052290789133:web:36b513630b7a87154eca44",
+            measurementId: "G-EQLBB94DY2"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let userData = {};
+        let coursesDB = [];
+
+        // CHECK AUTH
+        // FIX: Typo 'onAutonAuthStateChanged' diperbaiki menjadi 'onAuthStateChanged'
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                const docSnap = await getDoc(doc(db, "users_umkm", user.uid));
+                if (docSnap.exists()) {
+                    userData = docSnap.data();
+                    await loadCoursesFromFirestore(); // Ambil data dulu baru render
+                }
+            } else {
+                window.location.href = "login.html";
+            }
+        });
+
+        async function loadCoursesFromFirestore() {
+            try {
+                // FIX: Menggunakan query dan collection yang sudah diimport
+                const q = query(collection(db, "courses")); 
+                const snapshot = await getDocs(q);
+                
+                coursesDB = []; // Reset array
+                
+                if (!snapshot.empty) {
+                    snapshot.forEach(doc => {
+                        const data = doc.data();
+                        coursesDB.push({
+                            id: doc.id, // Gunakan ID dokumen sebagai Course ID
+                            ...data
+                        });
+                    });
+                } 
+
+                // OPTIONAL: Data Manual jika database kosong (agar tidak blank saat demo)
+                if (coursesDB.length === 0) {
+                    coursesDB = [
+                        {
+                            id: "digital_beginner",
+                            title: "Setup Profil Digital",
+                            sector: "digital",
+                            level: "Beginner",
+                            desc: "Optimasi WhatsApp Business & Google Maps.",
+                            url: "course-player.html",
+                            icon: "📱"
+                        },
+                        {
+                            id: "digital_intermediate",
+                            title: "Konten & Social Media",
+                            sector: "digital",
+                            level: "Intermediate",
+                            desc: "Strategi konten Instagram & TikTok untuk jualan.",
+                            url: "course-player-intermediate.html",
+                            icon: "📸"
+                        },
+                        {
+                            id: "digital_advanced",
+                            title: "Ads & Website",
+                            sector: "digital",
+                            level: "Advanced",
+                            desc: "Facebook Ads dan membuat website toko online.",
+                            url: "course-player-advanced.html",
+                            icon: "🚀"
+                        },
+                        {
+                            id: "finance_beginner",
+                            title: "Pencatatan Keuangan Dasar",
+                            sector: "finance",
+                            level: "Beginner",
+                            desc: "Memisahkan uang pribadi & bisnis.",
+                            url: "#",
+                            icon: "💰"
+                        }
+                    ];
+                }
+
+                renderCourses('all');
+            } catch (e) {
+                console.error("Gagal memuat course:", e);
+                document.getElementById('courseContainer').innerHTML = `<div style="text-align:center; color:white;">Error memuat data: ${e.message}</div>`;
+            }
+        }
+
+        // FILTER FUNCTION
+        window.filterCourses = function(category, btn) {
+            // Update UI Button
+            document.querySelectorAll('.filter-chip').forEach(el => el.classList.remove('active'));
+            btn.classList.add('active');
+            
+            renderCourses(category);
+        }
+
+        // RENDER FUNCTION
+        function renderCourses(category) {
+            const container = document.getElementById('courseContainer');
+            container.innerHTML = "";
+
+            const completedList = userData.completed_courses || [];
+
+            // Filter Data
+            let filtered = coursesDB;
+            if(category !== 'all') {
+                filtered = coursesDB.filter(c => c.sector === category);
+            }
+
+            if(filtered.length === 0) {
+                container.innerHTML = `<div style="grid-column:1/-1; text-align:center; color:white;">Belum ada materi untuk kategori ini.</div>`;
+                return;
+            }
+
+            filtered.forEach(course => {
+                // --- LOGIC LOCK ---
+                let isLocked = false;
+                let lockReason = "";
+
+                // Intermediate butuh Beginner selesai
+                if (course.level === "Intermediate" && !completedList.includes(course.sector + "_beginner")) {
+                    isLocked = true;
+                    lockReason = "Selesaikan Level Beginner Dulu";
+                }
+                // Advanced butuh Intermediate selesai
+                else if (course.level === "Advanced" && !completedList.includes(course.sector + "_intermediate")) {
+                    isLocked = true;
+                    lockReason = "Selesaikan Level Intermediate Dulu";
+                }
+
+                // Check is Completed
+                const isCompleted = completedList.includes(course.id);
+
+                // Style Classes
+                const lockedClass = isLocked ? "locked" : "";
+                let thumbColor = "thumb-digital";
+                if(course.sector === 'finance') thumbColor = "thumb-finance";
+                if(course.sector === 'legal') thumbColor = "thumb-legal";
+                if(course.sector === 'ops') thumbColor = "thumb-ops";
+
+                // HTML Structure
+                const html = `
+                <div class="course-card ${lockedClass}" onclick="${isLocked ? `alert('${lockReason}')` : `window.location.href='${course.url}'`}">
+                    
+                    <div class="card-thumb ${thumbColor}">
+                        <div class="thumb-icon">${course.icon}</div>
+                        ${isLocked ? `<div class="status-overlay">🔒 <span>Terkunci</span></div>` : ''}
+                        ${isCompleted ? `<div class="status-overlay" style="background:rgba(46, 92, 72, 0.8)">✅ <span>Selesai</span></div>` : ''}
+                    </div>
+
+                    <div class="card-body">
+                        <div class="badges">
+                            <span class="badge badge-sector">${course.sector}</span>
+                            <span class="badge badge-level">${course.level}</span>
+                        </div>
+                        <div class="card-title">${course.title}</div>
+                        <div class="card-desc">${isLocked ? lockReason : course.desc}</div>
+                        
+                        ${!isLocked && !isCompleted ? `
+                            <div class="progress-bar"><div class="progress-fill" style="width:0%"></div></div>
+                            <div style="font-size:0.75rem; color:#94a3b8; margin-top:5px;">Mulai Belajar</div>
+                        ` : ''}
+                        
+                        ${isCompleted ? `
+                            <div style="font-size:0.8rem; color:var(--forest-green); font-weight:bold;">Telah Diselesaikan</div>
+                        ` : ''}
+                    </div>
+                </div>
+                `;
+                container.innerHTML += html;
+            });
+        }
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Expert Coaching - ID-TRIBE</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <script type="module" src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
+    <script type="module" src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js"></script>
+    <script type="module" src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"></script>
+
+    <style>
+        :root {
+            --forest-green: #2E5C48;
+            --golden-orange: #F2994A;
+            --live-red: #ef4444;
+            --glass-bg: rgba(255, 255, 255, 0.95);
+            --glass-border: rgba(255, 255, 255, 0.6);
+            --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { font-family: 'Lato', sans-serif; background-color: var(--forest-green); color: #1e293b; min-height: 100vh; }
+
+        /* BACKGROUND */
+        .bg-image { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-image: url('https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&q=80'); background-size: cover; z-index: -2; }
+        .bg-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(135deg, rgba(46, 92, 72, 0.95), rgba(46, 92, 72, 0.85)); z-index: -1; }
+
+        .container { max-width: 1100px; margin: 0 auto; padding: 20px; position: relative; z-index: 10; }
+
+        /* NAV */
+        .nav-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .back-btn { background: rgba(255,255,255,0.2); color: white; padding: 8px 16px; border-radius: 50px; text-decoration: none; font-weight: 600; display: flex; align-items: center; gap: 8px; backdrop-filter: blur(5px); transition: 0.3s; }
+        .back-btn:hover { background: rgba(255,255,255,0.3); }
+
+        /* LIVE SESSION CARD */
+        .live-card { background: white; border-radius: 20px; overflow: hidden; box-shadow: var(--glass-shadow); margin-bottom: 30px; position: relative; }
+        .live-banner { height: 250px; background: #000; position: relative; display: flex; align-items: center; justify-content: center; background-size: cover; background-position: center; }
+        .live-badge { position: absolute; top: 20px; left: 20px; background: var(--live-red); color: white; padding: 5px 12px; border-radius: 4px; font-weight: 800; font-size: 0.8rem; display: flex; align-items: center; gap: 5px; animation: pulse 1.5s infinite; }
+        .upcoming-badge { position: absolute; top: 20px; left: 20px; background: var(--golden-orange); color: white; padding: 5px 12px; border-radius: 4px; font-weight: 800; font-size: 0.8rem; }
+        
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+
+        .live-content { padding: 25px; }
+        .live-title { font-size: 1.5rem; font-weight: 800; margin-bottom: 10px; color: var(--forest-green); line-height: 1.3; }
+        .live-desc { color: #64748b; margin-bottom: 20px; line-height: 1.5; }
+        
+        .countdown-box { display: flex; gap: 15px; margin-bottom: 20px; justify-content: center; }
+        .time-unit { background: #f1f5f9; padding: 10px; border-radius: 8px; text-align: center; min-width: 60px; }
+        .time-val { font-size: 1.2rem; font-weight: 800; color: var(--text-dark); }
+        .time-label { font-size: 0.7rem; text-transform: uppercase; color: #64748b; }
+
+        .btn-live { width: 100%; padding: 15px; border-radius: 10px; border: none; font-weight: 700; font-size: 1rem; cursor: pointer; transition: 0.3s; }
+        .btn-join { background: var(--live-red); color: white; box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3); }
+        .btn-remind { background: var(--golden-orange); color: white; }
+        .btn-join:hover { transform: translateY(-2px); filter: brightness(1.1); }
+
+        /* MENTOR SEARCH */
+        .section-header { color: white; font-size: 1.5rem; margin-bottom: 20px; font-weight: 800; display: flex; justify-content: space-between; align-items: center; }
+        
+        .filter-bar { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 15px; scrollbar-width: none; }
+        .filter-bar::-webkit-scrollbar { display: none; }
+        .filter-chip { background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3); padding: 8px 16px; border-radius: 50px; cursor: pointer; white-space: nowrap; transition: 0.3s; font-size: 0.9rem; }
+        .filter-chip.active, .filter-chip:hover { background: var(--golden-orange); border-color: var(--golden-orange); }
+
+        /* MENTOR GRID - Desktop Default */
+        .mentor-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; }
+        
+        .mentor-card { background: white; border-radius: 16px; overflow: hidden; transition: 0.3s; cursor: pointer; border: 1px solid rgba(255,255,255,0.5); }
+        .mentor-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+        
+        .mentor-head { padding: 20px; text-align: center; border-bottom: 1px solid #f1f5f9; background: #f8fafc; }
+        .mentor-img { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; margin-bottom: 10px; border: 3px solid white; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .mentor-name { font-weight: 800; font-size: 1.1rem; color: #1e293b; margin-bottom: 5px; }
+        .mentor-spec { color: var(--golden-orange); font-size: 0.85rem; font-weight: 600; text-transform: uppercase; }
+        
+        .mentor-body { padding: 15px 20px 20px; }
+        .rating-box { display: flex; align-items: center; gap: 5px; margin-bottom: 10px; font-size: 0.9rem; color: #f59e0b; }
+        .slot-badge { background: #dcfce7; color: #166534; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; display: inline-block; }
+        .slot-full { background: #fee2e2; color: #991b1b; }
+
+        /* LIVE ROOM OVERLAY */
+        .live-room { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: #0f172a; z-index: 200; display: none; flex-direction: column;
+        }
+        .room-video { height: 40%; background: #1e293b; position: relative; display: flex; align-items: center; justify-content: center; color: white; flex-shrink: 0; }
+        .room-chat { flex: 1; background: white; display: flex; flex-direction: column; overflow: hidden; border-radius: 20px 20px 0 0; margin-top: -20px; position: relative; z-index: 10; }
+        .chat-messages { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+        .chat-bubble { padding: 8px 12px; background: #f1f5f9; border-radius: 8px; font-size: 0.9rem; max-width: 85%; line-height: 1.4; }
+        .chat-input-area { padding: 10px 15px 20px; border-top: 1px solid #e2e8f0; display: flex; gap: 10px; background: white; }
+        
+        /* MODAL BOOKING */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 100; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
+        .modal-card { background: white; padding: 30px; border-radius: 20px; max-width: 400px; width: 90%; text-align: center; animation: slideUp 0.3s ease; }
+        @keyframes slideUp { from{transform:translateY(20px);opacity:0;} to{transform:translateY(0);opacity:1;} }
+
+        /* --- MOBILE RESPONSIVE FIXES --- */
+        @media (max-width: 768px) {
+            .container { padding: 15px; padding-bottom: 40px; }
+            
+            /* Header adjustments */
+            .nav-header { margin-bottom: 15px; }
+            .section-header { font-size: 1.2rem; }
+
+            /* Live Banner Resize */
+            .live-banner { height: 200px; }
+            .live-title { font-size: 1.25rem; }
+            .live-content { padding: 20px; }
+            .countdown-box { gap: 10px; }
+            .time-unit { min-width: 50px; padding: 8px; }
+            .time-val { font-size: 1rem; }
+
+            /* Mentor Grid: 1 Column Full Width */
+            .mentor-grid { grid-template-columns: 1fr; gap: 15px; }
+            .mentor-card { display: flex; flex-direction: row; align-items: center; padding: 10px; height: auto; }
+            .mentor-head { width: 35%; padding: 10px; background: transparent; border-bottom: none; border-right: 1px solid #f1f5f9; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+            .mentor-img { width: 60px; height: 60px; margin-bottom: 5px; }
+            .mentor-name { font-size: 0.95rem; margin-bottom: 2px; }
+            .mentor-spec { font-size: 0.7rem; line-height: 1.2; }
+            .mentor-body { width: 65%; padding: 10px 10px 10px 15px; display: flex; flex-direction: column; justify-content: center; }
+            
+            /* Live Room Mobile Optimization */
+            .room-video { height: 35vh; } /* Video takes less space */
+            .room-chat { height: 65vh; border-radius: 15px 15px 0 0; }
+            .chat-input-area { padding-bottom: 30px; /* Space for home indicator on newer phones */ }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="bg-image"></div>
+    <div class="bg-overlay"></div>
+
+    <div class="container">
+        
+        <div class="nav-header">
+            <a href="training-hub.html" class="back-btn"><i class="fas fa-arrow-left"></i> Kembali</a>
+            <div style="color: white; font-weight: bold; font-size: 1.1rem;">Expert Coaching</div>
+        </div>
+
+        <div id="liveSection">
+            </div>
+
+        <div class="section-header">
+            <span>Cari Mentor</span>
+            <button onclick="alert('Filter options')" style="background:none; border:none; color:white; cursor:pointer;"><i class="fas fa-sliders-h"></i></button>
+        </div>
+
+        <div class="filter-bar">
+            <div class="filter-chip active" onclick="filterMentors('all', this)">Semua</div>
+            <div class="filter-chip" onclick="filterMentors('Marketing', this)">Marketing</div>
+            <div class="filter-chip" onclick="filterMentors('Halal', this)">Halal</div>
+            <div class="filter-chip" onclick="filterMentors('Finance', this)">Keuangan</div>
+            <div class="filter-chip" onclick="filterMentors('Export', this)">Ekspor</div>
+        </div>
+
+        <div class="mentor-grid" id="mentorContainer">
+            </div>
+
+    </div>
+
+    <div id="liveRoomUI" class="live-room">
+        <div class="room-video">
+            <button onclick="leaveSession()" style="position: absolute; top: 15px; left: 15px; background: rgba(0,0,0,0.6); color: white; border: none; padding: 6px 12px; border-radius: 20px; cursor: pointer; z-index: 10; font-size: 0.85rem;"><i class="fas fa-times"></i> Keluar</button>
+            <div style="text-align: center;">
+                <i class="fas fa-user-tie" style="font-size: 3rem; margin-bottom: 10px;"></i>
+                <h3 style="font-size: 1.2rem; margin: 0;">Coach Budi</h3>
+                <p style="color: #94a3b8; font-size: 0.9rem;">Live Streaming...</p>
+            </div>
+            <div style="position: absolute; bottom: 15px; left: 15px; display: flex; align-items: center; gap: 8px;">
+                <span style="background: var(--live-red); color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.65rem; font-weight: bold;">LIVE</span>
+                <span style="font-size: 0.8rem; text-shadow: 0 1px 2px rgba(0,0,0,0.5);"><i class="far fa-eye"></i> 142</span>
+            </div>
+        </div>
+        <div class="room-chat">
+            <div style="padding: 12px 15px; border-bottom: 1px solid #f1f5f9; font-weight: bold; color: var(--forest-green); font-size: 0.9rem; display: flex; justify-content: space-between; align-items: center;">
+                <span>Live Chat</span>
+                <span style="font-size: 0.75rem; color: #94a3b8; font-weight: normal;">Tekan pesan untuk reply</span>
+            </div>
+            <div class="chat-messages" id="chatBox">
+                </div>
+            <div class="chat-input-area">
+                <input type="text" id="chatInput" placeholder="Tulis pesan..." style="flex:1; padding: 10px; border: 1px solid #e2e8f0; border-radius: 20px; outline: none; font-size: 0.95rem;">
+                <button onclick="sendChat()" style="background: var(--forest-green); color: white; border: none; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.1);"><i class="fas fa-paper-plane"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <div id="bookingModal" class="modal">
+        <div class="modal-card">
+            <div style="text-align: right;"><button onclick="closeBooking()" style="background:none; border:none; font-size:1.5rem; cursor:pointer;">&times;</button></div>
+            <img src="" id="modalImg" style="width: 70px; height: 70px; border-radius: 50%; margin-bottom: 10px;">
+            <h3 id="modalName" style="margin-bottom: 2px; font-size: 1.2rem;">Nama Mentor</h3>
+            <p id="modalSpec" style="color: var(--golden-orange); font-weight: bold; margin-bottom: 20px; font-size: 0.9rem;">Spesialisasi</p>
+            
+            <div style="text-align: left; background: #f8fafc; padding: 15px; border-radius: 10px; margin-bottom: 20px;">
+                <p style="font-size: 0.85rem; margin-bottom: 10px; color: #64748b;"><strong>Pilih Jadwal:</strong></p>
+                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                    <button class="filter-chip active" style="color: var(--forest-green); border-color: var(--forest-green); background: #dcfce7; font-size: 0.8rem;">Senin, 10:00</button>
+                    <button class="filter-chip" style="color: #64748b; border-color: #e2e8f0; background: white; font-size: 0.8rem;">Selasa, 14:00</button>
+                </div>
+            </div>
+
+            <button onclick="processBooking()" style="width: 100%; background: var(--forest-green); color: white; padding: 12px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 1rem;">Booking (Rp 150rb)</button>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+        // FIREBASE CONFIG
+        const firebaseConfig = {
+            apiKey: "AIzaSyBIaLzkNM0KqPVKxuMNmardLqcrr2kYTWQ",
+            authDomain: "database-idbm.firebaseapp.com",
+            projectId: "database-idbm",
+            storageBucket: "database-idbm.firebasestorage.app",
+            messagingSenderId: "1052290789133",
+            appId: "1:1052290789133:web:36b513630b7a87154eca44",
+            measurementId: "G-EQLBB94DY2"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        // DATA DUMMY
+        const mentors = [
+            { name: "Ahmad Zaky", spec: "Digital Marketing", img: "AZ", cat: "Marketing", rating: 4.9, status: "available" },
+            { name: "Siti Aminah", spec: "Ahli Halal", img: "SA", cat: "Halal", rating: 5.0, status: "available" },
+            { name: "Budi Finance", spec: "Manajemen Keuangan", img: "BF", cat: "Finance", rating: 4.8, status: "full" },
+            { name: "Rina Ekspor", spec: "Strategi Ekspor", img: "RE", cat: "Export", rating: 4.9, status: "available" }
+        ];
+
+        // STATE SIMULATION
+        let isSessionLive = false; 
+
+        // 1. RENDER LIVE SECTION
+        function renderLiveSection() {
+            const container = document.getElementById('liveSection');
+            
+            if (isSessionLive) {
+                // LIVE MODE
+                container.innerHTML = `
+                <div class="live-card">
+                    <div class="live-banner" style="background-image: url('https://images.unsplash.com/photo-1591115765373-5207764f72e7?auto=format&fit=crop&q=80');">
+                        <div class="bg-overlay" style="opacity: 0.3;"></div>
+                        <div class="live-badge"><i class="fas fa-circle" style="font-size: 0.5rem;"></i> LIVE</div>
+                        <button onclick="joinSession()" style="position: relative; z-index: 2; width: 50px; height: 50px; border-radius: 50%; background: rgba(255,255,255,0.2); backdrop-filter: blur(5px); border: 2px solid white; color: white; font-size: 1.2rem; cursor: pointer;"><i class="fas fa-play"></i></button>
+                    </div>
+                    <div class="live-content">
+                        <div style="font-size: 0.8rem; color: var(--golden-orange); font-weight: bold; margin-bottom: 5px;">SESI BULANAN</div>
+                        <h2 class="live-title">Strategi Iklan Ramadan</h2>
+                        <p class="live-desc">Tanya jawab langsung seputar budget iklan.</p>
+                        <button onclick="joinSession()" class="btn-live btn-join">GABUNG SEKARANG</button>
+                    </div>
+                </div>`;
+            } else {
+                // UPCOMING MODE
+                container.innerHTML = `
+                <div class="live-card">
+                    <div class="live-banner" style="background: #1e293b;">
+                        <div class="upcoming-badge">UPCOMING</div>
+                        <div style="text-align: center; color: white;">
+                            <h3 style="margin-bottom: 10px; font-size: 1.1rem;">Sesi Berikutnya:</h3>
+                            <div class="countdown-box">
+                                <div class="time-unit"><div class="time-val">02</div><div class="time-label">Jam</div></div>
+                                <div class="time-unit"><div class="time-val">15</div><div class="time-label">Mnt</div></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="live-content">
+                        <h2 class="live-title">Digital Marketing Q&A</h2>
+                        <p class="live-desc" style="margin-bottom: 15px;">Siapkan pertanyaan seputar konten TikTok.</p>
+                        <button onclick="alert('Pengingat diaktifkan!')" class="btn-live btn-remind"><i class="far fa-bell"></i> Ingatkan Saya</button>
+                        
+                        <div style="margin-top: 15px; border-top: 1px solid #f1f5f9; padding-top: 15px;">
+                            <h4 style="font-size: 0.85rem; color: #1e293b; margin-bottom: 8px;">Rekaman Lalu:</h4>
+                            <div style="display: flex; gap: 8px; overflow-x: auto;">
+                                <div style="min-width: 100px; height: 60px; background: #cbd5e1; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; color: #64748b;">Sesi #12</div>
+                                <div style="min-width: 100px; height: 60px; background: #cbd5e1; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; color: #64748b;">Sesi #11</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+                
+                // Auto toggle for demo purpose
+                setTimeout(() => {
+                    // isSessionLive = true; renderLiveSection(); 
+                }, 5000);
+            }
+        }
+
+        // 2. RENDER MENTORS
+        window.filterMentors = (cat, btn) => {
+            document.querySelectorAll('.filter-chip').forEach(el => {
+                el.classList.remove('active');
+                el.style.background = 'rgba(255,255,255,0.2)';
+                el.style.borderColor = 'rgba(255,255,255,0.3)';
+            });
+            btn.classList.add('active');
+            btn.style.background = 'var(--golden-orange)';
+            btn.style.borderColor = 'var(--golden-orange)';
+
+            const container = document.getElementById('mentorContainer');
+            container.innerHTML = "";
+
+            const filtered = cat === 'all' ? mentors : mentors.filter(m => m.cat === cat);
+
+            filtered.forEach(m => {
+                const isFull = m.status === 'full';
+                const btnText = isFull ? "Penuh" : "Booking";
+                const btnStyle = isFull ? "background:#cbd5e1; cursor:not-allowed;" : "background:var(--forest-green); color:white;";
+                const slotBadge = isFull ? '<span class="slot-badge slot-full">Full</span>' : '<span class="slot-badge">2 Slot</span>';
+
+                const html = `
+                <div class="mentor-card" onclick="${isFull ? '' : `openBooking('${m.name}', '${m.spec}', '${m.img}')`}">
+                    <div class="mentor-head">
+                        <img src="https://ui-avatars.com/api/?name=${m.img}&background=random" class="mentor-img">
+                        <div class="mentor-name">${m.name}</div>
+                        <div class="mentor-spec">${m.spec}</div>
+                    </div>
+                    <div class="mentor-body">
+                        <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+                            <div class="rating-box"><i class="fas fa-star"></i> ${m.rating}</div>
+                            ${slotBadge}
+                        </div>
+                        <button style="width:100%; padding:8px; border:none; border-radius:8px; font-weight:bold; font-size:0.9rem; ${btnStyle}">${btnText}</button>
+                    </div>
+                </div>`;
+                container.innerHTML += html;
+            });
+        }
+
+        // 3. LIVE ROOM
+        window.joinSession = function() {
+            document.getElementById('liveRoomUI').style.display = 'flex';
+            addMessage("System", "Selamat datang di Live Room!");
+            
+            setInterval(() => {
+                const names = ["Rina", "Joko", "Sari"];
+                const msgs = ["Keren coach!", "Sinyal aman?", "Mantap"];
+                addMessage(names[Math.floor(Math.random()*names.length)], msgs[Math.floor(Math.random()*msgs.length)]);
+            }, 3000);
+        }
+
+        window.leaveSession = function() {
+            if(confirm("Keluar dari sesi?")) {
+                document.getElementById('liveRoomUI').style.display = 'none';
+            }
+        }
+
+        function addMessage(name, text) {
+            const box = document.getElementById('chatBox');
+            const isSystem = name === "System";
+            const style = isSystem ? "background:#dcfce7; color:#166534; align-self:center; font-size:0.75rem;" : "";
+            
+            const html = `
+            <div style="margin-bottom: 8px; ${isSystem ? 'text-align:center;' : ''}">
+                ${!isSystem ? `<strong style="font-size:0.75rem; color:#64748b;">${name}</strong>` : ''}
+                <div class="chat-bubble" style="${style}">${text}</div>
+            </div>`;
+            box.insertAdjacentHTML('beforeend', html);
+            box.scrollTop = box.scrollHeight;
+        }
+
+        window.sendChat = function() {
+            const input = document.getElementById('chatInput');
+            if(input.value) {
+                addMessage("Saya", input.value);
+                input.value = "";
+            }
+        }
+
+        // 4. BOOKING
+        window.openBooking = function(name, spec, img) {
+            document.getElementById('bookingModal').style.display = 'flex';
+            document.getElementById('modalName').innerText = name;
+            document.getElementById('modalSpec').innerText = spec;
+            document.getElementById('modalImg').src = `https://ui-avatars.com/api/?name=${img}&background=random`;
+        }
+
+        window.closeBooking = () => document.getElementById('bookingModal').style.display = 'none';
+
+        window.processBooking = function() {
+            const btn = document.querySelector('#bookingModal button[onclick="processBooking()"]');
+            btn.innerHTML = "Memproses...";
+            setTimeout(() => {
+                alert("Redirect ke Payment Gateway...");
+                closeBooking();
+                btn.innerHTML = "Booking (Rp 150rb)";
+            }, 1000);
+        }
+
+        // INIT
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                renderLiveSection();
+                filterMentors('all', document.querySelector('.filter-chip'));
+            } else {
+                window.location.href = "login.html";
+            }
+        });
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Community Forum - ID-TRIBE</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
+    
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+
+    <script type="module" src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
+    <script type="module" src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js"></script>
+    <script type="module" src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"></script>
+
+    <style>
+        :root {
+            --forest-green: #2E5C48;
+            --forest-green-light: #3d7a5f;
+            --golden-orange: #F2994A;
+            --bg-main: #f0fdf4;
+            --text-primary: #1e293b;
+            --text-muted: #64748b;
+            --glass-bg: rgba(255, 255, 255, 0.9);
+            --glass-border: rgba(255, 255, 255, 0.6);
+            --glass-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Lato', sans-serif; background-color: var(--forest-green); color: var(--text-primary); min-height: 100vh; padding-bottom: 70px; /* Space for bottom nav */ }
+
+        /* BACKGROUND */
+        .bg-image { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-image: url('https://images.unsplash.com/photo-1556761175-5973dc0f32e7?auto=format&fit=crop&q=80'); background-size: cover; z-index: -2; }
+        .bg-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(135deg, rgba(46, 92, 72, 0.95), rgba(46, 92, 72, 0.85)); z-index: -1; }
+
+        /* LAYOUT */
+        .container { max-width: 1000px; margin: 0 auto; padding: 20px; display: grid; grid-template-columns: 250px 1fr; gap: 20px; position: relative; z-index: 10; height: 100vh; }
+        
+        /* SIDEBAR (Desktop) */
+        .sidebar { background: var(--glass-bg); backdrop-filter: blur(10px); border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 15px; height: fit-content; position: sticky; top: 20px; border: 1px solid var(--glass-border); }
+        .back-btn { color: var(--text-muted); text-decoration: none; font-weight: 700; display: flex; align-items: center; gap: 8px; margin-bottom: 10px; transition: 0.3s; }
+        .back-btn:hover { color: var(--forest-green); }
+        
+        .category-btn { display: flex; align-items: center; gap: 10px; padding: 10px; border-radius: 8px; cursor: pointer; color: var(--text-muted); transition: 0.3s; font-weight: 600; background: transparent; border: none; width: 100%; text-align: left; font-family: inherit; }
+        .category-btn:hover, .category-btn.active { background: #dcfce7; color: var(--forest-green); }
+        .category-btn i { width: 20px; text-align: center; }
+
+        /* MOBILE HEADER & NAV (Hidden on Desktop) */
+        .mobile-header { display: none; padding: 15px; background: var(--glass-bg); position: sticky; top: 0; z-index: 50; backdrop-filter: blur(10px); border-bottom: 1px solid var(--glass-border); align-items: center; justify-content: space-between; }
+        .mobile-header h1 { font-size: 1.2rem; margin: 0; color: var(--forest-green); }
+        .mobile-back { color: var(--text-muted); text-decoration: none; font-size: 1.2rem; }
+
+        .mobile-filter-bar { display: none; gap: 10px; overflow-x: auto; padding: 10px 15px; background: rgba(255,255,255,0.9); scrollbar-width: none; }
+        .mobile-filter-bar::-webkit-scrollbar { display: none; }
+        .mobile-chip { padding: 6px 14px; border-radius: 20px; background: white; border: 1px solid #e2e8f0; font-size: 0.85rem; white-space: nowrap; color: var(--text-muted); cursor: pointer; }
+        .mobile-chip.active { background: var(--forest-green); color: white; border-color: var(--forest-green); }
+
+        .fab-create { display: none; position: fixed; bottom: 80px; right: 20px; width: 56px; height: 56px; background: var(--golden-orange); border-radius: 50%; color: white; border: none; font-size: 1.5rem; box-shadow: 0 4px 15px rgba(242, 153, 74, 0.4); z-index: 90; cursor: pointer; align-items: center; justify-content: center; }
+
+        /* MAIN FEED (Right) */
+        .main-feed { display: flex; flex-direction: column; gap: 20px; overflow-y: auto; padding-bottom: 50px; scrollbar-width: none; height: 100%; }
+        .main-feed::-webkit-scrollbar { display: none; }
+
+        /* Header Feed (Desktop) */
+        .feed-header { background: var(--glass-bg); padding: 20px; border-radius: 16px; display: flex; gap: 15px; align-items: center; border: 1px solid var(--glass-border); }
+        .search-bar { flex: 1; position: relative; }
+        .search-input { width: 100%; padding: 12px 15px 12px 40px; border-radius: 50px; border: 1px solid #e2e8f0; background: #f8fafc; outline: none; transition: 0.3s; font-family: inherit; }
+        .search-input:focus { border-color: var(--forest-green); background: white; box-shadow: 0 0 0 3px rgba(46, 92, 72, 0.1); }
+        .search-icon { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: var(--text-muted); }
+        
+        .btn-create { background: var(--golden-orange); color: white; border: none; padding: 12px 20px; border-radius: 50px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: 0.3s; white-space: nowrap; box-shadow: 0 4px 10px rgba(242, 153, 74, 0.3); font-family: inherit; }
+        .btn-create:hover { background: #e88a38; transform: translateY(-2px); }
+
+        /* THREAD CARD */
+        .thread-card { background: white; border-radius: 16px; padding: 20px; border: 1px solid rgba(255,255,255,0.5); cursor: pointer; transition: 0.3s; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .thread-card:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); border-color: var(--forest-green-light); }
+        
+        .thread-meta { display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 10px; align-items: center; }
+        .author-info { display: flex; align-items: center; gap: 8px; }
+        .avatar-small { width: 24px; height: 24px; background: #e2e8f0; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: bold; color: var(--text-muted); }
+        
+        .badge-cat { padding: 4px 10px; border-radius: 20px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+        .bg-pajak { background: #fee2e2; color: #ef4444; }
+        .bg-izin { background: #e0f2fe; color: #0ea5e9; }
+        .bg-pemasaran { background: #dcfce7; color: #166534; }
+        .bg-umum { background: #f3f4f6; color: #64748b; }
+
+        .thread-title { font-size: 1.1rem; font-weight: 800; color: var(--text-primary); margin-bottom: 8px; line-height: 1.4; }
+        .thread-preview { font-size: 0.9rem; color: #475569; line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; margin-bottom: 15px; }
+
+        .thread-stats { display: flex; gap: 15px; border-top: 1px solid #f1f5f9; padding-top: 12px; }
+        .stat-item { font-size: 0.85rem; color: var(--text-muted); display: flex; align-items: center; gap: 6px; }
+        .stat-item:hover { color: var(--forest-green); }
+
+        /* THREAD DETAIL (Hidden by default) */
+        #detailView { display: none; background: white; border-radius: 16px; padding: 30px; height: 100%; overflow-y: auto; }
+        .detail-header { margin-bottom: 20px; border-bottom: 1px solid #e2e8f0; padding-bottom: 20px; }
+        .detail-content { font-size: 1rem; line-height: 1.7; margin-bottom: 30px; color: #334155; }
+        
+        .comment-section { background: #f8fafc; padding: 20px; border-radius: 12px; }
+        .comment-input-area { display: flex; gap: 10px; margin-top: 20px; }
+        .comment-input { flex: 1; padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; outline: none; font-family: inherit; }
+        .comment-item { padding: 15px 0; border-bottom: 1px solid #e2e8f0; }
+        .comment-item:last-child { border: none; }
+
+        /* MODAL CREATE */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 100; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
+        .modal-content { background: white; width: 90%; max-width: 500px; padding: 30px; border-radius: 20px; box-shadow: 0 20px 50px rgba(0,0,0,0.2); animation: slideUp 0.3s ease; }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        
+        .form-group { margin-bottom: 15px; }
+        .form-label { display: block; margin-bottom: 8px; font-weight: 700; font-size: 0.9rem; }
+        .form-control { width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-family: inherit; }
+        .btn-submit { width: 100%; padding: 12px; background: var(--forest-green); color: white; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; margin-top: 10px; font-family: inherit; }
+
+        /* MOBILE RESPONSIVE */
+        @media (max-width: 768px) {
+            body { padding-bottom: 0; } /* Remove padding, handling scroll inside main */
+            .container { grid-template-columns: 1fr; display: block; padding: 0; height: 100vh; overflow: hidden; }
+            .sidebar { display: none; }
+            .feed-header { display: none; } /* Hide Desktop Header */
+            
+            /* Show Mobile Elements */
+            .mobile-header { display: flex; }
+            .mobile-filter-bar { display: flex; }
+            .fab-create { display: flex; }
+            
+            .main-feed { padding: 15px; height: calc(100vh - 110px); padding-bottom: 80px; }
+            #detailView { padding: 20px; border-radius: 0; height: 100vh; position: fixed; top: 0; left: 0; width: 100%; z-index: 200; }
+            .thread-card { padding: 15px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="bg-image"></div>
+    <div class="bg-overlay"></div>
+
+    <div class="mobile-header">
+        <a href="training-hub.html" class="mobile-back"><i class="fas fa-arrow-left"></i></a>
+        <h1>Forum Diskusi</h1>
+        <div style="width: 24px;"></div> </div>
+
+    <div class="mobile-filter-bar">
+        <div class="mobile-chip active" onclick="filterThreadsMobile('all', this)">Semua</div>
+        <div class="mobile-chip" onclick="filterThreadsMobile('Pemasaran', this)">Pemasaran</div>
+        <div class="mobile-chip" onclick="filterThreadsMobile('Legalitas', this)">Legalitas</div>
+        <div class="mobile-chip" onclick="filterThreadsMobile('Modal', this)">Modal</div>
+        <div class="mobile-chip" onclick="filterThreadsMobile('Operasional', this)">Operasional</div>
+    </div>
+
+    <div class="container">
+        
+        <aside class="sidebar">
+            <a href="training-hub.html" class="back-btn"><i class="fas fa-arrow-left"></i> Training Hub</a>
+            
+            <div style="margin-bottom: 10px;">
+                <h3 style="font-size: 0.9rem; color: #94a3b8; text-transform: uppercase; margin-bottom: 10px;">Filter Topik</h3>
+                <button class="category-btn active" onclick="filterThreads('all', this)"><i class="fas fa-globe"></i> Semua Topik</button>
+                <button class="category-btn" onclick="filterThreads('Pemasaran', this)"><i class="fas fa-bullhorn"></i> Pemasaran & Ads</button>
+                <button class="category-btn" onclick="filterThreads('Legalitas', this)"><i class="fas fa-scale-balanced"></i> Izin & Pajak</button>
+                <button class="category-btn" onclick="filterThreads('Modal', this)"><i class="fas fa-coins"></i> Permodalan</button>
+                <button class="category-btn" onclick="filterThreads('Operasional', this)"><i class="fas fa-box-open"></i> Operasional</button>
+            </div>
+
+            <div style="background: rgba(242, 153, 74, 0.1); padding: 15px; border-radius: 10px; border: 1px solid rgba(242, 153, 74, 0.3);">
+                <h4 style="color: var(--golden-orange); font-size: 0.9rem; margin-bottom: 5px;">🔥 Topik Hangat</h4>
+                <p style="font-size: 0.8rem; color: var(--text-muted); line-height: 1.4;">"Cara lapor SPT Tahunan UMKM 0.5%..."</p>
+            </div>
+        </aside>
+
+        <main class="main-feed">
+            
+            <div id="feedView">
+                <div class="feed-header">
+                    <div class="search-bar">
+                        <i class="fas fa-search search-icon"></i>
+                        <input type="text" id="searchInput" class="search-input" placeholder="Cari diskusi..." onkeyup="searchThreads()">
+                    </div>
+                    <button class="btn-create" onclick="openModal()">
+                        <i class="fas fa-plus"></i> <span style="display: none; @media(min-width:768px){ display:inline; }">Buat Diskusi</span>
+                    </button>
+                </div>
+
+                <div id="threadList" style="display: flex; flex-direction: column; gap: 15px; margin-top: 20px;">
+                    <div style="text-align: center; color: white; padding: 20px;">Memuat Diskusi...</div>
+                </div>
+            </div>
+
+            <div id="detailView">
+                <button onclick="closeDetail()" style="background:none; border:none; color:var(--text-muted); cursor:pointer; margin-bottom:15px; font-weight:600; font-size:1rem; display:flex; align-items:center; gap:5px;">
+                    <i class="fas fa-arrow-left"></i> Kembali
+                </button>
+                
+                <div class="detail-header">
+                    <span class="badge-cat bg-umum" id="detailCat">Kategori</span>
+                    <h1 class="thread-title" style="font-size: 1.5rem; margin-top: 10px;" id="detailTitle">Judul Thread</h1>
+                    <div class="thread-meta" style="justify-content: flex-start; gap: 15px; margin-top: 10px;">
+                        <span class="author-info">
+                            <div class="avatar-small" id="detailAvatar">U</div>
+                            <span id="detailAuthor">Nama Penulis</span>
+                        </span>
+                        <span>•</span>
+                        <span id="detailDate">Tanggal</span>
+                    </div>
+                </div>
+
+                <div class="detail-content" id="detailBody">
+                    Isi konten diskusi akan muncul di sini...
+                </div>
+
+                <div style="display: flex; gap: 15px; margin-bottom: 30px;">
+                    <button class="stat-item" style="background: #f1f5f9; padding: 8px 15px; border: none; border-radius: 50px; cursor: pointer;">
+                        <i class="far fa-thumbs-up"></i> <span id="detailLikes">0</span> Membantu
+                    </button>
+                </div>
+
+                <div class="comment-section">
+                    <h3 style="font-size: 1.1rem; margin-bottom: 15px;">Komentar (<span id="commentCount">0</span>)</h3>
+                    
+                    <div id="commentsList" style="margin-bottom: 20px;">
+                    </div>
+
+                    <div class="comment-input-area">
+                        <input type="text" id="commentInput" class="comment-input" placeholder="Tulis balasan...">
+                        <button onclick="postComment()" style="background: var(--forest-green); color: white; border: none; padding: 0 20px; border-radius: 8px; cursor: pointer;"><i class="fas fa-paper-plane"></i></button>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <button class="fab-create" onclick="openModal()">
+        <i class="fas fa-plus"></i>
+    </button>
+
+    <div id="createModal" class="modal">
+        <div class="modal-content">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2 style="font-size: 1.5rem; color: var(--forest-green);">Buat Diskusi Baru</h2>
+                <button onclick="closeModal()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer;">&times;</button>
+            </div>
+            <form onsubmit="handlePost(event)">
+                <div class="form-group">
+                    <label class="form-label">Judul Pertanyaan</label>
+                    <input type="text" id="postTitle" class="form-control" placeholder="Singkat dan jelas..." required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Kategori</label>
+                    <select id="postCategory" class="form-control">
+                        <option value="Umum">Umum</option>
+                        <option value="Pemasaran">Pemasaran & Ads</option>
+                        <option value="Legalitas">Legalitas & Izin</option>
+                        <option value="Modal">Keuangan & Modal</option>
+                        <option value="Operasional">Operasional</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Detail Pertanyaan</label>
+                    <textarea id="postContent" class="form-control" rows="5" placeholder="Ceritakan detail masalah atau pertanyaan Anda..." required></textarea>
+                </div>
+                <button type="submit" class="btn-submit">Posting Diskusi</button>
+            </form>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, getDocs, query, orderBy, where, doc, getDoc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBIaLzkNM0KqPVKxuMNmardLqcrr2kYTWQ",
+            authDomain: "database-idbm.firebaseapp.com",
+            projectId: "database-idbm",
+            storageBucket: "database-idbm.firebasestorage.app",
+            messagingSenderId: "1052290789133",
+            appId: "1:1052290789133:web:36b513630b7a87154eca44",
+            measurementId: "G-EQLBB94DY2"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let currentUser = null;
+        let currentThreadId = null;
+        let allThreads = [];
+
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                const docSnap = await getDoc(doc(db, "users_umkm", user.uid));
+                if (docSnap.exists()) {
+                    currentUser = {
+                        uid: user.uid,
+                        name: docSnap.data().nama_lengkap || "User UMKM",
+                        business: docSnap.data().nama_usaha
+                    };
+                } else {
+                    currentUser = { uid: user.uid, name: "User", business: "" };
+                }
+                loadThreads();
+            } else {
+                window.location.href = "login.html";
+            }
+        });
+
+        // --- CORE FUNCTIONS ---
+
+        window.loadThreads = async function(category = 'all') {
+            const listContainer = document.getElementById('threadList');
+            listContainer.innerHTML = '<div style="text-align:center; color:white;">Memuat...</div>';
+
+            try {
+                let q = query(collection(db, "forum_threads"), orderBy("timestamp", "desc"));
+                const querySnapshot = await getDocs(q);
+                allThreads = [];
+                
+                querySnapshot.forEach((doc) => {
+                    allThreads.push({ id: doc.id, ...doc.data() });
+                });
+
+                renderThreads(category);
+
+            } catch (e) {
+                console.error("Error loading threads:", e);
+                listContainer.innerHTML = '<div style="text-align:center; color:white;">Gagal memuat diskusi.</div>';
+            }
+        }
+
+        function renderThreads(filterCat) {
+            const listContainer = document.getElementById('threadList');
+            listContainer.innerHTML = "";
+
+            let filtered = allThreads;
+            if (filterCat !== 'all') {
+                filtered = allThreads.filter(t => t.category === filterCat);
+            }
+
+            if (filtered.length === 0) {
+                listContainer.innerHTML = '<div style="background: rgba(255,255,255,0.1); padding:20px; border-radius:10px; text-align:center; color:white;">Belum ada diskusi di kategori ini.</div>';
+                return;
+            }
+
+            filtered.forEach(t => {
+                const date = t.timestamp ? new Date(t.timestamp.toDate()).toLocaleDateString('id-ID') : 'Baru saja';
+                
+                let badgeClass = 'bg-umum';
+                if(t.category === 'Pemasaran') badgeClass = 'bg-pemasaran';
+                if(t.category === 'Legalitas') badgeClass = 'bg-pajak';
+                if(t.category === 'Modal') badgeClass = 'bg-izin';
+
+                const html = `
+                <div class="thread-card" onclick="openDetail('${t.id}')">
+                    <div class="thread-meta">
+                        <div class="author-info">
+                            <div class="avatar-small">${t.author_name.charAt(0)}</div>
+                            <b>${t.author_name}</b>
+                        </div>
+                        <span>${date}</span>
+                    </div>
+                    <div style="margin-bottom:8px;"><span class="badge-cat ${badgeClass}">${t.category}</span></div>
+                    <div class="thread-title">${t.title}</div>
+                    <div class="thread-preview">${t.content}</div>
+                    <div class="thread-stats">
+                        <div class="stat-item"><i class="far fa-comment-alt"></i> ${t.comment_count || 0} Balasan</div>
+                        <div class="stat-item"><i class="far fa-thumbs-up"></i> ${t.likes || 0}</div>
+                    </div>
+                </div>
+                `;
+                listContainer.innerHTML += html;
+            });
+        }
+
+        window.handlePost = async function(e) {
+            e.preventDefault();
+            const btn = e.target.querySelector('button');
+            const originalText = btn.innerText;
+            btn.innerText = "Memposting...";
+            btn.disabled = true;
+
+            const title = document.getElementById('postTitle').value;
+            const category = document.getElementById('postCategory').value;
+            const content = document.getElementById('postContent').value;
+
+            try {
+                await addDoc(collection(db, "forum_threads"), {
+                    title: title,
+                    category: category,
+                    content: content,
+                    author_uid: currentUser.uid,
+                    author_name: currentUser.name,
+                    timestamp: new Date(),
+                    likes: 0,
+                    comment_count: 0
+                });
+
+                closeModal();
+                e.target.reset();
+                loadThreads(); 
+                alert("Diskusi berhasil diposting!");
+
+            } catch (e) {
+                alert("Gagal posting: " + e.message);
+            } finally {
+                btn.innerText = originalText;
+                btn.disabled = false;
+            }
+        }
+
+        window.openDetail = async function(id) {
+            currentThreadId = id;
+            const thread = allThreads.find(t => t.id === id);
+            
+            if(!thread) return;
+
+            // DOM Logic
+            document.getElementById('feedView').style.display = 'none';
+            document.getElementById('detailView').style.display = 'block';
+            
+            // Hide mobile UI specific elements
+            document.querySelector('.mobile-header').style.display = 'none';
+            document.querySelector('.mobile-filter-bar').style.display = 'none';
+            document.querySelector('.fab-create').style.display = 'none';
+
+            document.getElementById('detailTitle').innerText = thread.title;
+            document.getElementById('detailCat').innerText = thread.category;
+            document.getElementById('detailAuthor').innerText = thread.author_name;
+            document.getElementById('detailAvatar').innerText = thread.author_name.charAt(0);
+            document.getElementById('detailDate').innerText = thread.timestamp ? new Date(thread.timestamp.toDate()).toLocaleDateString('id-ID', {weekday:'long', year:'numeric', month:'long', day:'numeric'}) : '-';
+            document.getElementById('detailBody').innerText = thread.content;
+            document.getElementById('detailLikes').innerText = thread.likes || 0;
+
+            loadComments(id);
+        }
+
+        window.closeDetail = function() {
+            document.getElementById('feedView').style.display = 'block';
+            document.getElementById('detailView').style.display = 'none';
+            
+            // Restore mobile UI
+            if (window.innerWidth <= 768) {
+                document.querySelector('.mobile-header').style.display = 'flex';
+                document.querySelector('.mobile-filter-bar').style.display = 'flex';
+                document.querySelector('.fab-create').style.display = 'flex';
+            }
+            
+            currentThreadId = null;
+        }
+
+        async function loadComments(threadId) {
+            const list = document.getElementById('commentsList');
+            list.innerHTML = "Memuat komentar...";
+            
+            const q = query(collection(db, `forum_threads/${threadId}/comments`), orderBy("timestamp", "asc"));
+            const snapshot = await getDocs(q);
+            
+            list.innerHTML = "";
+            document.getElementById('commentCount').innerText = snapshot.size;
+
+            if(snapshot.empty) {
+                list.innerHTML = "<p style='color:#94a3b8; font-style:italic;'>Belum ada komentar.</p>";
+                return;
+            }
+
+            snapshot.forEach(doc => {
+                const c = doc.data();
+                const html = `
+                <div class="comment-item">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+                        <strong style="font-size:0.9rem;">${c.author_name}</strong>
+                        <span style="font-size:0.8rem; color:#94a3b8;">${new Date(c.timestamp.toDate()).toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'})}</span>
+                    </div>
+                    <div style="font-size:0.95rem; color:#334155;">${c.text}</div>
+                </div>`;
+                list.innerHTML += html;
+            });
+        }
+
+        window.postComment = async function() {
+            const input = document.getElementById('commentInput');
+            const text = input.value.trim();
+            if(!text) return;
+
+            try {
+                await addDoc(collection(db, `forum_threads/${currentThreadId}/comments`), {
+                    text: text,
+                    author_name: currentUser.name,
+                    author_uid: currentUser.uid,
+                    timestamp: new Date()
+                });
+
+                const threadRef = doc(db, "forum_threads", currentThreadId);
+                await updateDoc(threadRef, { comment_count: increment(1) });
+
+                input.value = "";
+                loadComments(currentThreadId);
+
+            } catch (e) {
+                alert("Gagal mengirim komentar");
+            }
+        }
+
+        // --- UI HELPERS ---
+        window.openModal = () => document.getElementById('createModal').style.display = 'flex';
+        window.closeModal = () => document.getElementById('createModal').style.display = 'none';
+        
+        window.filterThreads = (cat, btn) => {
+            document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            renderThreads(cat);
+        }
+
+        window.filterThreadsMobile = (cat, btn) => {
+            document.querySelectorAll('.mobile-chip').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            renderThreads(cat);
+        }
+
+        window.searchThreads = () => {
+            const keyword = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = allThreads.filter(t => t.title.toLowerCase().includes(keyword) || t.content.toLowerCase().includes(keyword));
+            
+            const listContainer = document.getElementById('threadList');
+            listContainer.innerHTML = "";
+            if(filtered.length === 0) { listContainer.innerHTML = '<div style="text-align:center; color:white;">Tidak ditemukan.</div>'; return; }
+            
+            filtered.forEach(t => {
+                let badgeClass = 'bg-umum';
+                if(t.category === 'Pemasaran') badgeClass = 'bg-pemasaran';
+                if(t.category === 'Legalitas') badgeClass = 'bg-pajak';
+                const date = t.timestamp ? new Date(t.timestamp.toDate()).toLocaleDateString('id-ID') : 'Baru saja';
+                
+                listContainer.innerHTML += `
+                <div class="thread-card" onclick="openDetail('${t.id}')">
+                    <div class="thread-meta">
+                        <div class="author-info"><b>${t.author_name}</b></div>
+                        <span>${date}</span>
+                    </div>
+                    <div style="margin-bottom:8px;"><span class="badge-cat ${badgeClass}">${t.category}</span></div>
+                    <div class="thread-title">${t.title}</div>
+                    <div class="thread-preview">${t.content}</div>
+                </div>`;
+            });
+        }
+
+    </script>
+</body>
+</html>
