@@ -4,187 +4,169 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Baca Artikel - ID-TRIBE</title>
+    <link rel="icon" type="image/png" href="favicon.png">
     
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Outfit:wght@300;400;600;800&family=Plus+Jakarta+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 
     <script type="module" src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
     <script type="module" src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"></script>
 
     <style>
         :root {
-            --forest-green: #2E5C48;
-            --golden-orange: #F2994A;
-            --text-dark: #1e293b;
-            --text-gray: #475569;
-            --bg-soft: #f8fafc;
+            --primary: #059669; --primary-dark: #047857; --accent: #f59e0b;
+            --dark: #0f172a; --text-gray: #475569; --bg-soft: #f8fafc;
+            --font-head: 'Outfit', sans-serif;
+            --font-serif: 'Outfit', serif;
+            --font-body: 'Plus Jakarta Sans', sans-serif;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
         
         body {
-            font-family: 'Lato', sans-serif;
-            background-color: var(--bg-soft);
-            color: var(--text-dark);
-            line-height: 1.8;
-            overflow-x: hidden;
+            font-family: var(--font-body); background-color: #fdfdfd; color: var(--text-dark);
+            line-height: 1.8; overflow-x: hidden; display: flex; flex-direction: column; min-height: 100vh;
         }
 
-        /* ORNAMENT BACKGROUND */
-        .bg-gradient {
-            position: fixed; top: 0; left: 0; width: 100%; height: 400px;
-            background: linear-gradient(180deg, #dcfce7 0%, rgba(255,255,255,0) 100%);
-            z-index: -1;
+        /* --- GRADIENT ORNAMENTS --- */
+        .blur-orb {
+            position: fixed; border-radius: 50%; filter: blur(80px); opacity: 0.5; z-index: -1;
         }
-        .orb {
-            position: fixed; width: 300px; height: 300px;
-            background: radial-gradient(circle, rgba(242,153,74,0.2) 0%, rgba(255,255,255,0) 70%);
-            border-radius: 50%; top: -100px; right: -100px; z-index: -1;
-            animation: float 10s infinite ease-in-out;
-        }
-        @keyframes float { 0%, 100% { transform: translate(0,0); } 50% { transform: translate(-20px, 30px); } }
+        .orb-1 { top: -10%; left: -10%; width: 400px; height: 400px; background: #d1fae5; }
+        .orb-2 { bottom: 10%; right: -5%; width: 300px; height: 300px; background: #fef3c7; }
 
-        /* NAVBAR */
+        /* --- NAVBAR --- */
         .nav-back {
             position: fixed; top: 0; width: 100%;
-            background: rgba(255, 255, 255, 0.8);
-            backdrop-filter: blur(12px);
-            padding: 15px 5%;
-            border-bottom: 1px solid rgba(0,0,0,0.05);
-            z-index: 100;
+            background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(12px);
+            padding: 15px 5%; border-bottom: 1px solid rgba(0,0,0,0.05); z-index: 100;
             display: flex; align-items: center; justify-content: space-between;
-            transition: all 0.3s;
         }
         .nav-back a {
-            text-decoration: none; color: var(--forest-green);
-            font-weight: 700; display: flex; align-items: center; gap: 8px;
-            font-size: 0.95rem; transition: 0.2s;
+            text-decoration: none; color: var(--dark); font-weight: 700; 
+            display: flex; align-items: center; gap: 8px; font-size: 0.9rem;
+            padding: 8px 16px; border-radius: 50px; transition: 0.3s;
         }
-        .nav-back a:hover { transform: translateX(-5px); color: var(--golden-orange); }
+        .nav-back a:hover { background: #f1f5f9; color: var(--primary); }
 
-        /* MAIN CONTAINER */
+        /* --- MAIN CONTENT --- */
         .container {
-            max-width: 800px; margin: 100px auto 60px;
-            padding: 0 20px;
-            animation: fadeInUp 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+            max-width: 800px; margin: 120px auto 60px; padding: 0 25px; flex: 1;
+            animation: fadeUp 0.8s ease-out;
         }
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(40px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* TYPOGRAPHY */
+        /* HEADER */
         .article-header { text-align: center; margin-bottom: 40px; }
-        
         .badge-cat {
-            display: inline-block; padding: 6px 14px;
-            background: rgba(46, 92, 72, 0.1); color: var(--forest-green);
-            border-radius: 50px; font-size: 0.75rem; font-weight: 800;
-            text-transform: uppercase; letter-spacing: 1px; margin-bottom: 15px;
+            display: inline-block; padding: 6px 16px; background: #ecfdf5; color: var(--primary-dark);
+            border-radius: 50px; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; 
+            letter-spacing: 1px; margin-bottom: 20px; border: 1px solid rgba(5, 150, 105, 0.2);
         }
-
         .article-title {
-            font-family: 'Playfair Display', serif;
-            font-size: 3rem; font-weight: 900; line-height: 1.2;
-            color: var(--text-dark); margin-bottom: 20px;
-            text-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            font-family: var(--font-serif); font-size: 2.8rem; font-weight: 700; 
+            line-height: 1.3; color: var(--dark); margin-bottom: 25px;
         }
-
         .article-meta {
-            color: var(--text-gray); font-size: 0.9rem;
-            display: flex; align-items: center; justify-content: center; gap: 15px;
+            display: flex; align-items: center; justify-content: center; gap: 20px; 
+            font-size: 0.9rem; color: var(--text-gray); border-top: 1px solid #f1f5f9; 
+            border-bottom: 1px solid #f1f5f9; padding: 15px 0; max-width: 500px; margin: 0 auto;
         }
-        .article-meta span { display: flex; align-items: center; gap: 6px; }
+        .author-box { display: flex; align-items: center; gap: 10px; font-weight: 700; color: var(--dark); }
+        .author-avatar { width: 30px; height: 30px; border-radius: 50%; background: #e2e8f0; }
 
-        /* IMAGE STYLES */
+        /* IMAGE */
         .main-img-wrapper {
-            position: relative; margin-bottom: 40px;
-            border-radius: 20px; overflow: hidden;
-            box-shadow: 0 20px 40px -10px rgba(0,0,0,0.15);
+            margin-bottom: 50px; border-radius: 24px; overflow: hidden;
+            box-shadow: 0 20px 40px -10px rgba(0,0,0,0.1); position: relative;
         }
-        .main-img {
-            width: 100%; height: auto; display: block;
-            transition: transform 0.5s;
+        .main-img { width: 100%; height: auto; display: block; }
+        .img-credit { 
+            position: absolute; bottom: 15px; right: 20px; background: rgba(0,0,0,0.6); 
+            color: white; font-size: 0.7rem; padding: 4px 10px; border-radius: 4px; backdrop-filter: blur(4px);
         }
-        .main-img:hover { transform: scale(1.02); }
 
-        /* CONTENT */
+        /* BODY */
         .article-content {
-            font-size: 1.15rem; color: #334155;
-            white-space: pre-line; margin-bottom: 40px;
+            font-size: 1.15rem; color: #374151; white-space: pre-line; margin-bottom: 50px;
+            font-family: 'Poppins'; /* Optional: Serif for body text looks classy */
         }
-        .article-content p { margin-bottom: 20px; }
+        .article-content p { margin-bottom: 25px; }
 
-        /* QUOTE BOX */
+        /* QUOTE */
         .quote-box {
-            position: relative;
-            background: white; border-radius: 16px;
-            padding: 40px 30px; margin: 40px 0;
-            text-align: center;
-            border: 1px solid rgba(0,0,0,0.05);
-            box-shadow: 0 10px 30px rgba(242, 153, 74, 0.1);
+            position: relative; margin: 40px -20px; padding: 40px;
+            background: linear-gradient(135deg, #fffbeb, #fff);
+            border-left: 4px solid var(--accent); border-radius: 0 16px 16px 0;
+            font-family: var(--font-serif); font-size: 1.4rem; color: #b45309; font-style: italic;
         }
-        .quote-icon {
-            font-size: 2rem; color: var(--golden-orange); margin-bottom: 15px; display: block; opacity: 0.5;
-        }
-        .quote-text {
-            font-family: 'Playfair Display', serif;
-            font-size: 1.5rem; font-style: italic; color: var(--forest-green);
-            line-height: 1.4;
-        }
+        .quote-icon { position: absolute; top: 10px; left: 10px; font-size: 3rem; color: var(--accent); opacity: 0.2; }
 
-        /* SUPPORT IMAGE */
-        .support-img {
-            width: 100%; border-radius: 16px; margin: 30px 0;
-            border: 4px solid white; box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+        /* CREDIT FOOTER */
+        .credit-section {
+            background: #f8fafc; padding: 25px; border-radius: 16px; 
+            border: 1px dashed #cbd5e1; margin-top: 50px; font-size: 0.9rem; color: var(--text-gray);
         }
+        .credit-item { display: flex; gap: 10px; margin-bottom: 5px; }
+        .credit-label { font-weight: 700; min-width: 80px; color: var(--dark); }
 
-        /* SKELETON LOADING */
-        .skeleton { background: #e2e8f0; border-radius: 8px; animation: pulse 1.5s infinite; }
-        .sk-badge { width: 100px; height: 30px; margin: 0 auto 20px; border-radius: 50px; }
-        .sk-title { width: 80%; height: 50px; margin: 0 auto 20px; }
-        .sk-meta { width: 200px; height: 20px; margin: 0 auto 40px; }
-        .sk-img { width: 100%; height: 400px; margin-bottom: 40px; border-radius: 20px; }
-        .sk-line { width: 100%; height: 20px; margin-bottom: 15px; }
-
+        /* SKELETON */
+        .skeleton { background: #e2e8f0; border-radius: 8px; animation: pulse 1.5s infinite; margin-bottom: 15px; }
+        .sk-h { height: 40px; width: 80%; margin: 0 auto 20px; }
+        .sk-img { height: 350px; width: 100%; border-radius: 20px; margin-bottom: 30px; }
+        .sk-txt { height: 15px; width: 100%; }
         @keyframes pulse { 0% { opacity: 0.6; } 50% { opacity: 1; } 100% { opacity: 0.6; } }
 
         /* RESPONSIVE */
         @media(max-width: 768px) {
             .article-title { font-size: 2rem; }
-            .main-img-wrapper { border-radius: 12px; }
-            .container { padding: 0 15px; margin-top: 80px; }
-            .quote-text { font-size: 1.2rem; }
+            .container { padding: 0 20px; }
+            .quote-box { margin: 30px 0; padding: 25px; font-size: 1.2rem; }
         }
+
+        /* FOOTER (SAMA DENGAN ABOUT) */
+        footer {
+            background: var(--dark); color: white; padding: 60px 5% 30px;
+            border-radius: 40px 40px 0 0; margin-top: auto; text-align: center;
+        }
+        .foot-logo { font-family: var(--font-head); font-size: 2rem; font-weight: 900; margin-bottom: 20px; display: inline-block; }
+        .foot-text { color: #94a3b8; max-width: 500px; margin: 0 auto 40px; font-size: 0.95rem; }
+        .foot-copy { border-top: 1px solid rgba(255,255,255,0.1); padding-top: 30px; font-size: 0.9rem; color: #64748b; }
     </style>
 </head>
 <body>
 
-    <div class="bg-gradient"></div>
-    <div class="orb"></div>
+    <div class="blur-orb orb-1"></div>
+    <div class="blur-orb orb-2"></div>
 
     <div class="nav-back">
-        <a href="index.html"><i class="fas fa-chevron-left"></i> Kembali ke Beranda</a>
-        <span style="font-weight: 900; color: #1e293b; font-size: 1.1rem;">ID<span style="color:var(--golden-orange)">TRIBE</span></span>
+        <a href="articles.html"><i class="fas fa-arrow-left"></i> Semua Wawasan</a>
+        <a href="index.html" style="text-decoration: none; font-weight: 800; color: var(--dark); font-size: 1.4rem; font-family: 'Outfit', sans-serif;">
+            ID<span style="color:var(--accent)">TRIBE</span>
+        </a>
     </div>
 
     <div class="container" id="contentArea">
-        <div class="skeleton sk-badge"></div>
-        <div class="skeleton sk-title"></div>
-        <div class="skeleton sk-meta"></div>
+        <div class="skeleton sk-h"></div>
         <div class="skeleton sk-img"></div>
-        <div class="skeleton sk-line"></div>
-        <div class="skeleton sk-line"></div>
-        <div class="skeleton sk-line"></div>
-        <div class="skeleton sk-line" style="width: 70%"></div>
+        <div class="skeleton sk-txt"></div>
+        <div class="skeleton sk-txt"></div>
+        <div class="skeleton sk-txt" style="width: 80%"></div>
     </div>
+
+    <footer>
+        <div class="foot-logo">ID-TRIBE</div>
+        <p class="foot-text">Platform inkubasi digital yang menghubungkan UMKM dengan ilmu, mentor, dan permodalan untuk masa depan ekonomi Indonesia yang lebih kuat.</p>
+        <div class="foot-copy">Copyright © 2026 ID-TRIBE Initiative. Powered by KNEKS Strategic Framework.</div>
+    </footer>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        // FIREBASE CONFIG
+        // FIREBASE CONFIG (Sama seperti file lain)
         const firebaseConfig = {
             apiKey: "AIzaSyBIaLzkNM0KqPVKxuMNmardLqcrr2kYTWQ",
             authDomain: "database-idbm.firebaseapp.com",
@@ -204,7 +186,7 @@
             const container = document.getElementById('contentArea');
 
             if (!artId) {
-                container.innerHTML = "<h3 style='text-align:center'>Artikel tidak ditemukan (ID Kosong).</h3>";
+                container.innerHTML = "<h3 style='text-align:center; padding: 50px;'>Artikel tidak ditemukan.</h3>";
                 return;
             }
 
@@ -215,26 +197,33 @@
                 if (docSnap.exists()) {
                     const data = docSnap.data();
                     
-                    // Format Tanggal Cantik (misal: 25 Januari 2026)
+                    // Format Data
                     const dateObj = data.timestamp ? data.timestamp.toDate() : new Date();
                     const dateStr = dateObj.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
-                    
-                    // Fallback Image
                     const mainImg = data.mainImage || 'https://via.placeholder.com/800x400?text=No+Image';
+                    const authorName = data.author || "Tim Redaksi ID-TRIBE";
+                    const creditSource = data.credit || "Dokumentasi Internal";
+                    const authorInitial = authorName.charAt(0).toUpperCase();
 
-                    // Render HTML
+                    // Render Content
                     container.innerHTML = `
                         <div class="article-header">
                             <span class="badge-cat">Insight Bisnis</span>
                             <h1 class="article-title">${data.title}</h1>
+                            
                             <div class="article-meta">
-                                <span><i class="far fa-calendar-alt"></i> ${dateStr}</span>
-                                <span><i class="far fa-user"></i> Admin ID-TRIBE</span>
+                                <div class="author-box">
+                                    <div class="author-avatar" style="display:flex;align-items:center;justify-content:center;color:#64748b;font-size:0.8rem;">${authorInitial}</div>
+                                    <span>${authorName}</span>
+                                </div>
+                                <span style="color:#cbd5e1;">|</span>
+                                <span><i class="far fa-calendar"></i> ${dateStr}</span>
                             </div>
                         </div>
                         
                         <div class="main-img-wrapper">
                             <img src="${mainImg}" class="main-img" alt="${data.title}">
+                            <div class="img-credit">Credits: ${creditSource}</div>
                         </div>
                         
                         <div class="article-content">${data.content}</div>
@@ -246,21 +235,30 @@
                             </div>
                         ` : ''}
 
-                        ${data.supportImage ? `<img src="${data.supportImage}" class="support-img" alt="Gambar Pendukung">` : ''}
-                        
-                        <div style="text-align:center; margin-top:50px; padding-top:30px; border-top:1px solid #e2e8f0;">
-                            <p style="color:#64748b; font-size:0.9rem;">Suka artikel ini? Bagikan ke temanmu!</p>
-                            <div style="display:flex; gap:10px; justify-content:center; margin-top:10px;">
-                                <button onclick="alert('Link tersalin!')" style="padding:8px 15px; border:1px solid #cbd5e1; background:white; border-radius:50px; cursor:pointer;"><i class="fas fa-link"></i> Salin Link</button>
+                        <div class="credit-section">
+                            <div class="credit-item">
+                                <span class="credit-label">Penulis:</span>
+                                <span>${authorName}</span>
                             </div>
+                            <div class="credit-item">
+                                <span class="credit-label">Sumber:</span>
+                                <span>${creditSource}</span>
+                            </div>
+                        </div>
+                        
+                        <div style="text-align:center; margin-top:50px; padding-top:30px;">
+                            <p style="color:#64748b; font-size:0.9rem; margin-bottom:10px;">Bagikan wawasan ini:</p>
+                            <button onclick="navigator.clipboard.writeText(window.location.href); alert('Link tersalin!');" style="padding:10px 20px; border:1px solid #e2e8f0; background:white; border-radius:50px; cursor:pointer; font-weight:700; color:var(--dark); transition:0.3s;">
+                                <i class="fas fa-link"></i> Salin Link Artikel
+                            </button>
                         </div>
                     `;
                 } else {
-                    container.innerHTML = "<h3 style='text-align:center'>Artikel tidak ditemukan di database.</h3>";
+                    container.innerHTML = "<h3 style='text-align:center; padding: 50px;'>Artikel tidak ditemukan di database.</h3>";
                 }
             } catch (e) {
                 console.error(e);
-                container.innerHTML = "<h3 style='text-align:center'>Terjadi kesalahan saat memuat artikel.</h3>";
+                container.innerHTML = "<h3 style='text-align:center; padding: 50px; color:red;'>Terjadi kesalahan jaringan.</h3>";
             }
         }
 

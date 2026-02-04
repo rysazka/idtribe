@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ID-TRIBE - Ekosistem UMKM Masa Depan</title>
+    <link rel="icon" type="image/png" href="favicon.png">
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -40,7 +41,7 @@
             overflow-x: hidden;
         }
 
-        /* --- 2. NAVBAR (TEKNIK FLEXBOX ORDER) --- */
+        /* --- 2. NAVBAR --- */
         .navbar {
             display: flex; justify-content: space-between; align-items: center;
             padding: 20px 5%;
@@ -50,7 +51,7 @@
             position: sticky; top: 0; z-index: 100;
             transition: all 0.3s ease;
             box-shadow: 0 4px 20px rgba(0,0,0,0.03);
-            flex-wrap: wrap; /* Penting untuk mobile */
+            flex-wrap: wrap; 
         }
 
         .brand { display: flex; align-items: center; gap: 10px; text-decoration: none; }
@@ -75,100 +76,56 @@
         }
         .btn-nav:hover { background: var(--primary-dark); transform: translateY(-2px); }
 
-        /* --- LOGIKA RESPONSIVE (MAGIC DISINI) --- */
+        /* RESPONSIVE NAVBAR */
         @media (max-width: 768px) {
-            .navbar {
-                padding: 15px 20px;
-                gap: 15px; /* Jarak vertikal saat menu turun */
-            }
-
-            /* Urutan 1: Logo (Kiri) */
-            .brand { 
-                order: 1; 
-                flex-grow: 1; /* Mendorong tombol ke kanan mentok */
-            } 
-
-            /* Urutan 2: Tombol Masuk (Kanan atas) */
-            .btn-nav { 
-                order: 2; 
-                padding: 8px 18px; 
-                font-size: 0.85rem; 
-            }
-
-            /* Urutan 3: Menu Navigasi (Pindah ke Bawah / Baris Baru) */
+            .navbar { padding: 15px 20px; gap: 15px; }
+            .brand { order: 1; flex-grow: 1; } 
+            .btn-nav { order: 2; padding: 8px 18px; font-size: 0.85rem; }
             .nav-menu {
-                order: 3;
-                width: 100%; /* Memaksa turun ke baris baru */
-                display: flex; /* Tetap tampil */
-                justify-content: center; /* Rata tengah */
-                gap: 15px;
-                padding-top: 15px;
-                border-top: 1px solid rgba(0,0,0,0.05);
-                overflow-x: auto; /* Scroll samping jika layar kekecilan */
+                order: 3; width: 100%; display: flex; justify-content: center; 
+                gap: 15px; padding-top: 15px; border-top: 1px solid rgba(0,0,0,0.05);
+                overflow-x: auto; 
             }
-            
             .nav-link { font-size: 0.85rem; }
         }
 
-        /* --- 3. HERO SECTION (BACKGROUND GAMBAR) --- */
+        /* --- 3. HERO SECTION --- */
         .hero {
-            position: relative;
-            min-height: 600px;
+            position: relative; min-height: 600px;
             background-image: url('https://images.unsplash.com/photo-1556761175-5973dc0f32e7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1920');
-            background-size: cover;
-            background-position: center;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            padding: 0 20px;
-            color: white;
-            margin-bottom: 60px;
+            background-size: cover; background-position: center;
+            display: flex; align-items: center; justify-content: center;
+            text-align: center; padding: 0 20px; color: white; margin-bottom: 60px;
         }
-
         .hero-overlay {
             position: absolute; inset: 0;
-            background: linear-gradient(to right, 
-                rgba(6, 78, 59, 0.95) 0%, 
-                rgba(5, 150, 105, 0.85) 60%, 
-                rgba(5, 150, 105, 0.5) 100%
-            );
+            background: linear-gradient(to right, rgba(6, 78, 59, 0.95) 0%, rgba(5, 150, 105, 0.85) 60%, rgba(5, 150, 105, 0.5) 100%);
             z-index: 1;
         }
-
-        .hero-content {
-            position: relative; z-index: 2;
-            max-width: 900px;
-        }
-
+        .hero-content { position: relative; z-index: 2; max-width: 900px; }
         .hero-badge {
             display: inline-block; padding: 8px 20px; border-radius: 50px;
             background: rgba(255, 255, 255, 0.15); color: #fbbf24; border: 1px solid rgba(255, 255, 255, 0.3);
             font-weight: 800; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 2px;
             margin-bottom: 25px; backdrop-filter: blur(5px);
         }
-
         .hero-title {
             font-family: var(--font-head); font-size: 4rem; line-height: 1.1; font-weight: 900;
-            margin-bottom: 25px; color: white;
-            text-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            margin-bottom: 25px; color: white; text-shadow: 0 4px 20px rgba(0,0,0,0.1);
         }
-
         .hero-desc {
             font-size: 1.25rem; color: rgba(255, 255, 255, 0.9); 
             max-width: 700px; margin: 0 auto 40px; line-height: 1.7; font-weight: 300;
         }
-
         .hero-btn {
             display: inline-flex; align-items: center; gap: 10px;
             padding: 18px 45px; background: var(--accent);
             color: var(--dark); font-weight: 800; border-radius: 16px; text-decoration: none;
-            font-size: 1.1rem; box-shadow: 0 10px 30px rgba(245, 158, 11, 0.4);
-            transition: all 0.3s;
+            font-size: 1.1rem; box-shadow: 0 10px 30px rgba(245, 158, 11, 0.4); transition: all 0.3s;
         }
         .hero-btn:hover { background: #fcd34d; transform: translateY(-5px); box-shadow: 0 20px 40px rgba(245, 158, 11, 0.5); }
 
-        /* --- 4. SECTIONS (Container) --- */
+        /* --- 4. SECTIONS & TIMELINE --- */
         .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
         
         .section-glass {
@@ -176,8 +133,7 @@
             border: var(--glass-border); border-radius: 30px;
             padding: 60px 40px; margin-bottom: 60px;
             box-shadow: var(--glass-shadow);
-            opacity: 0; transform: translateY(30px);
-            transition: all 0.8s ease;
+            opacity: 0; transform: translateY(30px); transition: all 0.8s ease;
         }
         .section-glass.visible { opacity: 1; transform: translateY(0); }
 
@@ -185,7 +141,7 @@
         .sec-title { font-family: var(--font-head); font-size: 2.5rem; font-weight: 800; color: var(--primary-dark); margin-bottom: 10px; }
         .sec-sub { color: #64748b; font-size: 1.1rem; }
 
-        /* --- 5. TIMELINE REDESIGN --- */
+        /* Timeline Styles */
         .timeline { position: relative; padding: 20px 0; }
         .timeline::before {
             content: ''; position: absolute; left: 50%; transform: translateX(-50%);
@@ -196,7 +152,6 @@
             position: relative; margin-bottom: 60px; width: 50%;
         }
         .time-item:nth-child(even) { align-self: flex-end; justify-content: flex-start; padding-right: 0; padding-left: 50px; margin-left: 50%; }
-        
         .time-dot {
             position: absolute; right: -22px; top: 0; width: 44px; height: 44px;
             background: white; border: 6px solid var(--primary); border-radius: 50%;
@@ -204,11 +159,9 @@
             font-weight: 800; color: var(--primary-dark); box-shadow: 0 0 0 5px rgba(5, 150, 105, 0.1);
         }
         .time-item:nth-child(even) .time-dot { left: -22px; right: auto; }
-
         .time-card {
             background: white; padding: 25px; border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.05); border: 1px solid rgba(0,0,0,0.05);
-            transition: transform 0.3s;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05); border: 1px solid rgba(0,0,0,0.05); transition: transform 0.3s;
         }
         .time-item:hover .time-card { transform: translateY(-5px); border-color: var(--primary); }
         .time-card h4 { font-family: var(--font-head); font-size: 1.25rem; margin-bottom: 8px; color: var(--primary-dark); }
@@ -218,11 +171,26 @@
             margin-bottom: 10px; color: var(--accent);
         }
 
-        /* --- 6. ARTICLE CARDS --- */
-        .grid-articles {
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 30px;
+        /* --- 5. SLIDER ARTICLES (MODIFIED) --- */
+        .slider-wrapper {
+            position: relative;
+            padding: 0 20px;
         }
+        
+        .slider-track {
+            display: flex;
+            gap: 25px;
+            overflow-x: auto;
+            scroll-behavior: smooth;
+            padding: 20px 5px; /* Padding for shadow */
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
+        }
+        .slider-track::-webkit-scrollbar { display: none; } /* Chrome */
+
         .card-art {
+            min-width: 300px; max-width: 300px; /* Fixed width for slider */
+            flex-shrink: 0;
             background: white; border-radius: 24px; overflow: hidden;
             box-shadow: 0 10px 40px -10px rgba(0,0,0,0.1);
             transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
@@ -230,22 +198,33 @@
             cursor: pointer; text-decoration: none; display: block; color: inherit;
         }
         .card-art:hover { transform: translateY(-10px); box-shadow: 0 20px 50px -10px rgba(0,0,0,0.2); }
-        .card-img { height: 200px; width: 100%; object-fit: cover; transition: transform 0.5s; }
+        .card-img { height: 180px; width: 100%; object-fit: cover; transition: transform 0.5s; }
         .card-art:hover .card-img { transform: scale(1.05); }
         .card-body { padding: 25px; }
         .card-meta { font-size: 0.8rem; font-weight: 700; color: var(--accent); text-transform: uppercase; margin-bottom: 10px; display: block; }
-        .card-title { font-family: var(--font-head); font-size: 1.3rem; font-weight: 700; line-height: 1.4; margin-bottom: 10px; color: var(--dark); }
-        .card-desc { font-size: 0.95rem; color: #64748b; margin-bottom: 20px; line-height: 1.6; }
+        .card-title { font-family: var(--font-head); font-size: 1.2rem; font-weight: 700; line-height: 1.4; margin-bottom: 10px; color: var(--dark); }
+        .card-desc { font-size: 0.9rem; color: #64748b; margin-bottom: 20px; line-height: 1.6; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
         .card-link { font-weight: 700; color: var(--primary); display: flex; align-items: center; gap: 5px; font-size: 0.9rem; }
 
-        /* --- 7. SUCCESS STORIES --- */
+        /* SLIDER BUTTONS */
+        .slider-btn {
+            position: absolute; top: 50%; transform: translateY(-50%);
+            width: 50px; height: 50px; border-radius: 50%;
+            background: white; border: 1px solid #e2e8f0; color: var(--primary);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1); cursor: pointer;
+            z-index: 10; display: flex; align-items: center; justify-content: center;
+            font-size: 1.2rem; transition: all 0.3s;
+        }
+        .slider-btn:hover { background: var(--primary); color: white; transform: translateY(-50%) scale(1.1); }
+        .prev-btn { left: -15px; }
+        .next-btn { right: -15px; }
+
+        /* --- 6. SUCCESS STORIES --- */
         .story-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 30px; }
         .story-card {
             background: linear-gradient(145deg, #ffffff, #f0fdf4);
-            padding: 35px; border-radius: 24px;
-            border: 1px solid rgba(255,255,255,0.6);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-            position: relative; transition: 0.3s;
+            padding: 35px; border-radius: 24px; border: 1px solid rgba(255,255,255,0.6);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05); position: relative; transition: 0.3s;
         }
         .story-card:hover { transform: translateY(-5px); box-shadow: 0 15px 40px rgba(5, 150, 105, 0.1); }
         .story-header { display: flex; align-items: center; margin-bottom: 20px; gap: 15px; }
@@ -260,7 +239,7 @@
         .story-quote { font-style: italic; color: #475569; line-height: 1.6; }
         .quote-icon { position: absolute; top: 25px; right: 25px; font-size: 2rem; color: var(--primary); opacity: 0.1; }
 
-        /* --- 8. FOOTER --- */
+        /* --- 7. FOOTER --- */
         footer {
             background: var(--dark); color: white; padding: 60px 5% 30px;
             border-radius: 40px 40px 0 0; margin-top: 80px; text-align: center;
@@ -274,27 +253,31 @@
             .hero { min-height: auto; padding: 100px 20px 60px; }
             .hero-title { font-size: 2.5rem; }
             .section-glass { padding: 40px 20px; }
-            
             .timeline::before { left: 20px; }
             .time-item { width: 100%; padding-left: 50px; padding-right: 0; margin-bottom: 40px; }
             .time-item:nth-child(even) { margin-left: 0; }
             .time-dot { left: -2px !important; right: auto; }
+            
+            /* Slider Mobile Fix */
+            .prev-btn, .next-btn { display: none; } /* Hide buttons on mobile, rely on swipe */
+            .slider-wrapper { padding: 0; }
+            .slider-track { padding-left: 20px; padding-right: 20px; }
         }
     </style>
 </head>
 <body>
 
-    <nav class="navbar" id="navbar">
-        <a href="#" class="brand">
-            <div class="brand-icon">ID</div>
-            <span class="brand-text">ID-TRIBE</span>
+        <nav class="navbar" id="navbar">
+        <a href="index.html" class="brand">
+            <img src="favicon.png" alt="Logo" style="width: 40px; height: 40px; border-radius: 12px; margin-right: 5px;">
+            <span class="brand-text">ID-<span style="color: var(--accent);">TRIBE</span></span>
         </a>
         
         <div class="nav-menu">
-            <a href="#" class="nav-link">Beranda</a>
-            <a href="#roadmap" class="nav-link">Alur Program</a>
-            <a href="#articles" class="nav-link">Wawasan</a>
-            <a href="about.html" class="nav-link">Tentang Kami</a>
+            <a href="index.html" class="nav-link">Beranda</a>
+            <a href="index.html#roadmap" class="nav-link">Alur Program</a>
+            <a href="articles.html" class="nav-link">Wawasan</a>
+            <a href="about.html" class="nav-link active">Tentang Kami</a>
         </div>
 
         <a href="login.html" class="btn-nav">Masuk / Daftar</a>
@@ -365,8 +348,18 @@
                 <p class="sec-sub">Tips, trik, dan strategi dari para ahli industri.</p>
             </div>
 
-            <div class="grid-articles" id="articleList">
-                <p style="text-align:center; width:100%; color:#94a3b8;">Sedang memuat artikel...</p>
+            <div class="slider-wrapper">
+                <button class="slider-btn prev-btn" onclick="slideArticles(-1)"><i class="fas fa-chevron-left"></i></button>
+                
+                <div class="slider-track" id="articleTrack">
+                    <p style="text-align:center; width:100%; color:#94a3b8;">Sedang memuat artikel...</p>
+                </div>
+
+                <button class="slider-btn next-btn" onclick="slideArticles(1)"><i class="fas fa-chevron-right"></i></button>
+            </div>
+            
+            <div style="text-align: center; margin-top: 30px;">
+                <a href="articles.html" style="color: var(--primary); font-weight: 700; text-decoration: none;">Lihat Semua Artikel &rarr;</a>
             </div>
         </section>
 
@@ -408,14 +401,15 @@
     <footer>
         <div class="foot-logo">ID-TRIBE</div>
         <p class="foot-text">Platform inkubasi digital yang menghubungkan UMKM dengan ilmu, mentor, dan permodalan untuk masa depan ekonomi Indonesia yang lebih kuat.</p>
-        <div class="foot-copy">&copy; 2026 ID-TRIBE Platform. All rights reserved.</div>
+        <div class="foot-copy">Copyright © 2026 ID-TRIBE Initiative. Powered by KNEKS Strategic Framework.</div>
     </footer>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js"; // Tambah import signOut & onAuthStateChanged
         import { getFirestore, collection, query, orderBy, limit, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        // CONFIG
+        // ... (Config Firebase Tetap Sama) ...
         const firebaseConfig = {
             apiKey: "AIzaSyBIaLzkNM0KqPVKxuMNmardLqcrr2kYTWQ",
             authDomain: "database-idbm.firebaseapp.com",
@@ -427,7 +421,29 @@
         };
 
         const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app); // Inisialisasi Auth
         const db = getFirestore(app);
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                // Jika User Login: Tampilkan Icon User & Logout, Sembunyikan Tombol Masuk
+                document.getElementById('uiLoggedIn').style.display = 'flex';
+                document.getElementById('uiLoggedOut').style.display = 'none';
+            } else {
+                // Jika Tamu: Tampilkan Tombol Masuk, Sembunyikan Icon User
+                document.getElementById('uiLoggedIn').style.display = 'none';
+                document.getElementById('uiLoggedOut').style.display = 'block';
+                // HAPUS KODE INI: window.location.href = "login.html"; <--- INI BIANG KEROKNYA
+            }
+        });
+
+        // Tambahkan Fungsi Logout
+        const btnLogout = document.getElementById('navLogoutBtn');
+        if(btnLogout){
+            btnLogout.addEventListener('click', () => {
+                signOut(auth).then(() => window.location.reload());
+            });
+        }
 
         // SCROLL REVEAL ANIMATION
         window.addEventListener('scroll', reveal);
@@ -448,15 +464,16 @@
         }
         reveal();
 
-        // LOAD ARTICLES
+        // LOAD ARTICLES (MODIFIED FOR SLIDER - LIMIT 6)
         async function loadArticlesForHomepage() {
-            const container = document.getElementById('articleList');
+            const container = document.getElementById('articleTrack');
             try {
-                const q = query(collection(db, "articles"), orderBy("timestamp", "desc"), limit(3));
+                // UBAH DISINI: Limit jadi 6
+                const q = query(collection(db, "articles"), orderBy("timestamp", "desc"), limit(5));
                 const snapshot = await getDocs(q);
 
                 if (snapshot.empty) {
-                    container.innerHTML = `<div style="grid-column:1/-1; text-align:center;">Belum ada artikel terbaru.</div>`;
+                    container.innerHTML = `<div style="text-align:center; width:100%; padding:20px;">Belum ada artikel terbaru.</div>`;
                     return;
                 }
 
@@ -468,13 +485,14 @@
                     let imgSource = data.mainImage || 'https://via.placeholder.com/400x250?text=No+Image';
                     let textHeadline = String(data.headline || data.snippet || "Klik untuk membaca selengkapnya...");
 
+                    // Ganti struktur HTML agar sesuai dengan style slider (card-art width fixed di CSS)
                     const html = `
                     <a href="${linkUrl}" class="card-art">
                         <div style="overflow:hidden;">
                             <img src="${imgSource}" class="card-img" alt="${data.title}">
                         </div>
                         <div class="card-body">
-                            <span class="card-meta">Insight Bisnis</span>
+                            <span class="card-meta">${data.category || 'Insight Bisnis'}</span>
                             <h3 class="card-title">${data.title || "Tanpa Judul"}</h3>
                             <p class="card-desc">${textHeadline.substring(0, 80)}...</p>
                             <span class="card-link">Baca Selengkapnya <i class="fas fa-arrow-right"></i></span>
@@ -486,8 +504,19 @@
 
             } catch (e) {
                 console.error("Error:", e);
-                container.innerHTML = `<p style="text-align:center; color:red;">Gagal memuat konten.</p>`;
+                container.innerHTML = `<p style="text-align:center; color:red; width:100%;">Gagal memuat konten.</p>`;
             }
+        }
+
+        // SLIDER LOGIC
+        window.slideArticles = (direction) => {
+            const track = document.getElementById('articleTrack');
+            // Scroll sebesar lebar kartu (300) + gap (25) = 325px
+            const scrollAmount = 325; 
+            track.scrollBy({
+                left: direction * scrollAmount,
+                behavior: 'smooth'
+            });
         }
 
         loadArticlesForHomepage();

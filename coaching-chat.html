@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Konsultasi Expert - ID-TRIBE</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Plus+Jakarta+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <script type="module" src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
+    <script type="module" src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js"></script>
+    <script type="module" src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"></script>
+
+    <style>
+        /* (Style tetap sama seperti desain sebelumnya agar konsisten) */
+        :root { --primary: #059669; --primary-dark: #047857; --accent: #f59e0b; --dark: #0f172a; --text-gray: #64748b; --glass-bg: rgba(255, 255, 255, 0.95); --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.05); --font-head: 'Outfit', sans-serif; --font-body: 'Plus Jakarta Sans', sans-serif; }
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { font-family: var(--font-body); background-color: #f0fdf4; color: var(--dark); min-height: 100vh; overflow-x: hidden; background-image: radial-gradient(at 0% 0%, hsla(152,100%,93%,1) 0, transparent 50%), radial-gradient(at 100% 100%, hsla(43,100%,93%,1) 0, transparent 50%); }
+        .navbar { padding: 20px 5%; display: flex; align-items: center; justify-content: space-between; position: relative; z-index: 10; }
+        .nav-back { text-decoration: none; color: var(--dark); font-weight: 700; display: flex; align-items: center; gap: 8px; transition: 0.3s; background: white; padding: 8px 20px; border-radius: 50px; border: 1px solid #e2e8f0; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; text-align: center; }
+        .header-text h1 { font-family: var(--font-head); font-size: 2rem; font-weight: 800; color: var(--dark); margin-bottom: 10px; }
+        .header-text p { color: var(--text-gray); font-size: 1rem; line-height: 1.6; }
+        .option-container { margin-top: 40px; display: flex; flex-direction: column; gap: 20px; }
+        .consult-card { background: white; border-radius: 20px; padding: 25px; box-shadow: var(--glass-shadow); border: 2px solid transparent; text-align: left; cursor: pointer; transition: 0.3s; display: flex; align-items: center; gap: 20px; position: relative; overflow: hidden; }
+        .consult-card:hover { transform: translateY(-5px); border-color: var(--primary); }
+        .consult-card.general { background: linear-gradient(to right, #ffffff, #f0fdf4); }
+        .consult-card.special { background: linear-gradient(to right, #ffffff, #fffbeb); }
+        .card-icon { width: 60px; height: 60px; border-radius: 15px; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; flex-shrink: 0; }
+        .general .card-icon { background: #d1fae5; color: var(--primary); }
+        .special .card-icon { background: #fef3c7; color: var(--accent); }
+        .card-text h3 { font-family: var(--font-head); font-size: 1.2rem; font-weight: 800; margin-bottom: 5px; }
+        .card-text p { font-size: 0.85rem; color: var(--text-gray); line-height: 1.4; }
+        .badge-status { position: absolute; top: 15px; right: 15px; font-size: 0.7rem; font-weight: 700; padding: 4px 10px; border-radius: 20px; }
+        .general .badge-status { background: #dcfce7; color: #166534; }
+        .special .badge-status { background: #fef3c7; color: #b45309; }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(8px); z-index: 100; display: none; align-items: center; justify-content: center; padding: 20px; }
+        .modal-content { background: white; width: 100%; max-width: 450px; padding: 30px; border-radius: 24px; position: relative; animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+        @keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .cat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
+        .cat-btn { background: #f8fafc; border: 1px solid #e2e8f0; padding: 15px; border-radius: 12px; text-align: center; cursor: pointer; transition: 0.2s; }
+        .cat-btn:hover { border-color: var(--primary); background: #ecfdf5; }
+        .cat-btn i { font-size: 1.5rem; color: var(--primary); margin-bottom: 8px; display: block; }
+        .cat-btn span { font-weight: 700; font-size: 0.9rem; color: var(--dark); }
+        .radar-box { width: 120px; height: 120px; border-radius: 50%; background: var(--primary-light); margin: 0 auto 20px; position: relative; display: flex; align-items: center; justify-content: center; }
+        .radar-box::before, .radar-box::after { content: ''; position: absolute; width: 100%; height: 100%; border-radius: 50%; border: 2px solid var(--primary); opacity: 0; animation: ripple 2s infinite; }
+        .radar-box::after { animation-delay: 1s; }
+        @keyframes ripple { 0% { transform: scale(0.8); opacity: 1; } 100% { transform: scale(2); opacity: 0; } }
+        .mentor-avatar { width: 100px; height: 100px; border-radius: 50%; object-fit: cover; z-index: 2; border: 4px solid white; }
+        .fallback-option { background: #f8fafc; border: 1px solid #e2e8f0; padding: 15px; border-radius: 12px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: 0.2s; text-align: left; }
+        .fallback-option:hover { border-color: var(--accent); background: #fffbeb; }
+        .fallback-info h4 { font-size: 0.95rem; font-weight: 700; margin-bottom: 3px; }
+        .fallback-info p { font-size: 0.8rem; color: var(--text-gray); }
+        .btn-confirm { width: 100%; padding: 15px; background: var(--primary); color: white; border: none; border-radius: 12px; font-weight: 700; font-size: 1rem; cursor: pointer; margin-top: 15px; }
+    </style>
+</head>
+<body>
+
+    <div class="navbar">
+        <a href="coaching.html" class="nav-back"><i class="fas fa-arrow-left"></i> Kembali</a>
+    </div>
+
+    <div class="container">
+        <div class="header-text">
+            <h1>Konsultasi Bisnis</h1>
+            <p>Dapatkan solusi cepat lewat chat 45 menit. Pilih jalur sesuai kebutuhan urgensi Anda.</p>
+        </div>
+
+        <div class="option-container">
+            <div class="consult-card general" onclick="initiateSearch('General')">
+                <div class="badge-status"><i class="fas fa-bolt"></i> FAST</div>
+                <div class="card-icon"><i class="fas fa-user-clock"></i></div>
+                <div class="card-text">
+                    <h3>Jalur Umum</h3>
+                    <p>Terhubung dengan Mentor Generalist manapun yang sedang online. Cocok untuk pertanyaan dasar.</p>
+                </div>
+            </div>
+
+            <div class="consult-card special" onclick="openCategoryModal()">
+                <div class="badge-status"><i class="fas fa-star"></i> EXPERT</div>
+                <div class="card-icon"><i class="fas fa-briefcase-medical"></i></div>
+                <div class="card-text">
+                    <h3>Jalur Spesialis</h3>
+                    <p>Pilih Mentor Spesifik untuk bedah masalah mendalam dan unlock fitur.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="categoryModal" class="modal-overlay">
+        <div class="modal-content">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                <h3 style="font-weight:800; font-size:1.2rem;">Pilih Topik Spesialis</h3>
+                <button onclick="closeModal('categoryModal')" style="border:none; background:none; font-size:1.5rem;">&times;</button>
+            </div>
+            <div class="cat-grid">
+                <div class="cat-btn" onclick="initiateSearch('Finance')"><i class="fas fa-coins"></i><span>Finance</span></div>
+                <div class="cat-btn" onclick="initiateSearch('Digital')"><i class="fas fa-laptop-code"></i><span>Digital</span></div>
+                <div class="cat-btn" onclick="initiateSearch('Legal')"><i class="fas fa-balance-scale"></i><span>Legalitas</span></div>
+                <div class="cat-btn" onclick="initiateSearch('Ops')"><i class="fas fa-cogs"></i><span>Operasional</span></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="searchOverlay" class="modal-overlay" style="background: white;">
+        <div style="text-align:center;">
+            <div class="radar-box">
+                <i class="fas fa-search fa-3x" style="color:var(--primary);"></i>
+            </div>
+            <h2 style="margin-bottom:10px; font-family:var(--font-head);">Mencari Mentor...</h2>
+            <p style="color:#64748b;" id="searchStatus">Menghubungkan ke expert...</p>
+        </div>
+    </div>
+
+    <div id="foundModal" class="modal-overlay">
+        <div class="modal-content" style="text-align:center;">
+            <div class="radar-box" style="animation:none;">
+                <img src="" id="mentorImg" class="mentor-avatar">
+                <div style="position:absolute; bottom:0; right:0; width:30px; height:30px; background:#22c55e; border:3px solid white; border-radius:50%;"></div>
+            </div>
+            <h2 style="font-weight:800; color:var(--dark);" id="mentorName">Nama Mentor</h2>
+            <p style="color:#64748b; font-size:0.9rem; margin-bottom:20px;">Spesialis <span id="mentorSpec">Spec</span> • Rating 4.9</p>
+            
+            <div style="background:#f0fdf4; padding:15px; border-radius:12px; margin-bottom:20px; font-size:0.9rem; color:#166534;">
+                <i class="fas fa-check-circle"></i> Mentor Tersedia Sekarang
+            </div>
+
+            <button class="btn-confirm" onclick="createSessionAndRedirect()">Mulai Sesi (45 Menit)</button>
+            <button onclick="closeModal('foundModal')" style="margin-top:15px; background:none; border:none; color:#64748b; cursor:pointer;">Batal</button>
+        </div>
+    </div>
+
+    <div id="busyModal" class="modal-overlay">
+        <div class="modal-content">
+            <h3 style="font-weight:800; font-size:1.2rem; margin-bottom:10px;">Mentor Sedang Sibuk</h3>
+            <p style="color:#64748b; font-size:0.9rem; margin-bottom:20px;">Maaf, belum ada mentor yang available saat ini. Pilih opsi prioritas:</p>
+
+            <div class="fallback-option" onclick="handleQueue()">
+                <div class="fallback-info">
+                    <h4>Masuk Antrean (Waiting List)</h4>
+                    <p>Anda akan dinotifikasi saat mentor kosong.</p>
+                </div>
+                <i class="fas fa-chevron-right" style="color:#cbd5e1;"></i>
+            </div>
+
+            <div class="fallback-option" onclick="handleBooking()">
+                <div class="fallback-info">
+                    <h4>Booking Jadwal</h4>
+                    <p>Pilih slot waktu hari ini atau besok.</p>
+                </div>
+                <i class="fas fa-calendar-alt" style="color:#cbd5e1;"></i>
+            </div>
+
+            <button onclick="closeModal('busyModal')" style="width:100%; margin-top:10px; padding:12px; border:1px solid #e2e8f0; background:white; border-radius:12px; font-weight:700; color:#64748b;">Cari Lagi Nanti</button>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, collection, query, where, getDocs, addDoc, serverTimestamp, updateDoc, doc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        // KONFIGURASI FIREBASE
+        const firebaseConfig = {
+            apiKey: "AIzaSyBIaLzkNM0KqPVKxuMNmardLqcrr2kYTWQ",
+            authDomain: "database-idbm.firebaseapp.com",
+            projectId: "database-idbm",
+            storageBucket: "database-idbm.firebasestorage.app",
+            messagingSenderId: "1052290789133",
+            appId: "1:1052290789133:web:36b513630b7a87154eca44",
+            measurementId: "G-EQLBB94DY2"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        let currentUser = null;
+        let selectedMentorId = null; // Menyimpan ID mentor yang ditemukan
+        let selectedCategory = "";
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                currentUser = user;
+            } else {
+                window.location.href = "login.html";
+            }
+        });
+
+        // --- UI UTILS ---
+        window.openCategoryModal = () => document.getElementById('categoryModal').style.display = 'flex';
+        window.closeModal = (id) => document.getElementById(id).style.display = 'none';
+
+        // --- CORE LOGIC: MENCARI MENTOR (REALTIME QUERY) ---
+        window.initiateSearch = async (category) => {
+            selectedCategory = category;
+            
+            // UI
+            document.getElementById('categoryModal').style.display = 'none';
+            document.getElementById('searchOverlay').style.display = 'flex';
+            document.getElementById('searchStatus').innerText = `Mencari expert di bidang ${category}...`;
+
+            try {
+                // 1. QUERY DATABASE
+                // Cari Mentor yang: Role='coach', Status='online', dan (Generalist ATAU Specialty cocok)
+                const usersRef = collection(db, "users_umkm");
+                
+                // Note: Karena Firestore punya limitasi query majemuk, di tahap awal ini kita query semua Coach yang ONLINE dulu
+                // Di sisi server nanti harusnya ada cloud function, tapi ini implementasi client-side yang aman.
+                
+                const q = query(usersRef, where("role", "==", "coach"), where("status", "==", "online"));
+                const querySnapshot = await getDocs(q);
+
+                let availableCoach = null;
+
+                // 2. FILTER CLIENT SIDE (Pencocokan Keahlian)
+                querySnapshot.forEach((doc) => {
+                    const data = doc.data();
+                    
+                    // Cek Apakah dia sedang handle sesi lain? (field 'current_session' harus null/kosong)
+                    if (!data.current_session) {
+                        if (category === 'General') {
+                            // Generalist bisa diambil siapa saja
+                            availableCoach = { id: doc.id, ...data };
+                        } else {
+                            // Cek Spesialisasi (Array atau String)
+                            // Asumsi data.spesialisasi bisa string "Finance" atau array ["Finance", "Legal"]
+                            if (data.spesialisasi && data.spesialisasi.includes(category)) {
+                                availableCoach = { id: doc.id, ...data };
+                            }
+                        }
+                    }
+                });
+
+                // 3. TAMPILKAN HASIL
+                setTimeout(() => { // Delay dikit biar ada efek searching
+                    document.getElementById('searchOverlay').style.display = 'none';
+
+                    if (availableCoach) {
+                        // MENTOR DITEMUKAN
+                        selectedMentorId = availableCoach.id;
+                        document.getElementById('mentorName').innerText = availableCoach.nama_lengkap;
+                        document.getElementById('mentorSpec').innerText = category;
+                        document.getElementById('mentorImg').src = `https://ui-avatars.com/api/?name=${availableCoach.nama_lengkap}&background=random`;
+                        document.getElementById('foundModal').style.display = 'flex';
+                    } else {
+                        // MENTOR SIBUK / TIDAK ADA
+                        document.getElementById('busyModal').style.display = 'flex';
+                    }
+                }, 1500);
+
+            } catch (error) {
+                console.error("Error searching mentor:", error);
+                alert("Terjadi kesalahan sistem.");
+                document.getElementById('searchOverlay').style.display = 'none';
+            }
+        }
+
+        // --- SESSION CREATION ---
+        window.createSessionAndRedirect = async () => {
+            if (!currentUser || !selectedMentorId) return;
+
+            const btn = document.querySelector('.btn-confirm');
+            btn.innerText = "Membuat Room...";
+            btn.disabled = true;
+
+            try {
+                // 1. Buat Dokumen Sesi Baru di 'chat_sessions'
+                const sessionRef = await addDoc(collection(db, "chat_sessions"), {
+                    user_id: currentUser.uid,
+                    coach_id: selectedMentorId,
+                    category: selectedCategory,
+                    status: "active",
+                    start_time: serverTimestamp(),
+                    is_ended: false,
+                    messages: [] // Sub-collection nanti
+                });
+
+                // 2. Update Status Mentor jadi 'Busy' (isi current_session)
+                // Ini penting agar mentor tidak menerima order lain saat sesi
+                await updateDoc(doc(db, "users_umkm", selectedMentorId), {
+                    current_session: sessionRef.id
+                });
+
+                // 3. Redirect ke Chat Room dengan ID Sesi
+                window.location.href = `live-chat-room.html?session_id=${sessionRef.id}`;
+
+            } catch (error) {
+                console.error("Gagal membuat sesi:", error);
+                alert("Gagal koneksi database.");
+                btn.disabled = false;
+            }
+        }
+
+        // --- FALLBACK ACTIONS ---
+        window.handleQueue = () => {
+            alert("Anda masuk Waiting List. Kami akan notifikasi jika mentor tersedia.");
+            window.location.href = "dashboard.html";
+        }
+
+        window.handleBooking = () => {
+            alert("Mengarahkan ke halaman Jadwal...");
+            // Logika redirect ke booking page bisa ditaruh sini
+            window.location.href = "dashboard.html"; 
+        }
+
+    </script>
+
+</body>
+</html>

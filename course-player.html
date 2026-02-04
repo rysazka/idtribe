@@ -4,12 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kelas Online - ID-TRIBE Academy</title>
+    <link rel="icon" type="image/png" href="favicon.png">
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Playfair+Display:ital,wght@0,600;1,600&family=Plus+Jakarta+Sans:wght@400;500;700&display=swap" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Plus+Jakarta+Sans:wght@400;500;700&display=swap" rel="stylesheet">
     
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     
     <script type="module" src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
@@ -17,24 +18,22 @@
     <script type="module" src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"></script>
 
     <style>
-        /* --- 1. MODERN THEME VARIABLES --- */
+        /* --- 1. MODERN THEME --- */
         :root {
             --primary: #059669;
             --primary-dark: #047857;
             --primary-light: #d1fae5;
             --accent: #f59e0b;
-            --accent-glow: #fbbf24;
             --dark: #0f172a;
             --text-gray: #64748b;
             
             /* Glassmorphism */
-            --glass-bg: rgba(255, 255, 255, 0.85);
+            --glass-bg: rgba(255, 255, 255, 0.9);
             --glass-border: 1px solid rgba(255, 255, 255, 0.6);
-            --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.05);
+            --glass-shadow: 0 10px 40px rgba(0, 0, 0, 0.05);
             
             --font-head: 'Outfit', sans-serif;
             --font-body: 'Plus Jakarta Sans', sans-serif;
-            --font-serif: 'Playfair Display', serif;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -45,79 +44,88 @@
             color: var(--dark);
             min-height: 100vh;
             overflow-x: hidden;
-            background-image: radial-gradient(at 0% 0%, hsla(152,100%,90%,1) 0, transparent 50%), radial-gradient(at 100% 100%, hsla(43,100%,90%,1) 0, transparent 50%);
+            /* Latar Belakang Estetik */
+            background-image: 
+                radial-gradient(at 0% 0%, hsla(152,100%,93%,1) 0, transparent 50%), 
+                radial-gradient(at 100% 100%, hsla(43,100%,93%,1) 0, transparent 50%);
         }
 
-        /* --- 2. ORNAMENTS & ANIMATIONS --- */
-        .bg-shapes {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none;
-        }
-        .blob {
-            position: absolute; border-radius: 50%; filter: blur(60px); opacity: 0.5;
-            animation: float 8s infinite ease-in-out alternate;
-        }
-        .blob-1 { top: -5%; left: -5%; width: 400px; height: 400px; background: var(--primary-light); }
+        /* ORNAMENTS */
+        .bg-shapes { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none; }
+        .blob { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.6; animation: float 10s infinite alternate; }
+        .blob-1 { top: -10%; left: -10%; width: 500px; height: 500px; background: var(--primary-light); }
         .blob-2 { bottom: 10%; right: -5%; width: 300px; height: 300px; background: #fef3c7; animation-delay: -4s; }
-        
         @keyframes float { 0% { transform: translateY(0); } 100% { transform: translateY(30px); } }
 
-        /* --- 3. LAYOUT --- */
+        /* --- 2. LAYOUT & NAVBAR --- */
         .navbar {
             padding: 20px 5%; display: flex; align-items: center; justify-content: space-between;
-            backdrop-filter: blur(10px); position: sticky; top: 0; z-index: 100;
+            background: rgba(255,255,255,0.8); backdrop-filter: blur(12px);
+            position: sticky; top: 0; z-index: 100; border-bottom: 1px solid rgba(255,255,255,0.5);
         }
         .nav-back {
-            text-decoration: none; color: var(--primary-dark); font-weight: 700;
+            text-decoration: none; color: var(--dark); font-weight: 700;
             display: flex; align-items: center; gap: 8px; transition: 0.3s;
-            background: white; padding: 8px 20px; border-radius: 50px; box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            background: white; padding: 8px 20px; border-radius: 50px; 
+            border: 1px solid #e2e8f0;
         }
-        .nav-back:hover { transform: translateX(-5px); box-shadow: 0 6px 15px rgba(0,0,0,0.1); }
+        .nav-back:hover { transform: translateX(-5px); border-color: var(--primary); color: var(--primary); }
 
         .container {
-            max-width: 1200px; margin: 0 auto; padding: 20px;
+            max-width: 1200px; margin: 0 auto; padding: 30px 20px;
             display: grid; grid-template-columns: 2.5fr 1fr; gap: 30px;
         }
 
-        /* --- 4. VIDEO PLAYER CARD --- */
+        /* --- 3. VIDEO PLAYER CARD --- */
         .player-card {
             background: var(--glass-bg); backdrop-filter: blur(16px);
-            border-radius: 24px; border: var(--glass-border); padding: 25px;
-            box-shadow: var(--glass-shadow);
+            border-radius: 24px; border: var(--glass-border); padding: 30px;
+            box-shadow: var(--glass-shadow); position: relative;
         }
         
         .video-wrapper {
             position: relative; width: 100%; padding-top: 56.25%; /* 16:9 Aspect Ratio */
-            border-radius: 16px; overflow: hidden; background: #000;
-            box-shadow: 0 15px 30px rgba(0,0,0,0.2); margin-bottom: 25px;
+            border-radius: 20px; overflow: hidden; background: #0f172a;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2); margin-bottom: 30px;
+            border: 4px solid white;
         }
         .video-wrapper iframe, .video-wrapper div {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;
         }
 
         .course-header h1 {
-            font-family: var(--font-head); font-size: 1.8rem; font-weight: 800; color: var(--dark); margin-bottom: 10px;
+            font-family: var(--font-head); font-size: 2rem; font-weight: 800; 
+            color: var(--dark); margin-bottom: 15px; line-height: 1.2;
         }
+        
         .tags { display: flex; gap: 10px; margin-bottom: 20px; }
         .tag {
-            padding: 5px 12px; border-radius: 8px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
+            padding: 6px 14px; border-radius: 50px; font-size: 0.8rem; font-weight: 700; 
+            text-transform: uppercase; letter-spacing: 0.5px;
         }
         .tag-level { background: #e0e7ff; color: #4338ca; }
-        .tag-status { background: #fee2e2; color: #b91c1c; display: flex; align-items: center; gap: 5px; }
+        .tag-status { background: #fee2e2; color: #b91c1c; display: flex; align-items: center; gap: 6px; }
         .tag-status.completed { background: #dcfce7; color: #15803d; }
 
-        .desc-box { font-size: 1rem; color: var(--text-gray); line-height: 1.7; margin-bottom: 30px; }
+        .desc-box { font-size: 1rem; color: var(--text-gray); line-height: 1.8; margin-bottom: 30px; }
 
         .btn-main {
-            width: 100%; padding: 16px; border: none; border-radius: 12px;
+            width: 100%; padding: 18px; border: none; border-radius: 16px;
             background: linear-gradient(135deg, var(--primary), var(--primary-dark));
             color: white; font-weight: 700; font-size: 1rem; cursor: pointer;
             display: flex; align-items: center; justify-content: center; gap: 10px;
-            transition: 0.3s; box-shadow: 0 10px 20px rgba(5, 150, 105, 0.25);
+            transition: 0.3s; box-shadow: 0 10px 25px rgba(5, 150, 105, 0.3);
+            position: relative; overflow: hidden;
         }
-        .btn-main:hover { transform: translateY(-3px); box-shadow: 0 15px 30px rgba(5, 150, 105, 0.35); }
-        .btn-main i { font-size: 1.2rem; }
+        .btn-main::after {
+            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(to right, transparent, rgba(255,255,255,0.2), transparent);
+            transform: translateX(-100%); transition: 0.5s;
+        }
+        .btn-main:hover { transform: translateY(-3px); box-shadow: 0 15px 35px rgba(5, 150, 105, 0.4); }
+        .btn-main:hover::after { transform: translateX(100%); }
 
-        /* --- 5. SIDEBAR (SYLLABUS) --- */
+        /* --- 4. SIDEBAR (SYLLABUS) --- */
         .sidebar { display: flex; flex-direction: column; gap: 20px; }
         .syllabus-card {
             background: white; border-radius: 20px; padding: 25px;
@@ -128,7 +136,7 @@
         .menu-item {
             display: flex; align-items: center; gap: 15px; padding: 15px;
             border-radius: 12px; margin-bottom: 8px; text-decoration: none; color: var(--dark);
-            transition: 0.2s; border: 1px solid transparent;
+            transition: 0.2s; border: 1px solid transparent; cursor: pointer;
         }
         .menu-item:hover { background: #f8fafc; border-color: #e2e8f0; }
         .menu-item.active { background: #ecfdf5; border-color: var(--primary-light); }
@@ -142,26 +150,26 @@
         .menu-text h4 { font-size: 0.95rem; font-weight: 700; margin-bottom: 2px; }
         .menu-text span { font-size: 0.75rem; color: var(--text-gray); }
 
-        /* --- 6. QUIZ MODAL --- */
+        /* --- 5. QUIZ MODAL --- */
         .modal {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(8px);
+            background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(8px);
             z-index: 999; align-items: center; justify-content: center;
         }
         .modal-content {
             background: white; width: 90%; max-width: 650px; padding: 40px;
-            border-radius: 24px; position: relative;
-            animation: popUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-            max-height: 90vh; overflow-y: auto;
+            border-radius: 30px; position: relative;
+            animation: popUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            max-height: 90vh; overflow-y: auto; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
         }
         @keyframes popUp { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
         .quiz-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; border-bottom: 1px solid #e2e8f0; padding-bottom: 15px; }
-        .q-card { background: #f8fafc; padding: 20px; border-radius: 12px; margin-bottom: 15px; border: 1px solid #e2e8f0; }
-        .q-text { font-weight: 700; margin-bottom: 15px; font-size: 1rem; }
+        .q-card { background: #f8fafc; padding: 25px; border-radius: 16px; margin-bottom: 20px; border: 1px solid #e2e8f0; }
+        .q-text { font-weight: 700; margin-bottom: 15px; font-size: 1.05rem; }
         .opt-label {
-            display: flex; align-items: center; gap: 10px; padding: 12px; border: 2px solid white;
-            background: white; border-radius: 10px; margin-bottom: 8px; cursor: pointer; transition: 0.2s;
+            display: flex; align-items: center; gap: 10px; padding: 14px; border: 2px solid white;
+            background: white; border-radius: 12px; margin-bottom: 10px; cursor: pointer; transition: 0.2s;
             box-shadow: 0 2px 5px rgba(0,0,0,0.02);
         }
         .opt-label:hover { border-color: var(--accent); }
@@ -171,14 +179,14 @@
         /* RESULT SCREEN */
         .result-view { text-align: center; display: none; padding: 20px 0; }
         .score-ring {
-            width: 120px; height: 120px; border-radius: 50%; margin: 0 auto 20px;
+            width: 140px; height: 140px; border-radius: 50%; margin: 0 auto 25px;
             display: flex; align-items: center; justify-content: center;
-            font-size: 2.5rem; font-weight: 800; color: white;
+            font-size: 3rem; font-weight: 800; color: white;
             background: conic-gradient(var(--primary) 0%, var(--primary) 100%);
-            box-shadow: 0 10px 30px rgba(5, 150, 105, 0.3); position: relative;
+            box-shadow: 0 15px 35px rgba(5, 150, 105, 0.3); position: relative;
         }
         .score-ring::before {
-            content: ''; position: absolute; width: 100px; height: 100px; background: white; border-radius: 50%;
+            content: ''; position: absolute; width: 115px; height: 115px; background: white; border-radius: 50%;
         }
         .score-num { position: relative; z-index: 2; color: var(--dark); font-family: var(--font-head); }
 
@@ -196,8 +204,8 @@
     </div>
 
     <div class="navbar">
-        <a href="training-hub.html" class="nav-back">
-            <i class="fas fa-chevron-left"></i> Kembali ke Materi
+        <a href="dashboard.html" class="nav-back">
+            <i class="fas fa-arrow-left"></i> Dashboard
         </a>
         <div style="font-weight: 800; font-family: var(--font-head); color: var(--primary-dark); font-size: 1.2rem;">ID-TRIBE <span style="color:var(--accent);">ACADEMY</span></div>
     </div>
@@ -209,7 +217,7 @@
                 <div class="video-wrapper" id="videoContainer">
                     <div style="display:flex; align-items:center; justify-content:center; height:100%; color:white; flex-direction:column; background: linear-gradient(135deg, #1e293b, #0f172a);">
                         <i class="fas fa-spinner fa-spin fa-3x" style="color:var(--accent);"></i>
-                        <p style="margin-top:15px; font-weight:600; letter-spacing:1px;">MEMUAT MATERI...</p>
+                        <p style="margin-top:15px; font-weight:600; letter-spacing:1px;">MEMUAT VIDEO...</p>
                     </div>
                 </div>
 
@@ -222,7 +230,7 @@
                     <p class="desc-box" id="courseDescDisplay">Memuat deskripsi materi pembelajaran...</p>
                     
                     <button class="btn-main" id="btnQuiz" onclick="openQuiz()">
-                        <i class="fas fa-file-signature"></i> Ambil Ujian Validasi & Sertifikat
+                        <i class="fas fa-file-signature"></i> Ambil Ujian Validasi & Level Up
                     </button>
                 </div>
             </div>
@@ -248,7 +256,7 @@
                     </div>
                 </a>
 
-                <a href="#" class="menu-item">
+                <a href="community-forum.html" class="menu-item">
                     <div class="icon-box"><i class="fas fa-users"></i></div>
                     <div class="menu-text">
                         <h4>Diskusi Komunitas</h4>
@@ -257,10 +265,10 @@
                 </a>
             </div>
 
-            <div class="syllabus-card" style="background: linear-gradient(135deg, #059669, #047857); color: white; text-align: center;">
-                <i class="fas fa-award fa-3x" style="color: var(--accent-glow); margin-bottom: 15px;"></i>
+            <div class="syllabus-card" style="background: linear-gradient(135deg, #059669, #047857); color: white; text-align: center; border:none;">
+                <i class="fas fa-award fa-3x" style="color: var(--accent-glow); margin-bottom: 15px; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.2));"></i>
                 <h4 style="font-family: var(--font-head); margin-bottom: 10px;">Sertifikat Kompetensi</h4>
-                <p style="font-size: 0.85rem; opacity: 0.9; margin-bottom: 0;">Selesaikan video dan lulus ujian dengan skor min. 70 untuk mendapatkan sertifikat resmi.</p>
+                <p style="font-size: 0.85rem; opacity: 0.9; margin-bottom: 0;">Selesaikan video dan lulus ujian dengan skor min. 70 untuk naik level & dapat sertifikat.</p>
             </div>
         </div>
 
@@ -280,8 +288,8 @@
 
             <div id="resultSuccess" class="result-view">
                 <div class="score-ring"><span class="score-num" id="scoreValSuccess">100</span></div>
-                <h2 style="color:var(--primary); font-weight:800; margin-bottom:10px;">LULUS KOMPETENSI!</h2>
-                <p style="color:#64748b; margin-bottom:30px;">Selamat! Anda telah membuktikan pemahaman materi ini.</p>
+                <h2 style="color:var(--primary); font-weight:800; margin-bottom:10px;">LULUS & LEVEL UP!</h2>
+                <p style="color:#64748b; margin-bottom:30px;">Selamat! Kompetensi Anda telah divalidasi oleh sistem.</p>
                 <button class="btn-main" onclick="generateCertificate()" style="background: var(--accent); color: var(--dark);">
                     <i class="fas fa-download"></i> Download Sertifikat Resmi
                 </button>
@@ -321,8 +329,9 @@
         let currentUserName = "Peserta";
         let courseId = "";
         let currentQuizData = [];
+        let currentCourseData = {}; // Global var untuk data course
 
-        // 1. LOAD COURSE DATA & VIDEO (VERSI FIX ERROR 153 - HAPUS RESTRIKSI)
+        // 1. LOAD COURSE & VIDEO
         async function loadCourseData() {
             const params = new URLSearchParams(window.location.search);
             courseId = params.get('id');
@@ -333,16 +342,16 @@
                 const docSnap = await getDoc(docRef);
 
                 if (docSnap.exists()) {
-                    const data = docSnap.data();
+                    currentCourseData = docSnap.data(); // Simpan data global
                     
-                    document.getElementById('courseTitleDisplay').innerText = data.title;
-                    document.getElementById('levelBadge').innerText = data.level;
-                    document.getElementById('courseDescDisplay').innerText = data.desc;
-                    document.title = `${data.title} - ID-TRIBE`;
+                    document.getElementById('courseTitleDisplay').innerText = currentCourseData.title;
+                    document.getElementById('levelBadge').innerText = currentCourseData.level;
+                    document.getElementById('courseDescDisplay').innerText = currentCourseData.desc;
+                    document.title = `${currentCourseData.title} - ID-TRIBE`;
 
-                    // --- VIDEO FIX (ANTI ERROR 153) ---
-                    // Menggunakan referrerpolicy="no-referrer" agar jalan di local file
-                    let videoId = extractVideoID(data.url);
+                    // --- FIX ERROR 153 (YOUTUBE) ---
+                    // Menggunakan no-referrer-when-downgrade untuk kompatibilitas lebih baik
+                    let videoId = extractVideoID(currentCourseData.url);
                     if (videoId) {
                         document.getElementById('videoContainer').innerHTML = `
                             <iframe 
@@ -350,24 +359,24 @@
                                 title="Materi" 
                                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
                                 allowfullscreen
-                                referrerpolicy="no-referrer"
+                                referrerpolicy="strict-origin-when-cross-origin"
                             ></iframe>`;
                     } else {
-                        document.getElementById('videoContainer').innerHTML = `<div style="display:flex;justify-content:center;align-items:center;height:100%;color:white;text-align:center;">Link Video Tidak Valid</div>`;
+                        document.getElementById('videoContainer').innerHTML = `<div style="display:flex;justify-content:center;align-items:center;height:100%;color:white;text-align:center;">Video Tidak Tersedia</div>`;
                     }
 
                     // FILE MATERI
-                    if(data.file_url) {
+                    if(currentCourseData.file_url) {
                         const fileBtn = document.getElementById('fileLink');
-                        fileBtn.href = data.file_url;
+                        fileBtn.href = currentCourseData.file_url;
                         fileBtn.style.opacity = "1";
                         fileBtn.style.pointerEvents = "auto";
                         document.getElementById('fileStatus').innerText = "Klik untuk download PDF";
                         document.getElementById('fileStatus').style.color = "var(--primary)";
-                        fileBtn.classList.add('active'); // Highlight
+                        fileBtn.classList.add('active');
                     }
 
-                    currentQuizData = data.quiz_data || [];
+                    currentQuizData = currentCourseData.quiz_data || [];
                 }
             } catch (e) { console.error(e); }
         }
@@ -380,7 +389,44 @@
             return (match && match[2].length === 11) ? match[2] : null;
         }
 
-        // 2. QUIZ LOGIC
+        // 2. LOGIC LEVEL UP & UNLOCK
+        async function saveProgress(isPassed) {
+            const user = auth.currentUser;
+            if (user && isPassed) {
+                const userRef = doc(db, "users_umkm", user.uid);
+                
+                // Logic Naik Level
+                const courseLevel = currentCourseData.level; // Beginner/Intermediate/Advanced
+                const sector = currentCourseData.sector;
+                
+                // Ambil level user sekarang
+                const snap = await getDoc(userRef);
+                const currentLevels = snap.data().competency_levels || {};
+                const oldLevel = currentLevels[sector] || "Beginner";
+                
+                let newLevel = oldLevel;
+
+                // Aturan Kenaikan: Hanya bisa naik, tidak bisa turun
+                if (courseLevel === "Advanced") {
+                    newLevel = "Advanced";
+                } else if (courseLevel === "Intermediate" && oldLevel !== "Advanced") {
+                    newLevel = "Intermediate";
+                }
+
+                // Update Firestore: Tambah ke completed & Update Level
+                await updateDoc(userRef, {
+                    completed_courses: arrayUnion(courseId),
+                    [`competency_levels.${sector}`]: newLevel
+                });
+
+                // Update UI Badge
+                const statusBadge = document.getElementById('statusBadge');
+                statusBadge.innerHTML = '<i class="fas fa-check-circle"></i> Selesai & Valid';
+                statusBadge.classList.add('completed');
+            }
+        }
+
+        // 3. QUIZ FUNCTIONS
         window.openQuiz = () => {
             const container = document.getElementById('dynamicQuestions');
             container.innerHTML = "";
@@ -429,7 +475,7 @@
             if (finalScore >= 70) {
                 document.getElementById('resultSuccess').style.display = 'block';
                 document.getElementById('scoreValSuccess').innerText = finalScore;
-                saveProgress(true);
+                saveProgress(true); // Panggil fungsi Level Up
             } else {
                 document.getElementById('resultFail').style.display = 'block';
                 document.getElementById('scoreValFail').innerText = finalScore;
@@ -442,114 +488,41 @@
         }
         window.finishCourse = () => window.location.href = "training-hub.html";
 
-        // 3. SERTIFIKAT GENERATOR PREMIUM
+        // 4. SERTIFIKAT GENERATOR (SAMA SEPERTI SEBELUMNYA)
         window.generateCertificate = function() {
             const { jsPDF } = window.jspdf;
-            
-            // Format A4 Landscape (297mm x 210mm)
             const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
             const w = doc.internal.pageSize.getWidth();
             const h = doc.internal.pageSize.getHeight();
 
-            // --- A. BACKGROUND & BORDER ---
-            // Background Putih Gading
             doc.setFillColor(252, 252, 250); 
             doc.rect(0, 0, w, h, 'F');
+            doc.setFillColor(6, 78, 59); doc.circle(0, 0, 40, 'F'); doc.circle(w, h, 40, 'F');
+            doc.setFillColor(245, 158, 11); doc.circle(w, 0, 25, 'F'); doc.circle(0, h, 25, 'F');
+            doc.setDrawColor(6, 78, 59); doc.setLineWidth(1.5); doc.rect(10, 10, w-20, h-20);
 
-            // Ornamen Sudut (Hijau Tua)
-            doc.setFillColor(6, 78, 59); // Forest Green
-            doc.circle(0, 0, 40, 'F');
-            doc.circle(w, h, 40, 'F');
-            
-            // Ornamen Sudut (Emas)
-            doc.setFillColor(245, 158, 11); // Gold
-            doc.circle(w, 0, 25, 'F');
-            doc.circle(0, h, 25, 'F');
-
-            // Border Ganda Klasik
-            doc.setDrawColor(6, 78, 59); // Border Luar Hijau
-            doc.setLineWidth(1.5);
-            doc.rect(10, 10, w-20, h-20);
-
-            doc.setDrawColor(245, 158, 11); // Border Dalam Emas
-            doc.setLineWidth(0.8);
-            doc.rect(13, 13, w-26, h-26);
-
-            // --- B. KONTEN TEKS ---
-            
-            // Judul Sertifikat (Serif Font)
-            doc.setTextColor(6, 78, 59);
-            doc.setFont("times", "bold");
-            doc.setFontSize(32);
+            doc.setTextColor(6, 78, 59); doc.setFont("times", "bold"); doc.setFontSize(32);
             doc.text("SERTIFIKAT KOMPETENSI", w/2, 50, { align: "center" });
 
-            // Sub Judul
-            doc.setFont("helvetica", "normal");
-            doc.setFontSize(12);
-            doc.setTextColor(100);
+            doc.setFont("helvetica", "normal"); doc.setFontSize(12); doc.setTextColor(100);
             doc.text("No: IDTRIBE/" + Date.now().toString().substr(-6), w/2, 60, { align: "center" });
+            doc.setFontSize(14); doc.text("Diberikan kepada:", w/2, 75, { align: "center" });
 
-            doc.setFontSize(14);
-            doc.text("Diberikan sebagai bukti kelulusan kepada:", w/2, 75, { align: "center" });
-
-            // NAMA PESERTA (Besar & Elegan)
-            doc.setTextColor(15, 23, 42); // Dark Blue
-            doc.setFont("times", "italic"); // Italic Serif
-            doc.setFontSize(42);
+            doc.setTextColor(15, 23, 42); doc.setFont("times", "italic"); doc.setFontSize(42);
             doc.text(currentUserName, w/2, 95, { align: "center" });
+            doc.setDrawColor(200); doc.setLineWidth(0.5); doc.line(w/2 - 70, 100, w/2 + 70, 100);
 
-            // Garis Bawah Nama
-            doc.setDrawColor(200);
-            doc.setLineWidth(0.5);
-            doc.line(w/2 - 70, 100, w/2 + 70, 100);
+            doc.setFont("helvetica", "normal"); doc.setFontSize(14); doc.setTextColor(80);
+            doc.text("Telah lulus ujian kompetensi pada modul:", w/2, 115, { align: "center" });
+            doc.setFont("helvetica", "bold"); doc.setFontSize(20); doc.setTextColor(245, 158, 11);
+            doc.text(currentCourseData.title.toUpperCase(), w/2, 128, { align: "center" });
 
-            // Deskripsi Course
-            const courseTitle = document.getElementById('courseTitleDisplay').innerText;
-            doc.setFont("helvetica", "normal");
-            doc.setFontSize(14);
-            doc.setTextColor(80);
-            doc.text("Telah menyelesaikan pelatihan dan lulus ujian kompetensi pada modul:", w/2, 115, { align: "center" });
-            
-            // Judul Course
-            doc.setFont("helvetica", "bold");
-            doc.setFontSize(20);
-            doc.setTextColor(245, 158, 11); // Gold
-            doc.text(courseTitle.toUpperCase(), w/2, 128, { align: "center" });
-
-            // --- C. FOOTER & TANDA TANGAN ---
             const date = new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
-            
-            // Kiri: Tanggal
-            doc.setFontSize(12);
-            doc.setTextColor(60);
-            doc.setFont("helvetica", "normal");
+            doc.setFontSize(12); doc.setTextColor(60); doc.setFont("helvetica", "normal");
             doc.text(`Jakarta, ${date}`, 50, 160, { align: "center" });
-            doc.text("( Ditandatangani secara elektronik )", 50, 185, { align: "center" });
-            
-            // Kanan: Penyelenggara
             doc.text("ID-TRIBE Academy", w-50, 160, { align: "center" });
-            
-            // Stempel / Seal (Simulasi dengan Lingkaran)
-            doc.setDrawColor(245, 158, 11);
-            doc.setLineWidth(1);
-            doc.circle(w-50, 175, 12);
-            doc.setFontSize(8);
-            doc.setTextColor(245, 158, 11);
-            doc.text("OFFICIAL", w-50, 174, { align: "center" });
-            doc.text("SEAL", w-50, 178, { align: "center" });
 
             doc.save(`Sertifikat_${currentUserName}.pdf`);
-        }
-
-        async function saveProgress(passed) {
-            const user = auth.currentUser;
-            if(user && passed) {
-                await updateDoc(doc(db, "users_umkm", user.uid), {
-                    completed_courses: arrayUnion(courseId)
-                });
-                document.getElementById('statusBadge').innerHTML = '<i class="fas fa-check-circle"></i> Selesai';
-                document.getElementById('statusBadge').classList.add('completed');
-            }
         }
 
         onAuthStateChanged(auth, async (user) => {

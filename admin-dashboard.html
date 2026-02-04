@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Super Admin - ID-TRIBE</title>
+    <link rel="icon" type="image/png" href="favicon.png">
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -15,7 +16,6 @@
     <script type="module" src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"></script>
 
     <style>
-        /* --- SAMA SEPERTI SEBELUMNYA (TETAP AMAN) --- */
         :root {
             --primary: #059669; --primary-dark: #047857; --accent: #f59e0b;
             --dark: #0f172a; --light: #f8fafc; --sidebar-bg: #111827;
@@ -76,6 +76,10 @@
         .img-option { display: flex; gap: 20px; margin-bottom: 10px; }
         
         .info-box { background: #eff6ff; border-left: 4px solid #3b82f6; color: #1e40af; padding: 15px; border-radius: 8px; font-size: 0.9rem; margin-bottom: 20px; display: flex; gap: 10px; }
+        
+        .badge-ok {
+            background: #dcfce7; color: #166534; padding: 2px 8px; border-radius: 5px; font-size: 0.8rem; font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -147,6 +151,18 @@
                     <form onsubmit="handleAddArticle(event)">
                         <div class="form-group"><label class="form-label">Judul</label><input type="text" id="artTitle" class="form-input" required></div>
                         <div class="form-group"><label class="form-label">Headline</label><textarea id="artHeadline" class="form-input" rows="2" required></textarea></div>
+                        
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                            <div class="form-group">
+                                <label class="form-label">Penulis</label>
+                                <input type="text" id="artAuthor" class="form-input" placeholder="Nama Penulis" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Credit / Sumber</label>
+                                <input type="text" id="artCredit" class="form-input" placeholder="Contoh: Liputan6, Detik, dll">
+                            </div>
+                        </div>
+                        
                         <div class="form-group">
                             <label class="form-label">Gambar</label>
                             <div class="img-option">
@@ -183,8 +199,17 @@
             <div class="header"><h1 class="page-title">Data Pengguna</h1></div>
             <div class="card">
                 <table id="tableUsers">
-                    <thead><tr><th>Nama</th><th>Email</th><th>Nama Usaha</th><th>Role</th><th>Aksi</th></tr></thead>
-                    <tbody><tr><td colspan="5" align="center">Memuat data...</td></tr></tbody>
+                    <thead>
+                        <tr>
+                            <th>Nama</th>
+                            <th>Email</th>
+                            <th>Nama Usaha</th>
+                            <th>Role</th>
+                            <th>Aksi</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody><tr><td colspan="6" align="center">Memuat data...</td></tr></tbody>
                 </table>
             </div>
         </div>
@@ -241,8 +266,7 @@
             const tbody = document.querySelector('#tableValidasi tbody');
             tbody.innerHTML = '<tr><td colspan="5" align="center">Memuat...</td></tr>';
             try {
-                // Asumsi: UMKM yang perlu validasi ada di 'users_umkm' atau collection khusus
-                const q = query(collection(db, "users_umkm"), where("role", "==", "umkm")); // Contoh filter
+                const q = query(collection(db, "users_umkm"), where("role", "==", "umkm")); 
                 const snap = await getDocs(q);
                 
                 if(snap.empty) { tbody.innerHTML = '<tr><td colspan="5" align="center">Tidak ada data UMKM.</td></tr>'; return; }
@@ -274,6 +298,21 @@
             if(confirm(status ? "Validasi UMKM ini?" : "Batalkan validasi?")) {
                 await updateDoc(doc(db, "users_umkm", uid), { is_verified: status });
                 loadValidasi();
+            }
+        }
+
+        window.approveCoach = async (targetUserId) => {
+            if(confirm("Izinkan Coach ini beroperasi?")) {
+                try {
+                    await updateDoc(doc(db, "users_umkm", targetUserId), {
+                        is_verified: true
+                    });
+                    alert("Coach berhasil diverifikasi!");
+                    loadUsers(); 
+                } catch (e) {
+                    console.error(e);
+                    alert("Gagal. Anda mungkin bukan Admin atau tidak memiliki izin.");
+                }
             }
         }
 
@@ -316,12 +355,17 @@
                         <td>${d.nama_usaha || "-"}</td>
                         <td>${d.role}</td>
                         <td><button class="btn-red" onclick="deleteData('users_umkm', '${doc.id}')"><i class="fas fa-trash"></i></button></td>
+                        <td>
+                            ${d.role === 'coach' && d.is_verified === false 
+                            ? `<button class="btn-green" onclick="approveCoach('${doc.id}')">Approve</button>` 
+                            : `<span class="badge-ok">Verified</span>`}
+                        </td>
                     </tr>`;
                 });
             } catch(e) { console.error(e); }
         }
 
-        // --- CMS & ARTIKEL (LOGIC LAMA TAPI DIIMPLEMENTASIKAN ULANG) ---
+        // --- CMS ---
         window.addQuestion = (data = null) => {
             const container = document.getElementById('quizBuilder');
             const qCount = container.children.length + 1;
@@ -443,11 +487,18 @@
             e.preventDefault();
             const img = document.getElementById('finalImageBase64').value;
             if(!img) { alert("Gambar wajib!"); return; }
+            
+            // CAPTURE AUTHOR & CREDIT
+            const author = document.getElementById('artAuthor').value;
+            const credit = document.getElementById('artCredit').value;
+
             await addDoc(collection(db, "articles"), {
                 title: document.getElementById('artTitle').value,
                 headline: document.getElementById('artHeadline').value,
                 content: document.getElementById('artContent').value,
                 mainImage: img,
+                author: author, // SIMPAN AUTHOR
+                credit: credit, // SIMPAN CREDIT
                 timestamp: new Date()
             });
             alert("Artikel Publish!"); e.target.reset(); loadArticles();

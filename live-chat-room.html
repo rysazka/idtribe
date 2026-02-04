@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Live Konsultasi - ID-TRIBE</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Plus+Jakarta+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <script type="module" src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
+    <script type="module" src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js"></script>
+    <script type="module" src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"></script>
+
+    <style>
+        /* --- 1. MODERN VARIABLES & RESET --- */
+        :root {
+            --primary: #059669; --primary-dark: #047857; --accent: #f59e0b;
+            --dark: #0f172a; --text-gray: #64748b; --chat-bg: #f0fdf4;
+            --font-head: 'Outfit', sans-serif; --font-body: 'Plus Jakarta Sans', sans-serif;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        
+        body {
+            font-family: var(--font-body); background-color: var(--chat-bg); color: var(--dark);
+            height: 100vh; display: flex; flex-direction: column; overflow: hidden;
+        }
+
+        /* --- 2. HEADER --- */
+        .chat-header {
+            background: white; padding: 15px 20px; border-bottom: 1px solid #e2e8f0;
+            display: flex; justify-content: space-between; align-items: center; z-index: 10;
+        }
+        .mentor-info { display: flex; align-items: center; gap: 12px; }
+        .mentor-avatar {
+            width: 45px; height: 45px; border-radius: 50%; object-fit: cover;
+            border: 2px solid var(--primary); background: #e2e8f0;
+        }
+        .mentor-text h3 { font-family: var(--font-head); font-weight: 800; font-size: 1rem; margin-bottom: 2px; }
+        .mentor-text span { font-size: 0.75rem; color: var(--text-gray); }
+        
+        .timer-box {
+            background: #f8fafc; padding: 6px 14px; border-radius: 50px; border: 1px solid #e2e8f0;
+            font-family: var(--font-head); font-weight: 800; font-size: 0.9rem;
+        }
+        .timer-box.warning { background: #fef2f2; color: #ef4444; border-color: #fee2e2; animation: pulse 1s infinite; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+        
+        .btn-end { background: #ef4444; color: white; border: none; padding: 8px 12px; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 0.75rem; }
+
+        /* --- 3. CHAT AREA --- */
+        .chat-area {
+            flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 15px;
+            background-image: radial-gradient(#cbd5e1 1px, transparent 1px); background-size: 20px 20px;
+        }
+        
+        .msg { max-width: 80%; padding: 12px 16px; border-radius: 16px; font-size: 0.95rem; line-height: 1.5; position: relative; word-wrap: break-word; }
+        
+        .msg.mentor { background: white; color: var(--dark); border-bottom-left-radius: 4px; align-self: flex-start; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .msg.user { background: var(--primary); color: white; border-bottom-right-radius: 4px; align-self: flex-end; box-shadow: 0 4px 10px rgba(5, 150, 105, 0.2); }
+        
+        .msg.system { align-self: center; background: rgba(0,0,0,0.05); color: var(--text-gray); font-size: 0.75rem; padding: 6px 15px; border-radius: 50px; text-align: center; }
+        
+        .msg-time { font-size: 0.65rem; margin-top: 5px; opacity: 0.7; text-align: right; display: block; }
+
+        /* Attachment Styles */
+        .chat-img { max-width: 100%; border-radius: 8px; margin-bottom: 5px; cursor: pointer; }
+        .audio-player { width: 200px; height: 30px; margin-bottom: 5px; }
+
+        /* --- 4. INPUT AREA --- */
+        .chat-footer {
+            background: white; padding: 15px; border-top: 1px solid #e2e8f0;
+            display: flex; gap: 10px; align-items: center; flex-wrap: wrap;
+        }
+        .attach-group { display: flex; gap: 8px; }
+        
+        .btn-attach {
+            width: 40px; height: 40px; border-radius: 50%; border: none; background: #f1f5f9;
+            color: var(--text-gray); cursor: pointer; display: flex; align-items: center; justify-content: center;
+            font-size: 1.1rem; position: relative; overflow: hidden; transition: 0.2s;
+        }
+        .btn-attach:hover { background: #e2e8f0; color: var(--dark); }
+        .btn-attach.recording { background: #ef4444; color: white; animation: pulse 1s infinite; }
+        
+        .hidden-input { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
+
+        .input-box {
+            flex: 1; padding: 12px 18px; border-radius: 50px; border: 1px solid #e2e8f0;
+            outline: none; font-family: inherit; background: #f8fafc; font-size: 0.95rem;
+        }
+        .input-box:focus { background: white; border-color: var(--primary); }
+        
+        .btn-send {
+            background: var(--primary); border: none; width: 45px; height: 45px; border-radius: 50px;
+            color: white; cursor: pointer; display: flex; align-items: center; justify-content: center;
+            font-size: 1rem; box-shadow: 0 4px 10px rgba(5, 150, 105, 0.3); transition: 0.2s;
+        }
+        .btn-send:hover { transform: scale(1.1); }
+
+        /* --- 5. MODALS --- */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(15, 23, 42, 0.8); z-index: 100; display: none;
+            align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(5px);
+        }
+        .modal-card {
+            background: white; width: 100%; max-width: 400px; padding: 30px;
+            border-radius: 24px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+            animation: popUp 0.3s;
+        }
+        @keyframes popUp { from { transform: scale(0.9); } to { transform: scale(1); } }
+        
+        /* UNLOCK TICKET */
+        .unlock-card { background: #fffbeb; border: 1px solid #f59e0b; border-radius: 12px; padding: 15px; text-align: center; margin-top: 5px; color: #b45309; }
+        .btn-claim { background: #f59e0b; color: white; padding: 8px 15px; border-radius: 8px; border: none; font-weight: 700; cursor: pointer; width: 100%; margin-top: 10px; }
+
+        /* Rating Stars */
+        .stars { display: flex; justify-content: center; gap: 8px; margin: 20px 0; }
+        .star { font-size: 2rem; color: #e2e8f0; cursor: pointer; transition: 0.2s; }
+        .star.active { color: #f59e0b; transform: scale(1.1); }
+    </style>
+</head>
+<body>
+
+    <header class="chat-header">
+        <div class="mentor-info">
+            <img src="" id="mentorImg" class="mentor-avatar">
+            <div class="mentor-text">
+                <h3 id="mentorName">Loading...</h3>
+                <span id="sessionCategory">Konsultasi</span>
+            </div>
+        </div>
+        <div style="display: flex; gap: 8px; align-items: center;">
+            <div class="timer-box" id="timerDisplay">--:--</div>
+            <button class="btn-end" onclick="confirmEndSession()">AKHIRI</button>
+        </div>
+    </header>
+
+    <main class="chat-area" id="chatContainer">
+        </main>
+
+    <footer class="chat-footer">
+        <div class="attach-group">
+            <button class="btn-attach" title="Kirim Gambar">
+                <i class="far fa-image"></i>
+                <input type="file" class="hidden-input" accept="image/*" onchange="handleFile(this, 'image')">
+            </button>
+            <button class="btn-attach" title="Kirim File">
+                <i class="fas fa-paperclip"></i>
+                <input type="file" class="hidden-input" accept=".pdf,.doc,.docx,.xls,.xlsx" onchange="handleFile(this, 'file')">
+            </button>
+        </div>
+        
+        <input type="text" id="msgInput" class="input-box" placeholder="Ketik pesan..." onkeypress="handleEnter(event)">
+        <button class="btn-send" onclick="sendMessage()"><i class="fas fa-paper-plane"></i></button>
+    </footer>
+
+    <div id="ratingModal" class="modal-overlay">
+        <div class="modal-card">
+            <i class="fas fa-check-circle fa-3x" style="color:var(--primary); margin-bottom:15px;"></i>
+            <h2 style="font-weight: 800; color: var(--dark); margin-bottom: 10px;">Sesi Berakhir</h2>
+            <p style="color:#64748b;">Terima kasih telah berkonsultasi.</p>
+            
+            <div id="coachNotesArea" style="display:none; background:#f0fdf4; padding:15px; border-radius:12px; margin:20px 0; text-align:left; font-size:0.9rem; border:1px solid #dcfce7;">
+                <strong style="color:var(--primary); display:block; margin-bottom:5px;">📝 Catatan Mentor:</strong>
+                <span id="coachNotesText" style="color:#334155;">...</span>
+            </div>
+
+            <p style="font-size:0.9rem; margin-top:20px; font-weight:700;">Beri Rating Mentor:</p>
+            <div class="stars">
+                <i class="fas fa-star star" onclick="rate(1)"></i>
+                <i class="fas fa-star star" onclick="rate(2)"></i>
+                <i class="fas fa-star star" onclick="rate(3)"></i>
+                <i class="fas fa-star star" onclick="rate(4)"></i>
+                <i class="fas fa-star star" onclick="rate(5)"></i>
+            </div>
+            <button onclick="submitFeedback()" style="width: 100%; padding: 14px; background: var(--primary); color: white; border: none; border-radius: 12px; font-weight: 800; cursor:pointer;">Kirim & Kembali</button>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, updateDoc, addDoc, collection, serverTimestamp, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        const firebaseConfig = { apiKey: "AIzaSyBIaLzkNM0KqPVKxuMNmardLqcrr2kYTWQ", authDomain: "database-idbm.firebaseapp.com", projectId: "database-idbm", storageBucket: "database-idbm.firebasestorage.app", messagingSenderId: "1052290789133", appId: "1:1052290789133:web:36b513630b7a87154eca44", measurementId: "G-EQLBB94DY2" };
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let currentUser = null, sessionId = null, coachId = null;
+        let mediaRecorder, audioChunks = [];
+
+        // 1. AUTH & SESSION INIT
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                currentUser = user;
+                sessionId = new URLSearchParams(window.location.search).get('session_id');
+                if (!sessionId) { alert("Sesi invalid"); window.location.href = "dashboard.html"; return; }
+                loadSessionData();
+            } else { window.location.href = "login.html"; }
+        });
+
+        // 2. LOAD SESSION
+        async function loadSessionData() {
+            const sessionRef = doc(db, "chat_sessions", sessionId);
+            const sessionSnap = await getDoc(sessionRef);
+
+            if (sessionSnap.exists()) {
+                const data = sessionSnap.data();
+                coachId = data.coach_id;
+
+                if (data.status === 'completed') { showEndModal(data.coach_notes); return; }
+
+                // Get Mentor Info
+                const coachSnap = await getDoc(doc(db, "users_umkm", coachId));
+                if(coachSnap.exists()) {
+                    document.getElementById('mentorName').innerText = coachSnap.data().nama_lengkap;
+                    document.getElementById('mentorImg').src = `https://ui-avatars.com/api/?name=${coachSnap.data().nama_lengkap}&background=random`;
+                    document.getElementById('sessionCategory').innerText = data.category;
+                }
+
+                initTimer(data.start_time.toDate());
+                listenToChat();
+                
+                // Sync End Session
+                onSnapshot(sessionRef, (snap) => {
+                    const d = snap.data();
+                    if(d.status === 'completed') showEndModal(d.coach_notes);
+                });
+            } else {
+                alert("Sesi tidak ditemukan"); window.location.href = "dashboard.html";
+            }
+        }
+
+        // 3. TIMER
+        function initTimer(startTime) {
+            const endTime = startTime.getTime() + (45 * 60 * 1000);
+            setInterval(() => {
+                const now = new Date().getTime();
+                const distance = endTime - now;
+                if(distance < 0) { document.getElementById('timerDisplay').innerText = "00:00"; return; }
+                
+                const m = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                const s = Math.floor((distance % (1000 * 60)) / 1000);
+                document.getElementById('timerDisplay').innerText = `${m}:${s < 10 ? '0'+s : s}`;
+                if(distance < 300000) document.getElementById('timerDisplay').classList.add('warning');
+            }, 1000);
+        }
+
+        // 4. CHAT LISTENER (RENDER ALL TYPES)
+        function listenToChat() {
+            const q = query(collection(db, "chat_sessions", sessionId, "messages"), orderBy("timestamp", "asc"));
+            onSnapshot(q, (snapshot) => {
+                const container = document.getElementById('chatContainer');
+                container.innerHTML = `<div class="msg system">Sesi dimulai. Keamanan terenkripsi.</div>`;
+                
+                snapshot.forEach(doc => {
+                    const msg = doc.data();
+                    const isMe = msg.sender_id === currentUser.uid;
+                    const div = document.createElement('div');
+                    const time = msg.timestamp ? msg.timestamp.toDate().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) : '..';
+
+                    let content = "";
+                    if (msg.type === 'text') {
+                        content = msg.text;
+                    } else if (msg.type === 'image') {
+                        content = `<img src="${msg.content}" class="chat-img" onclick="window.open('${msg.content}')"><br>📷 Gambar`;
+                    } else if (msg.type === 'file') {
+                        content = `<a href="${msg.content}" download="${msg.filename}" style="color:inherit; text-decoration:none; display:flex; align-items:center; gap:10px;">
+                            <i class="fas fa-file-alt fa-2x"></i> <div><b>${msg.filename}</b><br><small>Klik untuk download</small></div></a>`;
+                    } else if (msg.type === 'audio') {
+                        content = `<audio controls src="${msg.content}" class="audio-player"></audio>`;
+                    } else if (msg.type === 'unlock_ticket') {
+                        div.innerHTML = `
+                        <div class="unlock-card" style="margin: 0 auto;">
+                            <h4>TIKET UNLOCK DITERIMA</h4>
+                            <p>Mentor merekomendasikan: <b>${msg.feature_name}</b></p>
+                            <button class="btn-claim" onclick="alert('Fitur Terbuka!')">Klaim Akses</button>
+                        </div>`;
+                        container.appendChild(div);
+                        return; // Skip default render
+                    }
+
+                    div.className = `msg ${isMe ? 'user' : 'mentor'}`;
+                    div.innerHTML = `${content} <span class="msg-time">${time}</span>`;
+                    container.appendChild(div);
+                });
+                container.scrollTop = container.scrollHeight;
+            });
+        }
+
+        // 5. SENDING FUNCTIONS
+        window.sendMessage = async () => {
+            const input = document.getElementById('msgInput');
+            const text = input.value.trim();
+            if(!text) return;
+            input.value = "";
+            await addDoc(collection(db, "chat_sessions", sessionId, "messages"), {
+                text: text, sender_id: currentUser.uid, timestamp: serverTimestamp(), type: "text"
+            });
+        }
+        window.handleEnter = (e) => { if(e.key === 'Enter') sendMessage(); }
+
+        // FILE & IMAGE HANDLER (Base64 for Prototype)
+        window.handleFile = (input, type) => {
+            const file = input.files[0];
+            if(!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                const base64 = e.target.result;
+                // Note: Firestore max doc size 1MB. For real app use Firebase Storage.
+                if(file.size > 800000) { alert("File terlalu besar (Max 800KB untuk demo)"); return; }
+                
+                await addDoc(collection(db, "chat_sessions", sessionId, "messages"), {
+                    content: base64, filename: file.name, type: type,
+                    sender_id: currentUser.uid, timestamp: serverTimestamp()
+                });
+            };
+            reader.readAsDataURL(file);
+        };
+
+        // VOICE RECORDING
+        window.startRecording = async () => {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            mediaRecorder = new MediaRecorder(stream);
+            mediaRecorder.start();
+            audioChunks = [];
+            document.getElementById('btnRecord').classList.add('recording');
+            
+            mediaRecorder.ondataavailable = event => audioChunks.push(event.data);
+            mediaRecorder.onstop = async () => {
+                const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                const reader = new FileReader();
+                reader.readAsDataURL(audioBlob);
+                reader.onloadend = async () => {
+                    await addDoc(collection(db, "chat_sessions", sessionId, "messages"), {
+                        content: reader.result, type: 'audio',
+                        sender_id: currentUser.uid, timestamp: serverTimestamp()
+                    });
+                };
+                document.getElementById('btnRecord').classList.remove('recording');
+            };
+        };
+        window.stopRecording = () => { if(mediaRecorder) mediaRecorder.stop(); };
+
+        // 6. END SESSION
+        window.confirmEndSession = async () => {
+            if(confirm("Akhiri sesi sekarang?")) {
+                await updateDoc(doc(db, "chat_sessions", sessionId), { status: "completed", ended_at: serverTimestamp() });
+                await updateDoc(doc(db, "users_umkm", coachId), { current_session: null });
+                // Listener will handle modal show
+            }
+        }
+
+        function showEndModal(notes) {
+            document.getElementById('ratingModal').style.display = 'flex';
+            if(notes) {
+                document.getElementById('coachNotesArea').style.display = 'block';
+                document.getElementById('coachNotesText').innerText = notes;
+            }
+        }
+
+        window.rate = (star) => {
+            document.querySelectorAll('.star').forEach((s, i) => { s.style.color = i < star ? '#f59e0b' : '#e2e8f0'; });
+        }
+        window.submitFeedback = () => { alert("Terima kasih!"); window.location.href = "dashboard.html"; }
+    </script>
+</body>
+</html>

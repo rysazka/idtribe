@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Community Forum - ID-TRIBE</title>
+    <link rel="icon" type="image/png" href="favicon.png">
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -329,8 +330,9 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, getDocs, query, orderBy, limit, doc, getDoc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, getDocs, query, orderBy, limit, where, doc, getDoc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
+        // ... (Config Firebase Tetap Sama) ...
         const firebaseConfig = {
             apiKey: "AIzaSyBIaLzkNM0KqPVKxuMNmardLqcrr2kYTWQ",
             authDomain: "database-idbm.firebaseapp.com",
@@ -347,7 +349,7 @@
 
         let currentUser = null;
         let currentThreadId = null;
-        let allThreads = [];
+        // HAPUS variabel allThreads karena tidak scalable
 
         onAuthStateChanged(auth, async (user) => {
             if (user) {
@@ -360,75 +362,62 @@
                 } else {
                     currentUser = { uid: user.uid, name: "User" };
                 }
-                loadThreads();
+                loadThreads('all'); // Load default
                 loadTrending();
             } else {
                 window.location.href = "login.html";
             }
         });
 
-        // 1. LOAD ALL THREADS
+        // --- 1. LOAD THREADS (SERVER-SIDE FILTERING) ---
         window.loadThreads = async function(category = 'all') {
             const listContainer = document.getElementById('threadList');
+            listContainer.innerHTML = '<div style="text-align: center; color: #64748b; padding: 20px;"><i class="fas fa-spinner fa-spin"></i> Memuat data...</div>';
+            
             try {
-                let q = query(collection(db, "forum_threads"), orderBy("timestamp", "desc"));
-                const querySnapshot = await getDocs(q);
-                allThreads = [];
-                
-                querySnapshot.forEach((doc) => {
-                    allThreads.push({ id: doc.id, ...doc.data() });
-                });
+                const threadRef = collection(db, "forum_threads");
+                let q;
 
-                renderThreads(category);
+                // LOGIKA QUERY CERDAS
+                if (category === 'all') {
+                    // Ambil semua, urutkan waktu, batasi 20
+                    q = query(threadRef, orderBy("timestamp", "desc"), limit(20));
+                } else {
+                    // Ambil kategori tertentu, urutkan waktu, batasi 20
+                    // PERHATIAN: Ini butuh Composite Index di Firebase Console
+                    q = query(threadRef, where("category", "==", category), orderBy("timestamp", "desc"), limit(20));
+                }
+
+                const querySnapshot = await getDocs(q);
+                
+                // Render langsung (Tidak simpan ke array global)
+                renderThreadList(querySnapshot);
+
             } catch (e) {
-                console.error(e);
-                listContainer.innerHTML = '<div style="text-align:center; color:#64748b;">Gagal memuat diskusi.</div>';
+                console.error("Error loading threads:", e);
+                // Menangani error Index Missing
+                if(e.message.includes("indexes")) {
+                    console.log("KLIK LINK DI CONSOLE UNTUK BUAT INDEX FIREBASE");
+                    alert("Admin: Mohon buat Index di Firebase Console (Cek Inspect Element)");
+                }
+                listContainer.innerHTML = '<div style="text-align:center; color:red;">Gagal memuat diskusi. Cek koneksi atau Index.</div>';
             }
         }
 
-        // 2. LOAD TRENDING
-        async function loadTrending() {
-            const container = document.getElementById('trendingList');
-            try {
-                const q = query(collection(db, "forum_threads"), orderBy("likes", "desc"), limit(3));
-                const snapshot = await getDocs(q);
-
-                container.innerHTML = `<h4 style="color: #d97706; font-size: 0.95rem; margin-bottom: 15px; display:flex; align-items:center; gap:8px;"><i class="fas fa-fire"></i> Topik Hangat</h4>`;
-
-                if (snapshot.empty) {
-                    container.innerHTML += `<div style="text-align:center; font-size:0.8rem; color:#94a3b8;">Belum ada topik populer.</div>`;
-                    return;
-                }
-
-                snapshot.forEach(doc => {
-                    const t = doc.data();
-                    const html = `
-                        <div class="trend-item" onclick="openDetail('${doc.id}')">
-                            <div class="trend-title">${t.title}</div>
-                            <div class="trend-stats">${t.likes || 0} Likes</div>
-                        </div>`;
-                    container.innerHTML += html;
-                });
-            } catch (e) { console.error(e); }
-        }
-
-        // 3. RENDER FUNCTION
-        function renderThreads(filterCat) {
+        // Fungsi Render Terpisah
+        function renderThreadList(snapshot) {
             const listContainer = document.getElementById('threadList');
             listContainer.innerHTML = "";
 
-            let filtered = allThreads;
-            if (filterCat !== 'all') {
-                filtered = allThreads.filter(t => t.category === filterCat);
-            }
-
-            if (filtered.length === 0) {
+            if (snapshot.empty) {
                 listContainer.innerHTML = '<div style="text-align:center; color:#64748b; padding:20px;">Belum ada diskusi di kategori ini.</div>';
                 return;
             }
 
-            filtered.forEach(t => {
+            snapshot.forEach((doc) => {
+                const t = { id: doc.id, ...doc.data() };
                 const date = t.timestamp ? new Date(t.timestamp.toDate()).toLocaleDateString('id-ID') : 'Baru saja';
+                
                 let badgeClass = 'bg-umum';
                 if(t.category === 'Pemasaran') badgeClass = 'bg-pemasaran';
                 if(t.category === 'Legalitas') badgeClass = 'bg-pajak';
@@ -454,130 +443,196 @@
             });
         }
 
-        window.handlePost = async function(e) {
-            e.preventDefault();
-            const btn = e.target.querySelector('button');
-            btn.innerText = "Memposting...";
-            btn.disabled = true;
-
-            const title = document.getElementById('postTitle').value;
-            const category = document.getElementById('postCategory').value;
-            const content = document.getElementById('postContent').value;
-
-            try {
-                await addDoc(collection(db, "forum_threads"), {
-                    title: title, category: category, content: content,
-                    author_uid: currentUser.uid, author_name: currentUser.name,
-                    timestamp: new Date(), likes: 0, comment_count: 0
-                });
-                closeModal(); e.target.reset(); loadThreads(); loadTrending();
-                alert("Diskusi berhasil diposting!");
-            } catch (e) { alert("Gagal: " + e.message); } 
-            finally { btn.innerText = "Posting Diskusi"; btn.disabled = false; }
-        }
-
-        window.openDetail = async function(id) {
-            currentThreadId = id;
-            const thread = allThreads.find(t => t.id === id);
-            if(!thread) return;
-
-            document.getElementById('feedView').style.display = 'none';
-            document.getElementById('detailView').style.display = 'flex'; // Changed to Flex
-            
-            // Hide mobile items
-            if(window.innerWidth <= 768) {
-                document.querySelector('.mobile-header').style.display = 'none';
-                document.querySelector('.mobile-filter-bar').style.display = 'none';
-                document.querySelector('.fab-create').style.display = 'none';
-            }
-
-            document.getElementById('detailTitle').innerText = thread.title;
-            document.getElementById('detailCat').innerText = thread.category;
-            document.getElementById('detailAuthor').innerText = thread.author_name;
-            document.getElementById('detailDate').innerText = thread.timestamp ? new Date(thread.timestamp.toDate()).toLocaleDateString('id-ID') : '-';
-            document.getElementById('detailBody').innerText = thread.content;
-
-            loadComments(id);
-        }
-
-        window.closeDetail = function() {
-            document.getElementById('feedView').style.display = 'block'; // Changed from flex to block/default
-            document.getElementById('detailView').style.display = 'none';
-            
-            if (window.innerWidth <= 768) {
-                document.querySelector('.mobile-header').style.display = 'flex';
-                document.querySelector('.mobile-filter-bar').style.display = 'flex';
-                document.querySelector('.fab-create').style.display = 'flex';
-            }
-            currentThreadId = null;
-        }
-
-        async function loadComments(threadId) {
-            const list = document.getElementById('commentsList');
-            list.innerHTML = "<div style='text-align:center; color:#94a3b8; padding:20px;'>Memuat komentar...</div>";
-            
-            const q = query(collection(db, `forum_threads/${threadId}/comments`), orderBy("timestamp", "asc"));
-            const snapshot = await getDocs(q);
-            
-            list.innerHTML = "";
-            document.getElementById('commentCount').innerText = snapshot.size;
-
-            if(snapshot.empty) { list.innerHTML = "<p style='color:#94a3b8; text-align:center; padding:20px;'>Belum ada komentar. Jadilah yang pertama!</p>"; return; }
-
-            snapshot.forEach(doc => {
-                const c = doc.data();
-                const html = `
-                <div class="comment-bubble">
-                    <div class="comment-header">
-                        <span class="comment-author">${c.author_name}</span>
-                        <span class="comment-time">${new Date(c.timestamp.toDate()).toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'})}</span>
-                    </div>
-                    <div class="comment-text">${c.text}</div>
-                </div>`;
-                list.innerHTML += html;
-            });
-            
-            // Scroll to bottom
-            const scrollArea = document.querySelector('.detail-scroll-area');
-            scrollArea.scrollTop = scrollArea.scrollHeight;
-        }
-
-        window.postComment = async function() {
-            const input = document.getElementById('commentInput');
-            const text = input.value.trim();
-            if(!text) return;
-
-            try {
-                await addDoc(collection(db, `forum_threads/${currentThreadId}/comments`), {
-                    text: text, author_name: currentUser.name, author_uid: currentUser.uid, timestamp: new Date()
-                });
-                const threadRef = doc(db, "forum_threads", currentThreadId);
-                await updateDoc(threadRef, { comment_count: increment(1) });
-                input.value = "";
-                loadComments(currentThreadId);
-            } catch (e) { alert("Gagal mengirim komentar"); }
-        }
-
-        // --- UI HELPERS ---
-        window.openModal = () => document.getElementById('createModal').style.display = 'flex';
-        window.closeModal = () => document.getElementById('createModal').style.display = 'none';
-        
+        // --- FILTER HANDLER ---
         window.filterThreads = (cat, btn) => {
+            // Update UI Button Active State
             document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active'); renderThreads(cat);
+            btn.classList.add('active');
+            
+            // Panggil Query Baru ke Server
+            loadThreads(cat);
         }
 
         window.filterThreadsMobile = (cat, btn) => {
             document.querySelectorAll('.mobile-chip').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active'); renderThreads(cat);
+            btn.classList.add('active');
+            loadThreads(cat);
         }
 
-        window.searchThreads = () => {
-            const keyword = document.getElementById('searchInput').value.toLowerCase();
-            const filtered = allThreads.filter(t => t.title.toLowerCase().includes(keyword) || t.content.toLowerCase().includes(keyword));
-            // ... (Logic render simplified)
-            renderThreads('all'); 
+        // --- SEARCH HANDLER (SERVER SIDE SEDERHANA) ---
+        // Catatan: Firestore tidak mendukung Full Text Search (LIKE %keyword%).
+        // Solusi Enterprise: Gunakan Algolia/Elasticsearch.
+        // Solusi Hemat: Filter di sisi klien hanya untuk data yang SEDANG DITAMPILKAN, 
+        // atau cari berdasarkan prefix judul (case sensitive).
+        window.searchThreads = async () => {
+            const keyword = document.getElementById('searchInput').value;
+            if(!keyword) {
+                loadThreads('all'); // Reset jika kosong
+                return;
+            }
+            
+            // Mencari berdasarkan Judul yang diawali kata tertentu (Prefix)
+            // Ini keterbatasan Firestore versi gratis.
+            const listContainer = document.getElementById('threadList');
+            listContainer.innerHTML = "Mencari...";
+            
+            try {
+                const q = query(
+                    collection(db, "forum_threads"),
+                    where("title", ">=", keyword),
+                    where("title", "<=", keyword + '\uf8ff'),
+                    limit(10)
+                );
+                const snapshot = await getDocs(q);
+                renderThreadList(snapshot);
+            } catch(e) {
+                console.error(e);
+                // Fallback jika query gagal (biasanya karena index)
+                // Kita load data standar saja
+                loadThreads('all');
+            }
         }
+
+        // ... (Kode CREATE POST, TRENDING, COMMENTS, DLL TETAP SAMA SEPERTI SEBELUMNYA) ...
+        // Pastikan copy-paste sisa fungsi handlePost, openDetail, loadComments, dll dari kode lama Anda di sini.
+        // Saya persingkat agar muat, tapi logika "loadTrending", "handlePost", "openDetail", "loadComments" tidak berubah.
+        
+        // --- 2. LOAD TRENDING ---
+       async function loadTrending() {
+           const container = document.getElementById('trendingList');
+           try {
+               const q = query(collection(db, "forum_threads"), orderBy("likes", "desc"), limit(3));
+               const snapshot = await getDocs(q);
+
+               container.innerHTML = `<h4 style="color: #d97706; font-size: 0.95rem; margin-bottom: 15px; display:flex; align-items:center; gap:8px;"><i class="fas fa-fire"></i> Topik Hangat</h4>`;
+
+               if (snapshot.empty) {
+                   container.innerHTML += `<div style="text-align:center; font-size:0.8rem; color:#94a3b8;">Belum ada topik populer.</div>`;
+                   return;
+               }
+
+               snapshot.forEach(doc => {
+                   const t = doc.data();
+                   const html = `
+                       <div class="trend-item" onclick="openDetail('${doc.id}')">
+                           <div class="trend-title">${t.title}</div>
+                           <div class="trend-stats">${t.likes || 0} Likes</div>
+                       </div>`;
+                   container.innerHTML += html;
+               });
+           } catch (e) { console.error(e); }
+       }
+
+       window.handlePost = async function(e) {
+           e.preventDefault();
+           const btn = e.target.querySelector('button');
+           btn.innerText = "Memposting...";
+           btn.disabled = true;
+
+           const title = document.getElementById('postTitle').value;
+           const category = document.getElementById('postCategory').value;
+           const content = document.getElementById('postContent').value;
+
+           try {
+               await addDoc(collection(db, "forum_threads"), {
+                   title: title, category: category, content: content,
+                   author_uid: currentUser.uid, author_name: currentUser.name,
+                   timestamp: new Date(), likes: 0, comment_count: 0
+               });
+               closeModal(); e.target.reset(); 
+               loadThreads('all'); // Refresh list
+               alert("Diskusi berhasil diposting!");
+           } catch (e) { alert("Gagal: " + e.message); } 
+           finally { btn.innerText = "Posting Diskusi"; btn.disabled = false; }
+       }
+
+       window.openDetail = async function(id) {
+           currentThreadId = id;
+           const docRef = doc(db, "forum_threads", id);
+           const docSnap = await getDoc(docRef);
+           
+           if(!docSnap.exists()) return;
+           const thread = docSnap.data();
+
+           document.getElementById('feedView').style.display = 'none';
+           document.getElementById('detailView').style.display = 'flex';
+           
+           if(window.innerWidth <= 768) {
+               document.querySelector('.mobile-header').style.display = 'none';
+               document.querySelector('.mobile-filter-bar').style.display = 'none';
+               document.querySelector('.fab-create').style.display = 'none';
+           }
+
+           document.getElementById('detailTitle').innerText = thread.title;
+           document.getElementById('detailCat').innerText = thread.category;
+           document.getElementById('detailAuthor').innerText = thread.author_name;
+           document.getElementById('detailDate').innerText = thread.timestamp ? new Date(thread.timestamp.toDate()).toLocaleDateString('id-ID') : '-';
+           document.getElementById('detailBody').innerText = thread.content;
+
+           loadComments(id);
+       }
+
+       window.closeDetail = function() {
+           document.getElementById('feedView').style.display = 'block'; 
+           document.getElementById('detailView').style.display = 'none';
+           
+           if (window.innerWidth <= 768) {
+               document.querySelector('.mobile-header').style.display = 'flex';
+               document.querySelector('.mobile-filter-bar').style.display = 'flex';
+               document.querySelector('.fab-create').style.display = 'flex';
+           }
+           currentThreadId = null;
+       }
+
+       async function loadComments(threadId) {
+           const list = document.getElementById('commentsList');
+           list.innerHTML = "<div style='text-align:center; color:#94a3b8; padding:20px;'>Memuat komentar...</div>";
+           
+           const q = query(collection(db, `forum_threads/${threadId}/comments`), orderBy("timestamp", "asc"));
+           const snapshot = await getDocs(q);
+           
+           list.innerHTML = "";
+           document.getElementById('commentCount').innerText = snapshot.size;
+
+           if(snapshot.empty) { list.innerHTML = "<p style='color:#94a3b8; text-align:center; padding:20px;'>Belum ada komentar. Jadilah yang pertama!</p>"; return; }
+
+           snapshot.forEach(doc => {
+               const c = doc.data();
+               const html = `
+               <div class="comment-bubble">
+                   <div class="comment-header">
+                       <span class="comment-author">${c.author_name}</span>
+                       <span class="comment-time">${new Date(c.timestamp.toDate()).toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'})}</span>
+                   </div>
+                   <div class="comment-text">${c.text}</div>
+               </div>`;
+               list.innerHTML += html;
+           });
+           
+           const scrollArea = document.querySelector('.detail-scroll-area');
+           scrollArea.scrollTop = scrollArea.scrollHeight;
+       }
+
+       window.postComment = async function() {
+           const input = document.getElementById('commentInput');
+           const text = input.value.trim();
+           if(!text) return;
+
+           try {
+               await addDoc(collection(db, `forum_threads/${currentThreadId}/comments`), {
+                   text: text, author_name: currentUser.name, author_uid: currentUser.uid, timestamp: new Date()
+               });
+               const threadRef = doc(db, "forum_threads", currentThreadId);
+               await updateDoc(threadRef, { comment_count: increment(1) });
+               input.value = "";
+               loadComments(currentThreadId);
+           } catch (e) { alert("Gagal mengirim komentar"); }
+       }
+
+       // UI HELPERS
+       window.openModal = () => document.getElementById('createModal').style.display = 'flex';
+       window.closeModal = () => document.getElementById('createModal').style.display = 'none';
+
     </script>
 </body>
 </html>

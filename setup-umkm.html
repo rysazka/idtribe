@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Setup Identitas UMKM - ID-TRIBE</title>
+    <link rel="icon" type="image/png" href="favicon.png">
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -12,6 +13,7 @@
     <script type="module" src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
     <script type="module" src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js"></script>
     <script type="module" src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"></script>
+    <script type="module" src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js"></script>
 
     <style>
         /* --- DESIGN SYSTEM --- */
@@ -258,9 +260,16 @@
                     
                     <div class="form-grid">
                         <div class="form-group full-width">
-                            <label class="form-label">NIB (Nomor Induk Berusaha)</label>
-                            <input type="text" id="nib" class="form-input" placeholder="Masukkan NIB jika ada (Opsional)">
+                            <label class="form-label">Nomor NIB</label>
+                            <input type="text" id="nib" class="form-input" placeholder="Nomor Induk Berusaha">
                         </div>
+                        
+                        <div class="form-group full-width">
+                            <label class="form-label">Upload Bukti NIB (PDF/Gambar)</label>
+                            <input type="file" id="nib_file" class="form-input" accept=".pdf,image/*">
+                            <small style="color:var(--text-muted); font-size:0.8rem;">Maksimal 2MB.</small>
+                        </div>
+
                         <div class="form-group full-width">
                             <label class="form-label">Sertifikasi Halal</label>
                             <select id="halal" class="form-input">
@@ -326,6 +335,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
         import { getFirestore, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
 
         // CONFIG FIREBASE
         const firebaseConfig = {
@@ -341,6 +351,7 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
+        const storage = getStorage(app);
         let currentUser = null;
 
         // Cek Login
@@ -373,51 +384,66 @@
             document.getElementById(`ind-${step}`).classList.remove('completed');
         }
 
-        // SUBMIT DATA
+        // SUBMIT DATA (UPDATED WITH FILE UPLOAD)
         window.handleFinalSubmit = async function(e) {
             e.preventDefault();
             const btn = e.target.querySelector('button[type="submit"]');
-            btn.innerText = "Menyimpan Data...";
+            btn.innerText = "Mengupload File...";
             btn.disabled = true;
 
-            // Ambil Checkbox
-            let kanalJual = [];
-            document.querySelectorAll('input[name="kanal"]:checked').forEach((checkbox) => {
-                kanalJual.push(checkbox.value);
-            });
-
-            // Data Object
-            const umkmData = {
-                brand: document.getElementById('nama_brand').value,
-                kategori: document.getElementById('kategori').value,
-                tahun_berdiri: document.getElementById('tahun_berdiri').value,
-                lokasi: document.getElementById('lokasi').value,
-                
-                jumlah_karyawan: document.getElementById('karyawan').value,
-                kapasitas_produksi: document.getElementById('kapasitas').value,
-                model_bisnis: document.getElementById('model_bisnis').value,
-                
-                nib: document.getElementById('nib').value,
-                status_halal: document.getElementById('halal').value,
-                izin_edar: document.getElementById('izin_edar').value,
-                
-                kanal_penjualan: kanalJual,
-                range_omzet: document.getElementById('omzet').value,
-                sosmed: document.getElementById('sosmed').value,
-                
-                status_setup: "completed",
-                last_updated: new Date()
-            };
-
             try {
+                // 1. Upload File NIB (Jika ada)
+                const nibFile = document.getElementById('nib_file').files[0];
+                let nibUrl = "";
+
+                if (nibFile) {
+                    if (nibFile.size > 2 * 1024 * 1024) { throw new Error("Ukuran file NIB maksimal 2MB"); }
+                    
+                    const storageRef = ref(storage, `nib_files/${currentUser.uid}_${nibFile.name}`);
+                    await uploadBytes(storageRef, nibFile);
+                    nibUrl = await getDownloadURL(storageRef);
+                }
+
+                btn.innerText = "Menyimpan Data...";
+
+                // 2. Ambil Checkbox
+                let kanalJual = [];
+                document.querySelectorAll('input[name="kanal"]:checked').forEach((checkbox) => {
+                    kanalJual.push(checkbox.value);
+                });
+
+                // 3. Data Object
+                const umkmData = {
+                    brand: document.getElementById('nama_brand').value,
+                    kategori: document.getElementById('kategori').value,
+                    tahun_berdiri: document.getElementById('tahun_berdiri').value,
+                    lokasi: document.getElementById('lokasi').value,
+                    
+                    jumlah_karyawan: document.getElementById('karyawan').value,
+                    kapasitas_produksi: document.getElementById('kapasitas').value,
+                    model_bisnis: document.getElementById('model_bisnis').value,
+                    
+                    nib: document.getElementById('nib').value,
+                    nib_file_url: nibUrl, // Simpan URL file
+                    status_halal: document.getElementById('halal').value,
+                    izin_edar: document.getElementById('izin_edar').value,
+                    
+                    kanal_penjualan: kanalJual,
+                    range_omzet: document.getElementById('omzet').value,
+                    sosmed: document.getElementById('sosmed').value,
+                    
+                    status_setup: "completed",
+                    last_updated: new Date()
+                };
+
+                // 4. Update Firestore
                 await updateDoc(doc(db, "users_umkm", currentUser.uid), umkmData);
                 
-                // Redirect ke Health Check
                 alert("Setup Identitas Berhasil!");
                 window.location.href = "business-health.html";
 
             } catch (error) {
-                console.error("Error updating document: ", error);
+                console.error("Error:", error);
                 alert("Gagal menyimpan: " + error.message);
                 btn.innerText = "Simpan & Selesai ✓";
                 btn.disabled = false;

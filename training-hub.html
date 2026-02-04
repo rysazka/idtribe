@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Training Hub - ID-TRIBE Academy</title>
+    <link rel="icon" type="image/png" href="favicon.png">
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -40,7 +41,6 @@
             color: var(--dark);
             min-height: 100vh;
             overflow-x: hidden;
-            /* Pola Latar Belakang Halus */
             background-image: 
                 radial-gradient(at 0% 0%, hsla(152,100%,93%,1) 0, transparent 50%), 
                 radial-gradient(at 100% 100%, hsla(43,100%,93%,1) 0, transparent 50%);
@@ -78,7 +78,7 @@
         .hero-hub p { color: var(--text-gray); max-width: 600px; margin: 0 auto; font-size: 1.1rem; line-height: 1.6; }
 
         /* TABS (NAVIGATION) */
-        .tabs-container { display: flex; justify-content: center; gap: 15px; margin-bottom: 40px; flex-wrap: wrap; }
+        .tabs-container { display: flex; justify-content: center; gap: 15px; margin-bottom: 30px; flex-wrap: wrap; }
         .tab-btn {
             padding: 12px 30px; border-radius: 12px; border: none; cursor: pointer;
             font-weight: 700; font-family: var(--font-body); transition: all 0.3s;
@@ -90,6 +90,36 @@
             color: white; box-shadow: 0 10px 20px rgba(5, 150, 105, 0.3); transform: translateY(-2px);
         }
         .tab-btn:hover:not(.active) { transform: translateY(-2px); color: var(--primary); }
+
+        /* --- SEARCH BAR STYLE (NEW) --- */
+        .search-container {
+            max-width: 600px;
+            margin: 0 auto 30px; /* Jarak bawah ke filter chips */
+            position: relative;
+        }
+        .search-input {
+            width: 100%;
+            padding: 14px 20px 14px 50px; /* Padding kiri besar untuk ikon */
+            border-radius: 50px;
+            border: 2px solid rgba(46, 92, 72, 0.1);
+            background: white;
+            font-family: var(--font-body);
+            font-size: 1rem;
+            color: var(--dark);
+            outline: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.03);
+        }
+        .search-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 4px 15px rgba(46, 92, 72, 0.15);
+        }
+        .search-input::placeholder { color: #94a3b8; }
+        .search-icon-svg {
+            position: absolute; left: 18px; top: 50%; transform: translateY(-50%);
+            width: 22px; height: 22px; color: #94a3b8; transition: color 0.3s;
+        }
+        .search-input:focus + .search-icon-svg { color: var(--primary); }
 
         /* FILTER CHIPS (SCROLLABLE) */
         .filter-scroll {
@@ -230,6 +260,14 @@
             <a href="community-forum.html" class="tab-btn"><i class="fas fa-comments"></i> Forum Diskusi</a>
         </div>
 
+        <div class="search-container">
+            <input type="text" id="searchInput" class="search-input" placeholder="Cari materi, topik, atau skill..." onkeyup="handleSearch()">
+            <svg class="search-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+        </div>
+
         <div class="filter-scroll">
             <button class="filter-chip active" onclick="filterCourses('all', this)">Semua Modul</button>
             <button class="filter-chip" onclick="filterCourses('digital', this)"><i class="fas fa-laptop-code"></i> Digital & Marketing</button>
@@ -269,6 +307,7 @@
 
         let userData = {};
         let coursesDB = [];
+        let activeCategory = 'all';
 
         onAuthStateChanged(auth, async (user) => {
             if (user) {
@@ -306,32 +345,45 @@
                     ];
                 }
 
-                renderCourses('all');
+                renderCourses();
             } catch (e) {
                 console.error("Gagal memuat course:", e);
                 document.getElementById('courseContainer').innerHTML = `<div style="text-align:center; color:red;">Gagal memuat data.</div>`;
             }
         }
 
+        // --- FILTER & SEARCH LOGIC ---
+        window.handleSearch = function() {
+            renderCourses();
+        }
+
         window.filterCourses = function(category, btn) {
             document.querySelectorAll('.filter-chip').forEach(el => el.classList.remove('active'));
             btn.classList.add('active');
-            renderCourses(category);
+            activeCategory = category;
+            renderCourses();
         }
 
-        function renderCourses(category) {
+        function renderCourses() {
             const container = document.getElementById('courseContainer');
+            const searchVal = document.getElementById('searchInput').value.toLowerCase();
             container.innerHTML = "";
 
             const completedList = userData.completed_courses || [];
 
-            let filtered = coursesDB;
-            if(category !== 'all') {
-                filtered = coursesDB.filter(c => c.sector === category);
-            }
+            // FILTER GANDA
+            const filtered = coursesDB.filter(course => {
+                const matchCat = activeCategory === 'all' || course.sector === activeCategory;
+                const matchSearch = course.title.toLowerCase().includes(searchVal) || course.desc.toLowerCase().includes(searchVal);
+                return matchCat && matchSearch;
+            });
 
             if(filtered.length === 0) {
-                container.innerHTML = `<div style="grid-column:1/-1; text-align:center; color:#64748b; padding:40px;">Belum ada materi untuk kategori ini.</div>`;
+                container.innerHTML = `
+                    <div style="grid-column:1/-1; text-align:center; padding:40px; color:rgba(100, 116, 139, 0.8);">
+                        <div style="font-size:3rem; margin-bottom:10px;">🔍</div>
+                        <p>Tidak ada modul yang cocok.</p>
+                    </div>`;
                 return;
             }
 
@@ -339,7 +391,7 @@
                 let isLocked = false;
                 let lockReason = "";
                 
-                // Logic Lock (Contoh: Intermediate butuh Beginner)
+                // Logic Lock (Opsional)
                 // if (course.level === "Intermediate" && !completedList.includes(course.sector + "_beginner")) { isLocked = true; lockReason = "Selesaikan Level Beginner Dulu"; }
 
                 const isCompleted = completedList.includes(course.id);

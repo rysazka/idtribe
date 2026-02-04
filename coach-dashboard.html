@@ -2,8 +2,9 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Coach Studio - ID-TRIBE</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Coach Dashboard - ID-TRIBE</title>
+    <link rel="icon" type="image/png" href="favicon.png">
     
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Plus+Jakarta+Sans:wght@400;500;700&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
@@ -13,124 +14,107 @@
     <script type="module" src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"></script>
 
     <style>
-        /* (STYLE CSS SAMA SEPERTI SEBELUMNYA) */
-        :root { --primary: #059669; --dark: #0f172a; --bg-light: #f1f5f9; --live-red: #ef4444; --sidebar-w: 260px; --font-head: 'Outfit', sans-serif; --font-body: 'Plus Jakarta Sans', sans-serif; }
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: var(--font-body); background: var(--bg-light); color: var(--dark); display: flex; height: 100vh; overflow: hidden; }
-        .sidebar { width: var(--sidebar-w); background: #1e293b; color: white; display: flex; flex-direction: column; padding: 25px; flex-shrink: 0; }
-        .brand { font-family: var(--font-head); font-size: 1.4rem; font-weight: 800; margin-bottom: 40px; color: var(--primary); display: flex; align-items: center; gap: 10px; }
-        .nav-link { padding: 12px 15px; border-radius: 10px; color: #94a3b8; text-decoration: none; display: flex; align-items: center; gap: 12px; margin-bottom: 5px; transition: 0.3s; cursor: pointer; }
+        /* --- COPY CSS DARI FILE COACH-CHAT.HTML DI ATAS AGAR TAMPILAN SAMA PERSIS --- */
+        /* Paste semua CSS dari bagian <style> file coach-chat.html ke sini */
+        /* Saya akan menyertakan style dasar yang relevan untuk file ini saja */
+        
+        :root {
+            --primary: #059669; --primary-dark: #047857; --accent: #f59e0b;
+            --dark: #0f172a; --bg-light: #f8fafc; --live-red: #ef4444;
+            --border: 1px solid #e2e8f0; --shadow: 0 4px 20px rgba(0,0,0,0.05);
+            --sidebar-w: 280px; --font-head: 'Outfit', sans-serif; --font-body: 'Plus Jakarta Sans', sans-serif;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+        body { font-family: var(--font-body); background: var(--bg-light); color: var(--dark); height: 100vh; display: flex; overflow: hidden; }
+
+        .sidebar { width: var(--sidebar-w); background: #1e293b; color: white; display: flex; flex-direction: column; padding: 25px; flex-shrink: 0; z-index: 150; transition: transform 0.3s ease; }
+        .brand { font-family: var(--font-head); font-size: 1.5rem; font-weight: 800; margin-bottom: 40px; color: var(--primary); display: flex; align-items: center; gap: 10px; }
+        .nav-link { padding: 14px 15px; border-radius: 12px; color: #94a3b8; text-decoration: none; display: flex; align-items: center; gap: 12px; margin-bottom: 8px; transition: 0.3s; font-weight: 500; cursor: pointer; }
         .nav-link:hover, .nav-link.active { background: rgba(255,255,255,0.1); color: white; }
-        .nav-link.active { background: var(--primary); font-weight: 700; }
-        .main { flex: 1; padding: 25px; overflow-y: auto; position: relative; }
+        .nav-link.active { background: var(--primary); font-weight: 700; box-shadow: 0 4px 15px rgba(5, 150, 105, 0.3); }
+
+        .main { flex: 1; padding: 25px; overflow-y: auto; display: flex; flex-direction: column; }
+        .status-header { display: flex; justify-content: space-between; align-items: center; background: white; padding: 20px 30px; border-radius: 20px; margin-bottom: 25px; box-shadow: var(--shadow); border: var(--border); }
+        .coach-name h2 { font-family: var(--font-head); font-size: 1.6rem; margin-bottom: 5px; }
+        .coach-name p { color: #64748b; font-size: 0.95rem; }
+        .toggle-btn { padding: 10px 24px; border-radius: 50px; border: none; cursor: pointer; font-weight: 800; font-size: 0.85rem; transition: 0.3s; }
+        .toggle-btn.offline { background: transparent; color: #64748b; }
+        .toggle-btn.online { background: #22c55e; color: white; box-shadow: 0 4px 12px rgba(34, 197, 94, 0.4); animation: pulseGreen 2s infinite; }
+
+        /* VIEW LOGIC */
         .view-section { display: none; height: 100%; }
         .view-section.active { display: block; animation: fadeIn 0.3s ease; }
-        @keyframes fadeIn { from{opacity:0;} to{opacity:1;} }
+        @keyframes fadeIn { from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:translateY(0);} }
+
+        /* STUDIO & BOOKING STYLES */
         .studio-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 25px; height: 100%; }
-        .studio-card { background: white; border-radius: 20px; padding: 25px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); margin-bottom: 25px; }
+        .studio-card { background: white; border-radius: 20px; padding: 25px; box-shadow: var(--shadow); border: var(--border); margin-bottom: 20px; }
         .card-head { font-family: var(--font-head); font-size: 1.2rem; font-weight: 800; margin-bottom: 20px; color: var(--dark); display: flex; justify-content: space-between; align-items: center; }
-        .preview-box { width: 100%; aspect-ratio: 16/9; background: #000; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: #64748b; border: 2px dashed #cbd5e1; margin-bottom: 20px; overflow: hidden; position: relative; }
-        .live-indicator { position: absolute; top: 15px; left: 15px; background: var(--live-red); color: white; padding: 5px 12px; border-radius: 5px; font-weight: 800; font-size: 0.8rem; display: none; align-items: center; gap: 5px; }
-        .live-indicator.active { display: flex; animation: pulse 1.5s infinite; }
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+        .preview-box { width: 100%; aspect-ratio: 16/9; background: #000; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: #64748b; border: 2px dashed #cbd5e1; margin-bottom: 20px; position: relative; }
         .form-group { margin-bottom: 15px; }
         .form-label { display: block; font-weight: 700; margin-bottom: 5px; font-size: 0.9rem; }
-        .form-input { width: 100%; padding: 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-family: inherit; }
+        .form-input { width: 100%; padding: 12px; border: var(--border); border-radius: 8px; font-family: inherit; }
         .btn-action { width: 100%; padding: 15px; border-radius: 10px; border: none; font-weight: 800; cursor: pointer; transition: 0.3s; font-size: 1rem; }
         .btn-start { background: var(--primary); color: white; }
-        .btn-stop { background: var(--live-red); color: white; display: none; }
-        .chat-panel { background: white; border-radius: 20px; display: flex; flex-direction: column; height: 100%; border: 1px solid #e2e8f0; overflow: hidden; }
-        .chat-header { padding: 15px; border-bottom: 1px solid #f1f5f9; font-weight: 700; display: flex; justify-content: space-between; }
-        .chat-list { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 10px; background: #f8fafc; }
-        .chat-bubble { padding: 10px; background: white; border-radius: 8px; border: 1px solid #e2e8f0; font-size: 0.9rem; }
-        .chat-sender { font-weight: 700; font-size: 0.8rem; color: var(--primary); display: block; margin-bottom: 3px; }
-        .tools-area { padding: 15px; border-top: 1px solid #e2e8f0; background: white; }
-        .input-chat { width: 100%; padding: 10px; border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 10px; }
         
-        /* TABLE STYLING */
-        table { width: 100%; border-collapse: collapse; background: white; border-radius: 12px; overflow: hidden; font-size: 0.95rem; }
-        th, td { padding: 18px 20px; text-align: left; border-bottom: 1px solid #f1f5f9; }
-        th { background: #f8fafc; font-weight: 700; color: #64748b; font-size: 0.85rem; text-transform: uppercase; }
-        tr:hover { background: #fafafa; }
+        table { width: 100%; border-collapse: collapse; background: white; border-radius: 12px; overflow: hidden; }
+        th, td { padding: 15px 20px; text-align: left; border-bottom: 1px solid #f1f5f9; }
+        th { background: #f8fafc; font-weight: 700; color: #64748b; font-size: 0.9rem; }
         .status-badge { padding: 4px 12px; border-radius: 50px; font-size: 0.8rem; font-weight: 700; }
         .status-pending { background: #fff7ed; color: #d97706; }
         .status-confirmed { background: #dcfce7; color: #166534; }
-        .btn-confirm { padding: 6px 12px; border-radius: 6px; border: none; cursor: pointer; font-weight: 600; font-size: 0.8rem; background: var(--primary); color: white; }
+
+        .menu-toggle { display: none; position: fixed; top: 15px; left: 15px; z-index: 200; background: white; border: none; padding: 10px; border-radius: 8px; box-shadow: var(--shadow); font-size: 1.2rem; }
+        @media (max-width: 768px) {
+            .menu-toggle { display: block; }
+            .sidebar { position: fixed; left: -100%; height: 100%; }
+            .sidebar.active { left: 0; }
+            .studio-grid { grid-template-columns: 1fr; }
+            .status-header { flex-direction: column; align-items: flex-start; gap: 15px; }
+            table { display: block; overflow-x: auto; white-space: nowrap; }
+        }
     </style>
 </head>
 <body>
 
+    <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('active')"><i class="fas fa-bars"></i></button>
+
     <aside class="sidebar">
-        <div class="brand"><i class="fas fa-podcast"></i> COACH STUDIO</div>
-        
-        <div class="nav-link active" onclick="switchView('streamView', this)">
-            <i class="fas fa-video"></i> Live Stream
-        </div>
-        <div class="nav-link" onclick="switchView('bookingView', this)">
-            <i class="fas fa-calendar-check"></i> Booking Masuk
-        </div>
-        
-        <div class="nav-link" onclick="logout()" style="margin-top: auto; color: #ef4444; cursor: pointer;">
-            <i class="fas fa-sign-out-alt"></i> Logout
-        </div>
+        <div class="brand"><i class="fas fa-rocket"></i> COACH STUDIO</div>
+        <a href="coach-chat.html" class="nav-link"><i class="fas fa-comments"></i> Konsultasi (Chat)</a>
+        <div class="nav-link" id="nav-stream" onclick="switchView('streamView', this)"><i class="fas fa-video"></i> Webinar (Stream)</div>
+        <div class="nav-link" id="nav-booking" onclick="switchView('bookingView', this)"><i class="fas fa-calendar-check"></i> Jadwal & Booking</div>
+        <a onclick="logout()" class="nav-link" style="margin-top: auto; color: #ef4444; cursor: pointer;"><i class="fas fa-sign-out-alt"></i> Keluar</a>
     </aside>
 
     <div class="main">
-        
-        <div id="streamView" class="view-section active">
+        <div class="status-header">
+            <div class="coach-name">
+                <h2 id="coachName">Loading...</h2>
+                <p><i class="fas fa-certificate" style="color:var(--accent);"></i> <span id="coachSpec">Expertise...</span></p>
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <button class="toggle-btn" id="btnOffline" onclick="setStatus('offline')">OFFLINE</button>
+                <button class="toggle-btn" id="btnOnline" onclick="setStatus('online')">GO ONLINE</button>
+            </div>
+        </div>
+
+        <div id="streamView" class="view-section">
             <div class="studio-grid">
-                <div class="left-col">
-                    <div class="studio-card">
-                        <div class="card-head">
-                            <span><i class="fas fa-sliders-h"></i> Stream Controller</span>
-                            <span id="statusText" style="font-size:0.9rem; color:#64748b;">OFFLINE</span>
-                        </div>
-                        <div class="preview-box" id="previewScreen">
-                            <div class="live-indicator" id="liveBadge"><i class="fas fa-circle"></i> ON AIR</div>
-                            <div id="placeholderVideo" style="text-align: center;">
-                                <i class="fas fa-video-slash fa-3x" style="margin-bottom: 10px;"></i><br>Preview Video
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Judul Sesi Live</label>
-                            <input type="text" id="streamTitle" class="form-input" placeholder="Contoh: Bedah Bisnis Kuliner">
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">YouTube Live URL</label>
-                            <input type="text" id="streamUrl" class="form-input" placeholder="Paste link YouTube Live...">
-                        </div>
-                        <button id="btnStart" onclick="toggleStream(true)" class="btn-action btn-start">MULAI STREAMING</button>
-                        <button id="btnStop" onclick="toggleStream(false)" class="btn-action btn-stop">AKHIRI SESI</button>
+                <div class="studio-card">
+                    <div class="card-head"><span><i class="fas fa-sliders-h"></i> Stream Controller</span></div>
+                    <div class="preview-box">
+                        <div style="text-align:center;"><i class="fas fa-video-slash fa-3x"></i><br>Preview Video</div>
                     </div>
-
-                    <div class="studio-card">
-                        <div class="card-head" style="margin-bottom:15px; color:var(--primary);">
-                            <span><i class="fas fa-paperclip"></i> Push Material</span>
-                        </div>
-                        <div class="form-group">
-                            <input type="text" id="materialLabel" class="form-input" placeholder="Nama File (PDF/Modul)" style="margin-bottom:10px;">
-                            <input type="text" id="materialLink" class="form-input" placeholder="Link Download...">
-                        </div>
-                        <button onclick="pushMaterial()" class="btn-action" style="background:#f59e0b; color:white; padding:10px; font-size:0.9rem;">
-                            <i class="fas fa-share-square"></i> Kirim ke Peserta
-                        </button>
+                    <div class="form-group">
+                        <label class="form-label">Judul Sesi</label>
+                        <input type="text" class="form-input" placeholder="Contoh: Bedah Bisnis">
                     </div>
-                </div>
-
-                <div class="right-col">
-                    <div class="chat-panel">
-                        <div class="chat-header">
-                            <span>Live Chat</span>
-                            <span style="font-size:0.8rem; background:#f1f5f9; padding:2px 8px; border-radius:4px;"><i class="fas fa-user"></i> <span id="viewerCount">0</span></span>
-                        </div>
-                        <div class="chat-list" id="chatList">
-                            <div style="text-align:center; font-size:0.8rem; color:#94a3b8; margin-top:20px;">Menunggu pesan...</div>
-                        </div>
-                        <div class="tools-area">
-                            <input type="text" id="coachChat" class="input-chat" placeholder="Balas sebagai Coach..." onkeypress="handleEnter(event)">
-                            <button onclick="sendCoachChat()" style="width:100%; padding:10px; background:var(--dark); color:white; border:none; border-radius:8px; cursor:pointer;">Kirim</button>
-                        </div>
+                    <div class="form-group">
+                        <label class="form-label">YouTube URL</label>
+                        <input type="text" class="form-input" placeholder="Paste link YouTube Live...">
                     </div>
+                    <button class="btn-action btn-start">MULAI STREAMING</button>
                 </div>
             </div>
         </div>
@@ -138,201 +122,95 @@
         <div id="bookingView" class="view-section">
             <div class="studio-card">
                 <div class="card-head">
-                    <span><i class="fas fa-calendar-check"></i> Daftar Booking Masuk</span>
+                    <span><i class="fas fa-calendar-check"></i> Booking Masuk</span>
                     <button onclick="loadBookings()" style="border:none; background:transparent; color:var(--primary); font-weight:bold; cursor:pointer;"><i class="fas fa-sync"></i> Refresh</button>
                 </div>
                 <table style="width:100%">
-                    <thead>
-                        <tr>
-                            <th>User UMKM</th>
-                            <th>Topik Sesi</th>
-                            <th>Jadwal</th>
-                            <th>Status</th>
-                            <th>Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody id="bookingTableBody">
-                        <tr><td colspan="5" style="text-align:center;">Memuat data...</td></tr>
-                    </tbody>
+                    <thead><tr><th>User</th><th>Topik</th><th>Jadwal</th><th>Status</th><th>Aksi</th></tr></thead>
+                    <tbody id="bookingTableBody"><tr><td colspan="5" style="text-align:center;">Memuat...</td></tr></tbody>
                 </table>
             </div>
         </div>
-
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc, updateDoc, collection, addDoc, query, where, orderBy, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, updateDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyBIaLzkNM0KqPVKxuMNmardLqcrr2kYTWQ",
-            authDomain: "database-idbm.firebaseapp.com",
-            projectId: "database-idbm",
-            storageBucket: "database-idbm.firebasestorage.app",
-            messagingSenderId: "1052290789133",
-            appId: "1:1052290789133:web:36b513630b7a87154eca44",
-            measurementId: "G-EQLBB94DY2"
-        };
-
+        const firebaseConfig = { apiKey: "AIzaSyBIaLzkNM0KqPVKxuMNmardLqcrr2kYTWQ", authDomain: "database-idbm.firebaseapp.com", projectId: "database-idbm", storageBucket: "database-idbm.firebasestorage.app", messagingSenderId: "1052290789133", appId: "1:1052290789133:web:36b513630b7a87154eca44", measurementId: "G-EQLBB94DY2" };
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-        let coachName = "Coach";
 
-        // NAVIGATION LOGIC
+        let coachId = null, coachNameVar = "";
+
         window.switchView = (viewId, btn) => {
             document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
             document.getElementById(viewId).classList.add('active');
-            
             document.querySelectorAll('.nav-link').forEach(el => el.classList.remove('active'));
             btn.classList.add('active');
-
+            if(window.innerWidth <= 768) document.querySelector('.sidebar').classList.remove('active');
             if(viewId === 'bookingView') loadBookings();
         };
 
-        // AUTH & INIT
+        // HANDLE HASH NAVIGATION (e.g. #booking or #stream)
+        window.onload = () => {
+            const hash = window.location.hash;
+            if(hash === '#booking') window.switchView('bookingView', document.getElementById('nav-booking'));
+            else window.switchView('streamView', document.getElementById('nav-stream'));
+        }
+
         onAuthStateChanged(auth, async (user) => {
             if (user) {
-                const snap = await getDoc(doc(db, "users_umkm", user.uid));
+                coachId = user.uid;
+                const snap = await getDoc(doc(db, "users_umkm", coachId));
                 if (snap.exists() && (snap.data().role === 'coach' || snap.data().role === 'admin')) {
-                    coachName = snap.data().nama_lengkap;
-                    // Init Chat Simulation jika sedang di halaman stream
-                    initChatSimulation();
-                    // Load booking awal
-                    loadBookings();
-                } else {
-                    window.location.href = "login.html";
-                }
-            } else {
-                window.location.href = "login.html";
-            }
+                    const data = snap.data();
+                    coachNameVar = data.nama_lengkap;
+                    document.getElementById('coachName').innerText = "Halo, " + data.nama_lengkap.split(' ')[0] + "!";
+                    document.getElementById('coachSpec').innerText = data.spesialisasi || "Coach";
+                    updateStatusUI(data.status || 'offline');
+                } else { window.location.href = "login.html"; }
+            } else { window.location.href = "login.html"; }
         });
 
-        // --- BOOKING LOGIC (DATA REAL) ---
+        window.setStatus = async (status) => {
+            if (!coachId) return;
+            await updateDoc(doc(db, "users_umkm", coachId), { status: status }); updateStatusUI(status);
+        };
+
+        function updateStatusUI(status) {
+            const btnOff = document.getElementById('btnOffline');
+            const btnOn = document.getElementById('btnOnline');
+            if (status === 'offline') {
+                btnOff.className = 'toggle-btn active'; btnOff.style.background = "#e2e8f0"; btnOff.style.color = "#334155";
+                btnOn.className = 'toggle-btn offline';
+            } else {
+                btnOff.className = 'toggle-btn offline';
+                btnOn.className = 'toggle-btn online';
+            }
+        }
+
         window.loadBookings = async () => {
             const tbody = document.getElementById('bookingTableBody');
-            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Memuat data terbaru...</td></tr>';
-
             try {
-                // Query: Ambil semua booking yg coach_name nya = nama coach yang login
-                // (Di produksi, sebaiknya pakai UID Coach, tapi utk demo kita pakai nama biar gampang connect dgn user side)
-                const q = query(collection(db, "bookings"), where("coach_name", "==", coachName));
+                const q = query(collection(db, "bookings"), where("coach_name", "==", coachNameVar));
                 const snapshot = await getDocs(q);
-
                 tbody.innerHTML = "";
-                
-                if (snapshot.empty) {
-                    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#94a3b8; padding:30px;">Belum ada booking masuk untuk Anda.</td></tr>';
-                    return;
-                }
-
+                if (snapshot.empty) { tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Belum ada booking.</td></tr>'; return; }
                 snapshot.forEach(doc => {
                     const b = doc.data();
                     const statusClass = b.status === 'Confirmed' ? 'status-confirmed' : 'status-pending';
-                    const actionBtn = b.status === 'Pending' ? 
-                        `<button class="btn-confirm" onclick="confirmBooking('${doc.id}')">Terima Booking</button>` : 
-                        `<span style="color:#166534; font-size:0.8rem;"><i class="fas fa-check"></i> Diterima</span>`;
-
-                    const html = `
-                    <tr>
-                        <td>
-                            <div style="font-weight:700;">${b.user_name}</div>
-                            <small style="color:#64748b;">${b.user_email || '-'}</small>
-                        </td>
-                        <td>${b.session_topic || 'Private Coaching'}</td>
-                        <td>${b.schedule_date || 'TBD'}</td>
-                        <td><span class="status-badge ${statusClass}">${b.status}</span></td>
-                        <td>${actionBtn}</td>
-                    </tr>`;
-                    
-                    tbody.innerHTML += html;
+                    const action = b.status === 'Pending' ? `<button onclick="confirmBooking('${doc.id}')" style="padding:5px; background:var(--primary); color:white; border:none; border-radius:5px; cursor:pointer;">Terima</button>` : `<i class="fas fa-check" style="color:green"></i>`;
+                    tbody.innerHTML += `<tr><td>${b.user_name}</td><td>${b.session_topic}</td><td>${b.schedule_date || '-'}</td><td><span class="status-badge ${statusClass}">${b.status}</span></td><td>${action}</td></tr>`;
                 });
-
-            } catch (error) {
-                console.error("Error loading bookings:", error);
-                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:red;">Gagal memuat data.</td></tr>';
-            }
-        };
-
-        window.confirmBooking = async (bookingId) => {
-            if(confirm("Terima booking ini?")) {
-                try {
-                    await updateDoc(doc(db, "bookings", bookingId), {
-                        status: "Confirmed"
-                    });
-                    loadBookings(); // Refresh tabel
-                } catch(e) {
-                    alert("Gagal update status.");
-                }
-            }
-        };
-
-        // --- STREAM & CHAT LOGIC (TETAP SAMA) ---
-        window.toggleStream = (isStart) => {
-            const btnStart = document.getElementById('btnStart');
-            const btnStop = document.getElementById('btnStop');
-            const statusText = document.getElementById('statusText');
-            const badge = document.getElementById('liveBadge');
-            const preview = document.getElementById('previewScreen');
-            const urlInput = document.getElementById('streamUrl').value;
-
-            if (isStart) {
-                if(!urlInput) { alert("Masukkan Link YouTube dulu!"); return; }
-                let videoId = "";
-                if (urlInput.includes('v=')) videoId = urlInput.split('v=')[1].split('&')[0];
-                else if (urlInput.includes('youtu.be/')) videoId = urlInput.split('youtu.be/')[1];
-
-                btnStart.style.display = 'none';
-                btnStop.style.display = 'block';
-                statusText.innerText = "🔴 LIVE";
-                statusText.style.color = "var(--live-red)";
-                badge.classList.add('active');
-                preview.innerHTML = `<div class="live-indicator active"><i class="fas fa-circle"></i> ON AIR</div><iframe width="100%" height="100%" src="https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1" frameborder="0" allowfullscreen></iframe>`;
-            } else {
-                btnStart.style.display = 'block';
-                btnStop.style.display = 'none';
-                statusText.innerText = "OFFLINE";
-                statusText.style.color = "#64748b";
-                badge.classList.remove('active');
-                preview.innerHTML = `<div id="placeholderVideo" style="text-align: center;"><i class="fas fa-video-slash fa-3x" style="margin-bottom: 10px;"></i><br>Preview Video</div>`;
-            }
-        };
-
-        function initChatSimulation() {
-            setInterval(() => {
-                if(document.getElementById('streamView').classList.contains('active') && document.getElementById('btnStop').style.display === 'block') {
-                    const names = ["Budi", "Sari", "Toko Makmur"];
-                    const texts = ["Materi bagus coach", "Suara jelas", "Tanya dong..."];
-                    addChatBubble(names[Math.floor(Math.random()*names.length)], texts[Math.floor(Math.random()*texts.length)], false);
-                }
-            }, 5000);
+            } catch (e) { tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Gagal memuat.</td></tr>'; }
         }
 
-        function addChatBubble(sender, text, isCoach) {
-            const list = document.getElementById('chatList');
-            const style = isCoach ? "background:#ecfdf5; border-color:var(--primary);" : "";
-            const senderStyle = isCoach ? "color:var(--primary-dark); font-weight:800;" : "";
-            const html = `<div class="chat-bubble" style="${style}"><span class="chat-sender" style="${senderStyle}">${sender}</span>${text}</div>`;
-            list.insertAdjacentHTML('beforeend', html);
-            list.scrollTop = list.scrollHeight;
+        window.confirmBooking = async (id) => {
+            if(confirm("Terima?")) { await updateDoc(doc(db, "bookings", id), { status: "Confirmed" }); loadBookings(); }
         }
-
-        window.sendCoachChat = () => {
-            const input = document.getElementById('coachChat');
-            if(input.value) { addChatBubble(coachName + " (Host)", input.value, true); input.value = ""; }
-        };
-        window.handleEnter = (e) => { if(e.key === 'Enter') sendCoachChat(); };
-
-        window.pushMaterial = () => {
-            const label = document.getElementById('materialLabel').value;
-            const link = document.getElementById('materialLink').value;
-            if(label && link) {
-                const list = document.getElementById('chatList');
-                list.insertAdjacentHTML('beforeend', `<div style="background:#fffbeb; padding:10px; border-radius:8px; text-align:center; margin:10px 0;"><div style="font-weight:bold; color:#b45309; font-size:0.8rem;">📢 COACH SHARE FILE</div><a href="${link}" target="_blank" style="color:#059669; font-weight:bold;">${label}</a></div>`);
-                list.scrollTop = list.scrollHeight;
-            } else { alert("Lengkapi data!"); }
-        };
 
         window.logout = () => signOut(auth).then(() => window.location.href = "login.html");
     </script>
