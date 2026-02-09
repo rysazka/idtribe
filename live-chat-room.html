@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, interactive-widget=resizes-content">
     <title>Live Konsultasi - ID-TRIBE</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Plus+Jakarta+Sans:wght@400;500;700&display=swap" rel="stylesheet">
@@ -23,7 +23,8 @@
         
         body {
             font-family: var(--font-body); background-color: var(--chat-bg); color: var(--dark);
-            height: 100vh; display: flex; flex-direction: column; overflow: hidden;
+            height: 100vh; height: 100dvh; /* FIX MOBILE VIEWPORT */
+            display: flex; flex-direction: column; overflow: hidden;
         }
 
         /* --- 2. HEADER --- */
@@ -52,6 +53,7 @@
         .chat-area {
             flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 15px;
             background-image: radial-gradient(#cbd5e1 1px, transparent 1px); background-size: 20px 20px;
+            -webkit-overflow-scrolling: touch; /* Smooth scroll iOS */
         }
         
         .msg { max-width: 80%; padding: 12px 16px; border-radius: 16px; font-size: 0.95rem; line-height: 1.5; position: relative; word-wrap: break-word; }
@@ -67,10 +69,12 @@
         .chat-img { max-width: 100%; border-radius: 8px; margin-bottom: 5px; cursor: pointer; }
         .audio-player { width: 200px; height: 30px; margin-bottom: 5px; }
 
-        /* --- 4. INPUT AREA --- */
+        /* --- 4. INPUT AREA (FIXED FOR MOBILE) --- */
         .chat-footer {
             background: white; padding: 15px; border-top: 1px solid #e2e8f0;
             display: flex; gap: 10px; align-items: center; flex-wrap: wrap;
+            position: relative; z-index: 50; /* Ensure on top */
+            padding-bottom: calc(15px + env(safe-area-inset-bottom)); /* iPhone X fix */
         }
         .attach-group { display: flex; gap: 8px; }
         
@@ -84,16 +88,21 @@
         
         .hidden-input { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
 
+        /* Form Wrapper for Mobile Keyboard "Go" Button */
+        .input-form { flex: 1; display: flex; gap: 10px; align-items: center; }
+
         .input-box {
-            flex: 1; padding: 12px 18px; border-radius: 50px; border: 1px solid #e2e8f0;
-            outline: none; font-family: inherit; background: #f8fafc; font-size: 0.95rem;
+            width: 100%; padding: 12px 18px; border-radius: 50px; border: 1px solid #e2e8f0;
+            outline: none; font-family: inherit; background: #f8fafc; 
+            font-size: 16px; /* FIX IOS ZOOM BUG */
+            transition: 0.3s;
         }
         .input-box:focus { background: white; border-color: var(--primary); }
         
         .btn-send {
             background: var(--primary); border: none; width: 45px; height: 45px; border-radius: 50px;
             color: white; cursor: pointer; display: flex; align-items: center; justify-content: center;
-            font-size: 1rem; box-shadow: 0 4px 10px rgba(5, 150, 105, 0.3); transition: 0.2s;
+            font-size: 1rem; box-shadow: 0 4px 10px rgba(5, 150, 105, 0.3); transition: 0.2s; flex-shrink: 0;
         }
         .btn-send:hover { transform: scale(1.1); }
 
@@ -141,18 +150,20 @@
 
     <footer class="chat-footer">
         <div class="attach-group">
-            <button class="btn-attach" title="Kirim Gambar">
+            <button type="button" class="btn-attach" title="Kirim Gambar">
                 <i class="far fa-image"></i>
                 <input type="file" class="hidden-input" accept="image/*" onchange="handleFile(this, 'image')">
             </button>
-            <button class="btn-attach" title="Kirim File">
+            <button type="button" class="btn-attach" title="Kirim File">
                 <i class="fas fa-paperclip"></i>
                 <input type="file" class="hidden-input" accept=".pdf,.doc,.docx,.xls,.xlsx" onchange="handleFile(this, 'file')">
             </button>
         </div>
         
-        <input type="text" id="msgInput" class="input-box" placeholder="Ketik pesan..." onkeypress="handleEnter(event)">
-        <button class="btn-send" onclick="sendMessage()"><i class="fas fa-paper-plane"></i></button>
+        <form class="input-form" onsubmit="handleFormSubmit(event)">
+            <input type="text" id="msgInput" class="input-box" placeholder="Ketik pesan..." autocomplete="off">
+            <button type="submit" class="btn-send"><i class="fas fa-paper-plane"></i></button>
+        </form>
     </footer>
 
     <div id="ratingModal" class="modal-overlay">
@@ -291,6 +302,11 @@
         }
 
         // 5. SENDING FUNCTIONS
+        window.handleFormSubmit = (e) => {
+            e.preventDefault();
+            sendMessage();
+        }
+
         window.sendMessage = async () => {
             const input = document.getElementById('msgInput');
             const text = input.value.trim();
@@ -300,9 +316,8 @@
                 text: text, sender_id: currentUser.uid, timestamp: serverTimestamp(), type: "text"
             });
         }
-        window.handleEnter = (e) => { if(e.key === 'Enter') sendMessage(); }
 
-        // FILE & IMAGE HANDLER (Base64 for Prototype)
+        // FILE & IMAGE HANDLER
         window.handleFile = (input, type) => {
             const file = input.files[0];
             if(!file) return;
@@ -310,7 +325,6 @@
             const reader = new FileReader();
             reader.onload = async (e) => {
                 const base64 = e.target.result;
-                // Note: Firestore max doc size 1MB. For real app use Firebase Storage.
                 if(file.size > 800000) { alert("File terlalu besar (Max 800KB untuk demo)"); return; }
                 
                 await addDoc(collection(db, "chat_sessions", sessionId, "messages"), {
@@ -321,36 +335,11 @@
             reader.readAsDataURL(file);
         };
 
-        // VOICE RECORDING
-        window.startRecording = async () => {
-            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            mediaRecorder = new MediaRecorder(stream);
-            mediaRecorder.start();
-            audioChunks = [];
-            document.getElementById('btnRecord').classList.add('recording');
-            
-            mediaRecorder.ondataavailable = event => audioChunks.push(event.data);
-            mediaRecorder.onstop = async () => {
-                const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
-                const reader = new FileReader();
-                reader.readAsDataURL(audioBlob);
-                reader.onloadend = async () => {
-                    await addDoc(collection(db, "chat_sessions", sessionId, "messages"), {
-                        content: reader.result, type: 'audio',
-                        sender_id: currentUser.uid, timestamp: serverTimestamp()
-                    });
-                };
-                document.getElementById('btnRecord').classList.remove('recording');
-            };
-        };
-        window.stopRecording = () => { if(mediaRecorder) mediaRecorder.stop(); };
-
         // 6. END SESSION
         window.confirmEndSession = async () => {
             if(confirm("Akhiri sesi sekarang?")) {
                 await updateDoc(doc(db, "chat_sessions", sessionId), { status: "completed", ended_at: serverTimestamp() });
                 await updateDoc(doc(db, "users_umkm", coachId), { current_session: null });
-                // Listener will handle modal show
             }
         }
 

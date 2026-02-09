@@ -289,7 +289,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc, query, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, query, collection, getDocs, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBIaLzkNM0KqPVKxuMNmardLqcrr2kYTWQ",
@@ -323,7 +323,8 @@
 
         async function loadCoursesFromFirestore() {
             try {
-                const q = query(collection(db, "courses")); 
+                // Tambahkan orderBy agar yang terbaru muncul duluan
+                const q = query(collection(db, "courses"), orderBy("timestamp", "desc")); 
                 const snapshot = await getDocs(q);
                 
                 coursesDB = []; 
@@ -333,29 +334,28 @@
                         coursesDB.push({ id: doc.id, ...doc.data() });
                     });
                 } 
-
-                // Fallback Data if empty
-                if (coursesDB.length === 0) {
-                    coursesDB = [
-                        { id: "d1", title: "Digital Branding Dasar", sector: "digital", level: "Beginner", desc: "Pelajari cara membangun identitas visual yang kuat di Instagram & TikTok.", icon: "📱" },
-                        { id: "f1", title: "Pencatatan Keuangan", sector: "finance", level: "Beginner", desc: "Pisahkan uang pribadi & usaha agar cashflow lebih sehat.", icon: "💰" },
-                        { id: "l1", title: "Urus NIB & PIRT", sector: "legal", level: "Intermediate", desc: "Panduan lengkap legalitas usaha makanan.", icon: "⚖️" },
-                        { id: "o1", title: "SOP Operasional Toko", sector: "ops", level: "Advanced", desc: "Standarisasi kerja karyawan agar auto-pilot.", icon: "⚙️" },
-                        { id: "n1", title: "Teknik Negosiasi B2B", sector: "network", level: "Intermediate", desc: "Cara deal dengan supplier besar.", icon: "🤝" }
-                    ];
-                }
+                
+                // DATA DUMMY DIHAPUS AGAR YANG MUNCUL HANYA DATA ASLI DARI CMS
 
                 renderCourses();
             } catch (e) {
                 console.error("Gagal memuat course:", e);
-                document.getElementById('courseContainer').innerHTML = `<div style="text-align:center; color:red;">Gagal memuat data.</div>`;
+                // Jika error index, biasanya karena belum ada index utk timestamp
+                // Fallback sederhana jika error index:
+                if(e.message.includes("index")) {
+                    console.log("Mengambil tanpa sorting sementara...");
+                    const q2 = query(collection(db, "courses"));
+                    const snap2 = await getDocs(q2);
+                    coursesDB = [];
+                    snap2.forEach(doc => coursesDB.push({ id: doc.id, ...doc.data() }));
+                    renderCourses();
+                } else {
+                    document.getElementById('courseContainer').innerHTML = `<div style="text-align:center; color:red;">Gagal memuat data.</div>`;
+                }
             }
         }
 
-        // --- FILTER & SEARCH LOGIC ---
-        window.handleSearch = function() {
-            renderCourses();
-        }
+        window.handleSearch = function() { renderCourses(); }
 
         window.filterCourses = function(category, btn) {
             document.querySelectorAll('.filter-chip').forEach(el => el.classList.remove('active'));
@@ -371,7 +371,6 @@
 
             const completedList = userData.completed_courses || [];
 
-            // FILTER GANDA
             const filtered = coursesDB.filter(course => {
                 const matchCat = activeCategory === 'all' || course.sector === activeCategory;
                 const matchSearch = course.title.toLowerCase().includes(searchVal) || course.desc.toLowerCase().includes(searchVal);
@@ -381,8 +380,9 @@
             if(filtered.length === 0) {
                 container.innerHTML = `
                     <div style="grid-column:1/-1; text-align:center; padding:40px; color:rgba(100, 116, 139, 0.8);">
-                        <div style="font-size:3rem; margin-bottom:10px;">🔍</div>
-                        <p>Tidak ada modul yang cocok.</p>
+                        <div style="font-size:3rem; margin-bottom:10px;">📂</div>
+                        <p>Belum ada modul materi di kategori ini.</p>
+                        ${activeCategory === 'all' ? '<small>Tunggu Coach/Admin mengupload materi baru.</small>' : ''}
                     </div>`;
                 return;
             }
@@ -390,30 +390,28 @@
             filtered.forEach(course => {
                 let isLocked = false;
                 let lockReason = "";
-                
-                // Logic Lock (Opsional)
-                // if (course.level === "Intermediate" && !completedList.includes(course.sector + "_beginner")) { isLocked = true; lockReason = "Selesaikan Level Beginner Dulu"; }
-
                 const isCompleted = completedList.includes(course.id);
                 const lockedClass = isLocked ? "locked" : "";
                 
                 // Color Mapping
                 let thumbColor = "thumb-digital";
-                let badgeName = "Digital";
+                let badgeName = "Digital"; // Default
                 
+                // Mapping sesuai value di CMS (digital, finance, legal, ops, network)
                 if(course.sector === 'finance') { thumbColor = "thumb-finance"; badgeName = "Finance"; }
                 if(course.sector === 'legal')   { thumbColor = "thumb-legal"; badgeName = "Legal"; }
                 if(course.sector === 'ops')     { thumbColor = "thumb-ops"; badgeName = "Ops"; }
                 if(course.sector === 'network') { thumbColor = "thumb-network"; badgeName = "Network"; }
-                if(course.sector === 'digital') { badgeName = "Marketing"; }
+                if(course.sector === 'digital') { thumbColor = "thumb-digital"; badgeName = "Marketing"; }
 
+                // Link ke Player (Akan dibuat di langkah selanjutnya)
                 const linkUrl = isLocked ? '#' : `course-player.html?id=${course.id}`;
 
                 const html = `
                 <div class="course-card ${lockedClass}" onclick="${isLocked ? `alert('${lockReason}')` : `window.location.href='${linkUrl}'`}">
                     
                     <div class="card-thumb ${thumbColor}">
-                        <div class="thumb-icon">${course.icon || '🎓'}</div>
+                        <div class="thumb-icon">🎓</div>
                         ${isLocked ? `<div class="status-overlay"><i class="fas fa-lock fa-2x"></i><span>Terkunci</span></div>` : ''}
                         ${isCompleted ? `<div class="status-overlay" style="background:rgba(5, 150, 105, 0.85);"><i class="fas fa-check-circle fa-2x"></i><span>Selesai</span></div>` : ''}
                     </div>
@@ -424,7 +422,7 @@
                             <span class="badge badge-level">${course.level}</span>
                         </div>
                         <div class="card-title">${course.title}</div>
-                        <div class="card-desc">${isLocked ? lockReason : course.desc}</div>
+                        <div class="card-desc">${course.desc}</div>
                         
                         <div class="card-footer">
                             ${!isLocked && !isCompleted ? `

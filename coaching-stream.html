@@ -4,95 +4,72 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Expert Coaching - ID-TRIBE</title>
-    <link rel="icon" type="image/png" href="favicon.png">
-    
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Plus+Jakarta+Sans:wght@400;500;700&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    
     <script type="module" src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
     <script type="module" src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js"></script>
     <script type="module" src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"></script>
 
     <style>
-        /* --- 1. MODERN VARIABLES --- */
-        :root {
-            --primary: #059669; --primary-dark: #047857; --accent: #f59e0b;
-            --live-red: #ef4444; --dark: #0f172a; --light: #f8fafc;
-            --glass-bg: rgba(255, 255, 255, 0.9);
-            --glass-border: 1px solid rgba(255, 255, 255, 0.6);
-            --font-head: 'Outfit', sans-serif; --font-body: 'Plus Jakarta Sans', sans-serif;
-        }
-
+        /* ... CSS TETAP SAMA SEPERTI SEBELUMNYA ... */
+        :root { --primary: #2E5C48; --primary-dark: #047857; --accent: #F2994A; --live-red: #ef4444; --dark: #0f172a; --light: #f8fafc; --glass-bg: rgba(255, 255, 255, 0.9); --font-head: 'Outfit', sans-serif; --font-body: 'Plus Jakarta Sans', sans-serif; }
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: var(--font-body); background-color: #ecfdf5; color: var(--dark); min-height: 100vh; overflow-x: hidden; }
-
-        /* ORNAMENTS */
         .bg-shapes { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none; }
         .blob { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.6; animation: float 10s infinite alternate; }
         .blob-1 { top: -10%; left: -10%; width: 500px; height: 500px; background: #d1fae5; }
         .blob-2 { bottom: 10%; right: -5%; width: 400px; height: 400px; background: #fef3c7; animation-delay: -5s; }
         @keyframes float { 0% { transform: translateY(0); } 100% { transform: translateY(30px); } }
-
-        /* CONTAINER */
         .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
-
-        /* HEADER */
         .nav-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
         .back-btn { background: white; color: var(--primary); padding: 10px 20px; border-radius: 50px; text-decoration: none; font-weight: 700; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); transition: 0.3s; }
         .back-btn:hover { transform: translateX(-5px); box-shadow: 0 8px 20px rgba(0,0,0,0.1); }
-
-        /* --- LIVE STREAMING SECTION --- */
-        .live-hero {
-            background: white; border-radius: 24px; overflow: hidden;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.1); margin-bottom: 40px;
-            display: grid; grid-template-columns: 1.5fr 1fr; border: 1px solid white;
-        }
-
-        .video-container {
-            background: #000; position: relative; aspect-ratio: 16/9;
-            display: flex; align-items: center; justify-content: center;
-        }
-        .live-tag { position: absolute; top: 20px; left: 20px; background: var(--live-red); color: white; padding: 5px 12px; border-radius: 4px; font-weight: 800; font-size: 0.8rem; display: flex; align-items: center; gap: 5px; animation: pulse 1.5s infinite; z-index: 10; }
-        .viewer-count { position: absolute; bottom: 20px; left: 20px; background: rgba(0,0,0,0.6); color: white; padding: 5px 10px; border-radius: 4px; font-size: 0.8rem; display: flex; align-items: center; gap: 5px; z-index: 10; }
+        .live-section-header { display: flex; align-items: center; gap: 10px; margin-bottom: 15px; }
+        .pulse-dot { width: 10px; height: 10px; background: var(--live-red); border-radius: 50%; animation: pulse 1.5s infinite; }
+        .slider-container { position: relative; width: 100%; overflow: hidden; padding: 10px 0 30px; }
+        .live-slider { display: flex; gap: 20px; overflow-x: auto; scroll-behavior: smooth; padding: 5px; scroll-snap-type: x mandatory; -ms-overflow-style: none; scrollbar-width: none; }
+        .live-slider::-webkit-scrollbar { display: none; }
+        .live-card { min-width: 320px; max-width: 320px; height: 200px; background: #000; border-radius: 20px; overflow: hidden; position: relative; scroll-snap-align: start; cursor: pointer; box-shadow: 0 10px 20px rgba(0,0,0,0.15); transition: transform 0.3s; border: 2px solid white; }
+        .live-card:hover { transform: translateY(-5px); border-color: var(--accent); }
+        .live-thumb { width: 100%; height: 100%; object-fit: cover; opacity: 0.8; transition: 0.3s; }
+        .live-card:hover .live-thumb { opacity: 0.6; transform: scale(1.05); }
+        .live-badges { position: absolute; top: 15px; left: 15px; display: flex; gap: 8px; z-index: 2; }
+        .badge-live { background: var(--live-red); color: white; padding: 4px 10px; border-radius: 4px; font-weight: 800; font-size: 0.7rem; display: flex; align-items: center; gap: 5px; }
+        .badge-view { background: rgba(0,0,0,0.6); color: white; padding: 4px 10px; border-radius: 4px; font-size: 0.7rem; backdrop-filter: blur(4px); }
+        .live-info { position: absolute; bottom: 0; left: 0; width: 100%; background: linear-gradient(to top, rgba(0,0,0,0.9), transparent); padding: 20px 15px; color: white; z-index: 2; }
+        .live-title { font-weight: 700; font-size: 1rem; margin-bottom: 4px; line-height: 1.2; }
+        .live-mentor { font-size: 0.85rem; color: #cbd5e1; display: flex; align-items: center; gap: 5px; }
+        .live-mentor img { width: 20px; height: 20px; border-radius: 50%; }
+        .play-btn-overlay { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 50px; height: 50px; background: rgba(255,255,255,0.2); backdrop-filter: blur(5px); border-radius: 50%; display: flex; align-items: center; justify-content: center; opacity: 0; transition: 0.3s; z-index: 3; pointer-events: none; }
+        .live-card:hover .play-btn-overlay { opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
+        .slider-nav { position: absolute; top: 50%; transform: translateY(-50%); width: 40px; height: 40px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.1); cursor: pointer; z-index: 5; color: var(--primary); transition: 0.2s; opacity: 0; }
+        .slider-container:hover .slider-nav { opacity: 1; }
+        .nav-prev { left: -15px; }
+        .nav-next { right: -15px; }
+        .slider-nav:hover { background: var(--primary); color: white; }
         @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
-
-        /* CHAT SECTION (Side of Video) */
-        .chat-panel { display: flex; flex-direction: column; height: 100%; border-left: 1px solid #e2e8f0; background: #f8fafc; }
-        .chat-header { padding: 15px; background: white; border-bottom: 1px solid #e2e8f0; font-weight: 700; color: var(--primary); display: flex; justify-content: space-between; }
-        .chat-messages { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; max-height: 400px; }
-        
-        .chat-bubble { padding: 10px 12px; background: white; border-radius: 0 12px 12px 12px; font-size: 0.9rem; max-width: 90%; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
-        .chat-user { font-size: 0.75rem; font-weight: 700; color: var(--text-gray); margin-bottom: 2px; display: block; }
-        .chat-input-area { padding: 15px; background: white; border-top: 1px solid #e2e8f0; display: flex; gap: 10px; }
-        
-        .material-link { 
-            background: #e0f2fe; color: #0284c7; padding: 10px; border-radius: 8px; margin-bottom: 10px; font-size: 0.85rem; 
-            display: flex; align-items: center; gap: 10px; text-decoration: none; font-weight: 600; border: 1px dashed #0284c7;
-        }
-
-        /* --- MENTOR LIST --- */
-        .mentor-section { margin-top: 50px; }
-        .section-head { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 20px; }
+        .mentor-section { margin-top: 10px; }
         .filter-scroll { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 10px; }
-        .filter-chip { background: white; padding: 8px 16px; border-radius: 50px; border: 1px solid #e2e8f0; cursor: pointer; font-size: 0.9rem; transition: 0.3s; white-space: nowrap; }
-        .filter-chip.active { background: var(--accent); color: white; border-color: var(--accent); }
-
-        .mentor-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 25px; }
-        .mentor-card { background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.03); transition: 0.3s; border: 1px solid white; cursor: pointer; }
+        .filter-chip { background: white; padding: 8px 20px; border-radius: 50px; border: 1px solid #e2e8f0; cursor: pointer; font-size: 0.9rem; transition: 0.3s; white-space: nowrap; font-weight: 600; color: #64748b; }
+        .filter-chip:hover { border-color: var(--primary); color: var(--primary); }
+        .filter-chip.active { background: var(--primary); color: white; border-color: var(--primary); }
+        .mentor-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 25px; margin-top: 20px; }
+        .mentor-card { background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.03); transition: 0.3s; border: 1px solid white; cursor: pointer; display: flex; flex-direction: column; }
         .mentor-card:hover { transform: translateY(-5px); box-shadow: 0 20px 40px rgba(0,0,0,0.1); border-color: var(--primary); }
-        
         .mentor-head { padding: 25px; text-align: center; background: linear-gradient(135deg, #f0fdf4, #fff); border-bottom: 1px dashed #e2e8f0; }
         .mentor-img { width: 90px; height: 90px; border-radius: 50%; object-fit: cover; border: 4px solid white; box-shadow: 0 5px 15px rgba(0,0,0,0.1); margin-bottom: 10px; }
-        .mentor-body { padding: 20px; }
-        
-        /* RESPONSIVE */
-        @media (max-width: 768px) {
-            .live-hero { grid-template-columns: 1fr; display: block; }
-            .video-container { height: 250px; }
-            .chat-messages { max-height: 300px; }
-        }
+        .mentor-badge { display: inline-block; padding: 4px 12px; background: #fff7ed; color: var(--accent); border-radius: 50px; font-size: 0.75rem; font-weight: 800; border: 1px solid #fed7aa; }
+        .mentor-body { padding: 20px; text-align: center; flex: 1; display: flex; flex-direction: column; justify-content: space-between; }
+        .mentor-name { font-weight: 800; font-size: 1.1rem; margin-bottom: 5px; color: var(--dark); }
+        .mentor-spec { color: #64748b; font-size: 0.9rem; margin-bottom: 15px; }
+        .btn-book { width: 100%; padding: 12px; background: var(--dark); color: white; border: none; border-radius: 12px; font-weight: 700; cursor: pointer; transition: 0.2s; }
+        .btn-book:hover { background: var(--primary); }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.8); z-index: 100; display: none; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
+        .modal-card { background: white; width: 100%; max-width: 400px; padding: 30px; border-radius: 24px; text-align: center; position: relative; animation: popUp 0.3s; }
+        @keyframes popUp { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        .time-slot { padding: 10px; border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 8px; cursor: pointer; transition: 0.2s; font-size: 0.9rem; }
+        .time-slot:hover, .time-slot.selected { border-color: var(--primary); background: #f0fdf4; color: var(--primary); font-weight: 700; }
+        @media (max-width: 768px) { .nav-prev, .nav-next { display: none; } }
     </style>
 </head>
 <body>
@@ -106,63 +83,82 @@
         
         <div class="nav-header">
             <a href="training-hub.html" class="back-btn"><i class="fas fa-arrow-left"></i> Kembali</a>
-            <div style="font-family: var(--font-head); font-weight: 800; font-size: 1.2rem; color: var(--primary-dark);">LIVE <span style="color:var(--accent);">COACHING</span></div>
+            <a href="index.html" style="text-decoration: none; font-weight: 800; color: var(--dark); font-size: 1.4rem; font-family: 'Outfit', sans-serif;">
+                ID<span style="color:var(--accent)">TRIBE</span>
+            </a>
         </div>
 
-        <div id="streamingArea">
-            <div class="live-hero" style="text-align:center; padding:50px; display:block;">
-                <i class="fas fa-video-slash" style="font-size:3rem; color:#cbd5e1; margin-bottom:15px;"></i>
-                <h3 style="color:#64748b;">Belum ada sesi Live saat ini.</h3>
-                <p style="color:#94a3b8; font-size:0.9rem;">Cek jadwal mentor di bawah untuk booking sesi.</p>
-             </div>
+        <div class="live-section-header">
+            <div class="pulse-dot"></div>
+            <h3 style="font-weight: 800; color: var(--dark); margin: 0;">Sedang Berlangsung</h3>
+        </div>
+
+        <div class="slider-container">
+            <button class="slider-nav nav-prev" onclick="slideLive(-1)"><i class="fas fa-chevron-left"></i></button>
+            <div class="live-slider" id="liveSlider">
+                <div style="padding:20px; color:#64748b; width:100%; text-align:center;">Memuat Live Streaming...</div>
+            </div>
+            <button class="slider-nav nav-next" onclick="slideLive(1)"><i class="fas fa-chevron-right"></i></button>
         </div>
 
         <div class="mentor-section">
             <div class="section-head">
                 <div>
                     <h2 style="font-family:var(--font-head); font-weight:800; color:var(--dark); margin-bottom:5px;">Pilih Mentor Ahli</h2>
-                    <p style="color:#64748b; font-size:0.95rem;">Booking sesi privat atau tunggu sesi live mereka.</p>
+                    <p style="color:#64748b; font-size:0.95rem;">Booking sesi privat 1-on-1 dengan praktisi berpengalaman.</p>
                 </div>
             </div>
 
             <div class="filter-scroll">
                 <div class="filter-chip active" onclick="filterMentors('all', this)">Semua</div>
                 <div class="filter-chip" onclick="filterMentors('Marketing', this)">Marketing</div>
-                <div class="filter-chip" onclick="filterMentors('Halal', this)">Halal</div>
+                <div class="filter-chip" onclick="filterMentors('Halal', this)">Halal & Legal</div>
                 <div class="filter-chip" onclick="filterMentors('Finance', this)">Keuangan</div>
                 <div class="filter-chip" onclick="filterMentors('Export', this)">Ekspor</div>
             </div>
-            <br>
 
-            <div class="mentor-grid" id="mentorContainer">
-                </div>
+            <div class="mentor-grid" id="mentorContainer"></div>
         </div>
 
+    </div>
+
+    <div id="bookingModal" class="modal-overlay">
+        <div class="modal-card">
+            <button onclick="closeBooking()" style="position:absolute; top:15px; right:15px; border:none; background:none; font-size:1.2rem; cursor:pointer;">&times;</button>
+            <img src="" id="modalImg" style="width:70px; height:70px; border-radius:50%; margin-bottom:15px; border:3px solid var(--primary);">
+            <h3 id="modalName" style="margin-bottom:5px;">Nama Mentor</h3>
+            <p id="modalSpec" style="color:#64748b; font-size:0.9rem; margin-bottom:20px;">Spesialisasi</p>
+            
+            <div style="text-align:left; margin-bottom:10px; font-weight:700; font-size:0.9rem;">Pilih Jadwal Tersedia:</div>
+            <div class="time-slot selected">Senin, 10:00 - 11:00 WIB</div>
+            <div class="time-slot">Selasa, 14:00 - 15:00 WIB</div>
+            <div class="time-slot">Rabu, 09:00 - 10:00 WIB</div>
+
+            <button onclick="processBooking()" style="width:100%; padding:12px; background:var(--primary); color:white; border:none; border-radius:12px; font-weight:800; cursor:pointer; margin-top:20px;">Booking (Rp 150rb)</button>
+        </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, getDocs, onSnapshot, query, orderBy, where, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, doc, getDoc, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        // ... (KODE CONFIG FIREBASE SAMA SEPERTI SEBELUMNYA) ...
-        const firebaseConfig = {
-            apiKey: "AIzaSyBIaLzkNM0KqPVKxuMNmardLqcrr2kYTWQ",
-            authDomain: "database-idbm.firebaseapp.com",
-            projectId: "database-idbm",
-            storageBucket: "database-idbm.firebasestorage.app",
-            messagingSenderId: "1052290789133",
-            appId: "1:1052290789133:web:36b513630b7a87154eca44",
-            measurementId: "G-EQLBB94DY2"
-        };
+        const firebaseConfig = { apiKey: "AIzaSyBIaLzkNM0KqPVKxuMNmardLqcrr2kYTWQ", authDomain: "database-idbm.firebaseapp.com", projectId: "database-idbm", storageBucket: "database-idbm.firebasestorage.app", messagingSenderId: "1052290789133", appId: "1:1052290789133:web:36b513630b7a87154eca44", measurementId: "G-EQLBB94DY2" };
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
 
         let currentUser = null;
-        let selectedMentorName = ""; // Variabel baru untuk menyimpan siapa yang dibooking
+        let selectedMentorName = "";
 
-        // ... (KODE AUTH & RENDER MENTOR SAMA) ...
+        const mentors = [
+            { name: "Coach Budi", spec: "Digital Marketing", category: "Marketing", img: "Budi" },
+            { name: "Siti Halimah", spec: "Sertifikasi Halal", category: "Halal", img: "Siti" },
+            { name: "Andi Finance", spec: "Manajemen Arus Kas", category: "Finance", img: "Andi" },
+            { name: "Rina Ekspor", spec: "Global Market Entry", category: "Export", img: "Rina" },
+            { name: "Joko Susilo", spec: "Branding & Kemasan", category: "Marketing", img: "Joko" },
+            { name: "Dewi Law", spec: "Legalitas Usaha", category: "Halal", img: "Dewi" }
+        ];
 
         onAuthStateChanged(auth, async (user) => {
             if (user) {
@@ -174,56 +170,129 @@
                         email: docSnap.data().email
                     };
                 }
+                fetchLiveStreams(); 
                 renderMentors('all');
-                // ... logic lain
+            } else {
+                window.location.href = "login.html";
             }
         });
 
-        // UPDATE DI SINI: Menyimpan nama mentor saat modal dibuka
-        window.openBooking = function(name, spec, img) {
-            selectedMentorName = name; // Simpan nama mentor
+        // --- FETCH LIVE STREAMS & HANDLE CLICK ---
+        async function fetchLiveStreams() {
+            const container = document.getElementById('liveSlider');
+            try {
+                const q = query(collection(db, "live_streams"), orderBy("timestamp", "desc"));
+                const snap = await getDocs(q);
+
+                container.innerHTML = "";
+
+                if(snap.empty) {
+                    container.innerHTML = `<div style="padding:40px; text-align:center; width:100%; color:#94a3b8;">Belum ada live streaming saat ini.</div>`;
+                    return;
+                }
+
+                snap.forEach(doc => {
+    const live = doc.data();
+    const liveId = doc.id; // <--- AMBIL ID UNIK DARI FIREBASE
+    const avatarUrl = `https://ui-avatars.com/api/?name=${live.mentor_name}&background=random&color=fff`;
+    
+    // Tambahkan liveId ke parameter fungsi watchLive
+    const html = `
+    <div class="live-card" onclick="watchLive('${liveId}', '${live.url}', '${live.title}', '${live.mentor_name}', '${live.viewers}')">
+        <img src="${live.thumbnail}" class="live-thumb">
+        
+        </div>`;
+    container.innerHTML += html;
+});
+
+            } catch(e) {
+                console.error(e);
+                container.innerHTML = `<div style="color:red; width:100%; text-align:center;">Gagal memuat live stream.</div>`;
+            }
+        }
+
+        // --- NAVIGASI KE PLAYER ---
+        window.watchLive = (id, url, title, mentor, viewers) => {
+    const params = new URLSearchParams({
+        roomID: id, // <--- Kirim ID ini ke URL
+        src: url,
+        title: title,
+        mentor: mentor,
+        viewers: viewers
+    });
+    window.location.href = `live-session.html?${params.toString()}`;
+}
+
+        window.slideLive = function(direction) {
+            const container = document.getElementById('liveSlider');
+            const scrollAmount = 340;
+            container.scrollBy({ left: direction * scrollAmount, behavior: 'smooth' });
+        }
+
+        window.renderMentors = function(category) {
+            const container = document.getElementById('mentorContainer');
+            container.innerHTML = "";
+            const filtered = category === 'all' ? mentors : mentors.filter(m => m.category === category);
+            filtered.forEach(m => {
+                const html = `
+                <div class="mentor-card" onclick="openBooking('${m.name}', '${m.spec}', '${m.img}')">
+                    <div class="mentor-head">
+                        <img src="https://ui-avatars.com/api/?name=${m.img}&background=random&color=fff&size=128" class="mentor-img">
+                        <br><span class="mentor-badge">${m.category}</span>
+                    </div>
+                    <div class="mentor-body">
+                        <div>
+                            <div class="mentor-name">${m.name}</div>
+                            <div class="mentor-spec">${m.spec}</div>
+                        </div>
+                        <button class="btn-book">Lihat Jadwal</button>
+                    </div>
+                </div>`;
+                container.innerHTML += html;
+            });
+        }
+
+        window.filterMentors = function(cat, btn) {
+            document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+            btn.classList.add('active');
+            renderMentors(cat);
+        }
+
+        window.openBooking = function(name, spec, imgName) {
+            selectedMentorName = name;
             document.getElementById('bookingModal').style.display = 'flex';
             document.getElementById('modalName').innerText = name;
             document.getElementById('modalSpec').innerText = spec;
-            document.getElementById('modalImg').src = `https://ui-avatars.com/api/?name=${img}&background=random`;
+            document.getElementById('modalImg').src = `https://ui-avatars.com/api/?name=${imgName}&background=random&color=fff&size=128`;
         }
 
-        // UPDATE DI SINI: Simpan ke Firestore
+        window.closeBooking = function() {
+            document.getElementById('bookingModal').style.display = 'none';
+        }
+
         window.processBooking = async function() {
             const btn = document.querySelector('#bookingModal button[onclick="processBooking()"]');
-            btn.innerHTML = "Memproses...";
-            btn.disabled = true;
-
+            btn.innerHTML = "Memproses..."; btn.disabled = true;
             try {
-                // Simpan data booking ke collection 'bookings'
                 await addDoc(collection(db, "bookings"), {
-                    coach_name: selectedMentorName, // Nama mentor yang dituju
+                    coach_name: selectedMentorName,
                     user_uid: currentUser.uid,
                     user_name: currentUser.name,
                     user_email: currentUser.email,
-                    session_topic: "Konsultasi Private", // Bisa dibuat dinamis inputnya
-                    date: new Date(), // Tanggal booking dibuat
-                    schedule_date: "Senin, 10:00", // Hardcoded dari pilihan UI (bisa dibuat dinamis)
-                    status: "Pending", // Status awal
+                    session_topic: "Konsultasi Private",
+                    created_at: new Date(),
+                    schedule_date: "Senin, 10:00", 
+                    status: "Pending",
                     price: 150000
                 });
-
-                alert("Booking Berhasil! Silakan tunggu konfirmasi Coach.");
-                window.closeBooking();
-
+                alert(`Berhasil Booking ${selectedMentorName}! Silakan cek email untuk instruksi pembayaran.`);
+                closeBooking();
             } catch (e) {
-                console.error(e);
-                alert("Gagal melakukan booking: " + e.message);
+                alert("Gagal booking: " + e.message);
             } finally {
-                btn.innerHTML = "Booking (Rp 150rb)";
-                btn.disabled = false;
+                btn.innerHTML = "Booking (Rp 150rb)"; btn.disabled = false;
             }
         }
-        
-        // ... (SISA KODE LAINNYA TETAP SAMA) ...
-        
-        // Pastikan fungsi helper lain ada (filterMentors, renderMentors, closeBooking, dll)
-        // ...
     </script>
 </body>
 </html>

@@ -64,12 +64,6 @@
         td { padding: 15px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; font-size: 0.95rem; }
         tr:hover td { background: #f8fafc; }
 
-        /* QUIZ */
-        .quiz-container { background: #f0fdf4; border: 1px dashed var(--primary); padding: 20px; border-radius: 16px; margin-top: 15px; }
-        .quiz-item { background: white; border: 1px solid #e2e8f0; padding: 20px; border-radius: 12px; margin-bottom: 15px; position: relative; }
-        .quiz-delete { position: absolute; top: 15px; right: 15px; color: #ef4444; cursor: pointer; }
-        .option-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px; }
-
         /* IMAGE UPLOAD */
         .file-preview { margin-top: 10px; width: 100%; height: 180px; border: 2px dashed #cbd5e1; border-radius: 12px; display: flex; align-items: center; justify-content: center; overflow: hidden; background: #f8fafc; }
         .file-preview img { width: 100%; height: 100%; object-fit: cover; }
@@ -85,9 +79,8 @@
 <body>
 
     <nav class="sidebar">
-        <div class="brand"><i class="fas fa-cube"></i> ID-TRIBE <span style="color:var(--primary);">Admin</span></div>
+        <div class="brand"><i class="fas fa-cube"></i>            <span class="brand-text">ID-<span style="color: var(--accent);">TRIBE</span></span></div>
         <div class="nav-item active" onclick="switchTab('validasi', this)"><i class="fas fa-check-circle"></i> Validasi UMKM</div>
-        <div class="nav-item" onclick="switchTab('cms', this)"><i class="fas fa-video"></i> CMS Training</div>
         <div class="nav-item" onclick="switchTab('artikel', this)"><i class="fas fa-newspaper"></i> Artikel</div>
         <div class="nav-item" onclick="switchTab('forum', this)"><i class="fas fa-comments"></i> Forum</div>
         <div class="nav-item" onclick="switchTab('users', this)"><i class="fas fa-users"></i> Pengguna</div>
@@ -103,43 +96,6 @@
                     <thead><tr><th>Nama Usaha</th><th>Pemilik</th><th>NIB</th><th>Status</th><th>Aksi</th></tr></thead>
                     <tbody><tr><td colspan="5" align="center">Memuat data...</td></tr></tbody>
                 </table>
-            </div>
-        </div>
-
-        <div id="cms" class="section">
-            <div class="header"><h1 class="page-title">Materi & Ujian</h1></div>
-            <div style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 30px;">
-                <div class="card">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-                        <h3 class="card-title" id="formTitle">Buat Modul Baru</h3>
-                        <button id="btnCancelEdit" class="btn btn-gray" style="display:none; font-size:0.8rem;" onclick="cancelEditMode()">Batal</button>
-                    </div>
-                    <form onsubmit="handleCourseSubmit(event)">
-                        <div class="form-group"><label class="form-label">Judul Modul</label><input type="text" id="c_title" class="form-input" required></div>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-                            <div class="form-group"><label class="form-label">Kategori</label><select id="c_sector" class="form-input"><option value="digital">Digital</option><option value="finance">Finance</option><option value="legal">Legal</option><option value="ops">Ops</option><option value="network">Network</option></select></div>
-                            <div class="form-group"><label class="form-label">Level</label><select id="c_level" class="form-input"><option value="Beginner">Beginner</option><option value="Intermediate">Intermediate</option><option value="Advanced">Advanced</option></select></div>
-                        </div>
-                        <div class="form-group"><label class="form-label">Deskripsi</label><textarea id="c_desc" class="form-input" rows="3" required></textarea></div>
-                        <div class="form-group" style="background:#fffbeb; padding:15px; border-radius:10px; border:1px dashed #f59e0b;">
-                            <label class="form-label" style="color:#b45309;">Link Konten</label>
-                            <input type="text" id="c_url" class="form-input" placeholder="YouTube URL" style="margin-bottom:10px;" required>
-                            <input type="text" id="c_file" class="form-input" placeholder="PDF/Drive URL (Opsional)">
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label" style="display:flex; justify-content:space-between; align-items:center;">
-                                <span>📝 Quiz Builder</span>
-                                <button type="button" class="btn btn-green" style="font-size:0.75rem; padding:6px 12px;" onclick="addQuestion()">+ Soal</button>
-                            </label>
-                            <div id="quizBuilder" class="quiz-container"></div>
-                        </div>
-                        <button type="submit" id="btnSubmitCourse" class="btn btn-blue" style="width:100%">Simpan & Publish</button>
-                    </form>
-                </div>
-                <div class="card">
-                    <h3 class="card-title" style="margin-bottom: 20px;">Daftar Materi</h3>
-                    <table id="tableCourses"><thead><tr><th>Modul</th><th>Level</th><th>Aksi</th></tr></thead><tbody><tr><td colspan="3">Memuat...</td></tr></tbody></table>
-                </div>
             </div>
         </div>
 
@@ -235,10 +191,6 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // VARS
-        let isEditingCourse = false;
-        let editingCourseId = null;
-
         // AUTH
         onAuthStateChanged(auth, async (user) => {
             if(user) {
@@ -254,7 +206,6 @@
         });
 
         function loadAllData() {
-            loadCourses(); 
             loadArticles();
             loadValidasi(); 
             loadForum(); 
@@ -363,123 +314,6 @@
                     </tr>`;
                 });
             } catch(e) { console.error(e); }
-        }
-
-        // --- CMS ---
-        window.addQuestion = (data = null) => {
-            const container = document.getElementById('quizBuilder');
-            const qCount = container.children.length + 1;
-            const qVal = data ? data.question : "";
-            const opts = data ? data.options : ["", "", "", ""];
-            const corr = data ? data.correct : 0;
-
-            const html = `
-            <div class="quiz-item" id="q-${qCount}">
-                <div class="quiz-delete" onclick="this.parentElement.remove()"><i class="fas fa-trash"></i></div>
-                <div class="form-group" style="margin-bottom:10px;">
-                    <label style="font-size:0.85rem;">Pertanyaan</label>
-                    <input type="text" class="form-input q-text" value="${qVal}" required>
-                </div>
-                <div class="option-row">
-                    ${opts.map((o, i) => `<input type="text" class="form-input q-opt-${i}" placeholder="Opsi ${String.fromCharCode(65+i)}" value="${o}" required>`).join('')}
-                </div>
-                <div style="margin-top:10px;">
-                    <label style="font-size:0.8rem;">Jawaban Benar:</label>
-                    <select class="form-input q-correct" style="width:100px;">
-                        ${[0,1,2,3].map(i => `<option value="${i}" ${corr === i ? 'selected' : ''}>${String.fromCharCode(65+i)}</option>`).join('')}
-                    </select>
-                </div>
-            </div>`;
-            container.insertAdjacentHTML('beforeend', html);
-        }
-
-        window.handleCourseSubmit = async (e) => {
-            e.preventDefault();
-            const btn = document.getElementById('btnSubmitCourse');
-            const quizData = [];
-            document.querySelectorAll('.quiz-item').forEach(item => {
-                quizData.push({
-                    question: item.querySelector('.q-text').value,
-                    options: [0,1,2,3].map(i => item.querySelector(`.q-opt-${i}`).value),
-                    correct: parseInt(item.querySelector('.q-correct').value)
-                });
-            });
-
-            if (quizData.length === 0) { alert("Buat minimal 1 soal!"); return; }
-            btn.innerHTML = "Memproses..."; btn.disabled = true;
-
-            const payload = {
-                title: document.getElementById('c_title').value,
-                sector: document.getElementById('c_sector').value,
-                level: document.getElementById('c_level').value,
-                desc: document.getElementById('c_desc').value,
-                url: document.getElementById('c_url').value,
-                file_url: document.getElementById('c_file').value || "",
-                quiz_data: quizData,
-                timestamp: new Date()
-            };
-
-            try {
-                if (isEditingCourse) {
-                    await updateDoc(doc(db, "courses", editingCourseId), payload);
-                    alert("Updated!"); cancelEditMode();
-                } else {
-                    await addDoc(collection(db, "courses"), payload);
-                    alert("Created!"); e.target.reset(); document.getElementById('quizBuilder').innerHTML = "";
-                }
-                loadCourses();
-            } catch(e) { alert(e.message); }
-            finally { btn.innerHTML = isEditingCourse ? "Update" : "Simpan & Publish"; btn.disabled = false; }
-        }
-
-        window.editCourse = async (id) => {
-            const snap = await getDoc(doc(db, "courses", id));
-            if(snap.exists()) {
-                const d = snap.data();
-                document.getElementById('c_title').value = d.title;
-                document.getElementById('c_sector').value = d.sector;
-                document.getElementById('c_level').value = d.level;
-                document.getElementById('c_desc').value = d.desc;
-                document.getElementById('c_url').value = d.url;
-                document.getElementById('c_file').value = d.file_url || "";
-                
-                const qb = document.getElementById('quizBuilder'); qb.innerHTML = "";
-                if(d.quiz_data) d.quiz_data.forEach(q => addQuestion(q));
-
-                isEditingCourse = true; editingCourseId = id;
-                document.getElementById('formTitle').innerText = "Edit Modul";
-                document.getElementById('btnSubmitCourse').innerText = "Update Course";
-                document.getElementById('btnCancelEdit').style.display = "block";
-                document.getElementById('cms').scrollIntoView();
-            }
-        }
-
-        window.cancelEditMode = () => {
-            isEditingCourse = false; editingCourseId = null;
-            document.querySelector('#cms form').reset();
-            document.getElementById('quizBuilder').innerHTML = "";
-            document.getElementById('formTitle').innerText = "Buat Modul Baru";
-            document.getElementById('btnSubmitCourse').innerText = "Simpan & Publish";
-            document.getElementById('btnCancelEdit').style.display = "none";
-        }
-
-        async function loadCourses() {
-            const tbody = document.querySelector('#tableCourses tbody');
-            const q = query(collection(db, "courses"), orderBy("timestamp", "desc"));
-            const snap = await getDocs(q);
-            tbody.innerHTML = "";
-            snap.forEach(doc => {
-                const d = doc.data();
-                tbody.innerHTML += `
-                <tr>
-                    <td><strong>${d.title}</strong><br><small>${d.sector}</small></td>
-                    <td>${d.level}</td>
-                    <td>
-                        <button class="btn-warning" style="padding:5px;" onclick="editCourse('${doc.id}')"><i class="fas fa-edit"></i></button>
-                        <button class="btn-red" style="padding:5px;" onclick="deleteData('courses', '${doc.id}')"><i class="fas fa-trash"></i></button>
-                    </td>
-                </tr>`;
-            });
         }
 
         // --- ARTIKEL ---

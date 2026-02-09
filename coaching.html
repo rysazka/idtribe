@@ -49,7 +49,7 @@
     </div>
 
     <div class="navbar">
-        <a href="training-hub.html" class="nav-back">
+        <a href="dashboard.html" class="nav-back">
             <i class="fas fa-arrow-left"></i> Kembali
         </a>
     </div>
@@ -73,13 +73,13 @@
                 </div>
             </a>
 
-            <div class="option-card style-consult" onclick="handleConsultClick()">
+            <div class="option-card style-consult" onclick="handleDirectChat()">
                 <div class="icon-circle">
                     <i class="fas fa-comments"></i>
                 </div>
                 <div>
                     <div class="card-title">Private Consultation</div>
-                    <div class="card-desc">Konsultasi 1-on-1 secara privat melalui live chat dengan mentor pilihan. (Sistem akan mencari mentor yang available).</div>
+                    <div class="card-desc">Konsultasi 1-on-1 secara privat melalui live chat dengan mentor. (Klik untuk langsung mulai sesi).</div>
                 </div>
             </div>
 
@@ -89,9 +89,9 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore, collection, query, where, getDocs, doc, runTransaction, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, serverTimestamp, doc, updateDoc, query, where, getDocs, limit } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        // 1. CONFIG FIREBASE (Langsung disini agar tidak perlu file eksternal)
+        // 1. CONFIG FIREBASE
         const firebaseConfig = {
             apiKey: "AIzaSyBIaLzkNM0KqPVKxuMNmardLqcrr2kYTWQ",
             authDomain: "database-idbm.firebaseapp.com",
@@ -116,102 +116,72 @@
             }
         });
 
-        // 2. FUNGSI HANDLER (Di-expose ke window agar bisa dipanggil HTML)
-        window.handleConsultClick = () => {
+        // 2. FUNGSI DIRECT CHAT (BYPASS SEARCHING)
+        window.handleDirectChat = async () => {
             if(!currentUser) {
                 alert("Silakan login terlebih dahulu.");
                 window.location.href = "login.html";
                 return;
             }
-            // Mulai pencarian mentor
-            bookMentorSafe('General', currentUser.uid);
-        }
 
-        // 3. LOGIKA BOOKING MENTOR
-        async function bookMentorSafe(categoryId, userId) {
-            // Ubah tampilan kartu jadi loading
             const card = document.querySelector('.style-consult');
-            const originalTitle = card.querySelector('.card-title').innerText;
-            
             card.style.opacity = "0.7";
-            card.style.pointerEvents = "none"; // Cegah klik ganda
-            card.querySelector('.card-title').innerText = "Mencari Mentor...";
+            card.style.pointerEvents = "none";
+            const originalText = card.querySelector('.card-title').innerText;
+            card.querySelector('.card-title').innerText = "Menghubungkan...";
 
             try {
-                // A. Cari Mentor Online
+                // A. Cari Mentor Online (Sembarang Mentor Online)
+                // Kita ambil 1 mentor online secara acak/pertama untuk di-assign
                 const q = query(
                     collection(db, "users_umkm"), 
                     where("role", "==", "coach"), 
-                    where("status", "==", "online")
+                    where("status", "==", "online"),
+                    limit(1) 
                 );
                 
                 const snapshot = await getDocs(q);
-                
-                // Filter mentor yang tidak sedang sibuk (client side filter sementara)
-                const availableMentors = snapshot.docs
-                    .map(doc => ({id: doc.id, ...doc.data()}))
-                    .filter(m => !m.current_session); // Pastikan mentor tidak punya sesi aktif
+                let selectedCoachId = null;
 
-                if (availableMentors.length === 0) {
-                    throw new Error("Maaf, tidak ada mentor yang tersedia saat ini.");
-                }
-
-                // Pilih 1 Random
-                const candidate = availableMentors[Math.floor(Math.random() * availableMentors.length)];
-
-                // B. Transaksi Database (Booking)
-                await runTransaction(db, async (transaction) => {
-                    // Cek ulang status mentor (Double Check)
-                    const mentorRef = doc(db, "users_umkm", candidate.id);
-                    const mentorDoc = await transaction.get(mentorRef);
-
-                    if (!mentorDoc.exists()) throw "Data mentor tidak ditemukan!";
-                    
-                    const mentorData = mentorDoc.data();
-                    if (mentorData.current_session) {
-                        throw "Maaf, Mentor baru saja diambil orang lain!";
+                // Cek ketersediaan mentor
+                let found = false;
+                snapshot.forEach(doc => {
+                    if (!doc.data().current_session) { // Pastikan mentor tidak sedang chat
+                        selectedCoachId = doc.id;
+                        found = true;
                     }
-
-                    // Buat Sesi Chat Baru
-                    const newSessionRef = doc(collection(db, "chat_sessions"));
-                    transaction.set(newSessionRef, {
-                        user_id: userId,
-                        coach_id: candidate.id,
-                        category: categoryId,
-                        status: "active",
-                        start_time: serverTimestamp(),
-                        messages: [] 
-                    });
-
-                    // Update Status Mentor jadi Sibuk
-                    transaction.update(mentorRef, {
-                        current_session: newSessionRef.id
-                    });
-                    
-                    // Simpan ID sesi di window untuk redirect setelah transaksi selesai
-                    window.tempSessionId = newSessionRef.id;
                 });
 
-                // C. Redirect ke Ruang Chat
-                if (window.tempSessionId) {
-                    window.location.href = `coaching-chat.html?session_id=${window.tempSessionId}`;
+                if (!found) {
+                    throw new Error("Maaf, tidak ada mentor online saat ini. Silakan coba lagi nanti.");
                 }
 
-            } catch (e) {
-                console.error("Booking Error:", e);
+                // B. Buat Sesi Langsung
+                const newSessionRef = await addDoc(collection(db, "chat_sessions"), {
+                    user_id: currentUser.uid,
+                    coach_id: selectedCoachId,
+                    category: "General", // Default kategori
+                    status: "active",
+                    start_time: serverTimestamp(),
+                    messages: [] 
+                });
+
+                // C. Update Status Mentor (Supaya dashboard mentor berubah)
+                await updateDoc(doc(db, "users_umkm", selectedCoachId), {
+                    current_session: newSessionRef.id
+                });
+
+                // D. Redirect Langsung
+                window.location.href = `live-chat-room.html?session_id=${newSessionRef.id}`;
+
+            } catch (error) {
+                console.error("Error creating session:", error);
+                alert(error.message);
                 
-                // Reset UI
+                // Reset UI jika gagal
                 card.style.opacity = "1";
                 card.style.pointerEvents = "auto";
-                card.querySelector('.card-title').innerText = originalTitle;
-
-                if (e === "Maaf, Mentor baru saja diambil orang lain!") {
-                    // Retry otomatis jika gagal karena rebutan
-                    console.log("Retrying...");
-                    bookMentorSafe(categoryId, userId); 
-                } else {
-                    alert(e.message || "Gagal menghubungkan ke mentor.");
-                }
+                card.querySelector('.card-title').innerText = originalText;
             }
         }
     </script>

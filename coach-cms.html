@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Kelola Materi - Coach Workspace</title>
+    <link rel="icon" type="image/png" href="favicon.png">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Plus+Jakarta+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <script type="module" src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
+    <script type="module" src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js"></script>
+    <script type="module" src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"></script>
+
+    <style>
+        /* --- 1. VARIABLES (Sama dengan Coach Dashboard) --- */
+        :root {
+            --primary: #059669; --primary-dark: #047857;
+            --accent: #f59e0b; --dark: #0f172a; --bg-light: #f8fafc; --live-red: #ef4444;
+            --border: 1px solid #e2e8f0; --shadow: 0 4px 20px rgba(0,0,0,0.05);
+            --sidebar-w: 280px; --font-head: 'Outfit', sans-serif; --font-body: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: var(--font-body); background: var(--bg-light); color: var(--dark); display: flex; min-height: 100vh; }
+
+        /* --- 2. SIDEBAR (Coach Style) --- */
+        .sidebar {
+            width: var(--sidebar-w); background: #1e293b; color: white;
+            display: flex; flex-direction: column; padding: 25px; flex-shrink: 0; position: fixed; height: 100vh; z-index: 100;
+        }
+        .brand { font-family: var(--font-head); font-size: 1.5rem; font-weight: 800; margin-bottom: 40px; color: var(--primary); display: flex; align-items: center; gap: 10px; }
+        
+        .nav-link {
+            padding: 14px 15px; border-radius: 12px; color: #94a3b8; text-decoration: none;
+            display: flex; align-items: center; gap: 12px; margin-bottom: 8px; transition: 0.3s; font-weight: 500; cursor: pointer;
+        }
+        .nav-link:hover { background: rgba(255,255,255,0.1); color: white; }
+        .nav-link.active { background: var(--primary); font-weight: 700; box-shadow: 0 4px 15px rgba(5, 150, 105, 0.3); color: white; }
+
+        /* --- 3. MAIN CONTENT (CMS Style) --- */
+        .main { flex: 1; margin-left: var(--sidebar-w); padding: 40px; }
+        
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        .page-title { font-family: var(--font-head); font-size: 2rem; font-weight: 800; color: var(--dark); }
+
+        .card { background: white; padding: 30px; border-radius: 20px; box-shadow: var(--shadow); border: var(--border); margin-bottom: 25px; }
+        
+        /* FORM INPUTS */
+        .form-group { margin-bottom: 20px; }
+        .form-label { display: block; margin-bottom: 8px; font-weight: 700; font-size: 0.9rem; }
+        .form-input { width: 100%; padding: 12px 15px; border: 2px solid #e2e8f0; border-radius: 10px; font-family: inherit; background: #f9fafb; transition: 0.3s; }
+        .form-input:focus { border-color: var(--primary); background: white; outline: none; }
+
+        /* BUTTONS */
+        .btn { padding: 10px 20px; border-radius: 10px; border: none; cursor: pointer; font-weight: 700; display: inline-flex; align-items: center; gap: 8px; justify-content: center; transition: 0.3s; font-size: 0.9rem; }
+        .btn:hover { transform: translateY(-2px); }
+        .btn-green { background: var(--primary); color: white; }
+        .btn-blue { background: #3b82f6; color: white; }
+        .btn-red { background: #ef4444; color: white; padding: 8px 12px; font-size: 0.8rem; }
+        .btn-warning { background: var(--accent); color: white; }
+        .btn-gray { background: #64748b; color: white; }
+
+        /* TABLE */
+        table { width: 100%; border-collapse: separate; border-spacing: 0; }
+        th { text-align: left; padding: 15px; background: #f8fafc; color: #64748b; font-weight: 700; font-size: 0.85rem; text-transform: uppercase; border-bottom: 2px solid #e2e8f0; }
+        td { padding: 15px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; font-size: 0.95rem; }
+        tr:hover td { background: #f8fafc; }
+
+        /* QUIZ BUILDER */
+        .quiz-container { background: #f0fdf4; border: 1px dashed var(--primary); padding: 20px; border-radius: 16px; margin-top: 15px; }
+        .quiz-item { background: white; border: 1px solid #e2e8f0; padding: 20px; border-radius: 12px; margin-bottom: 15px; position: relative; }
+        .quiz-delete { position: absolute; top: 15px; right: 15px; color: #ef4444; cursor: pointer; }
+        .option-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px; }
+
+        /* MOBILE */
+        @media (max-width: 768px) {
+            .sidebar { display: none; } /* Simplified for mobile, usually toggle needed */
+            .main { margin-left: 0; padding: 20px; }
+            .grid-layout { grid-template-columns: 1fr !important; }
+        }
+    </style>
+</head>
+<body>
+
+    <aside class="sidebar">
+        <div class="brand"><i class="fas fa-rocket"> </i> <span class="brand-text">ID-<span style="color: var(--accent);">TRIBE</span></span></div>
+        
+        <a href="coach-chat.html" class="nav-link">
+            <i class="fas fa-comments"></i> Konsultasi (Chat)
+        </a>
+        <a href="coach-dashboard.html#stream" class="nav-link">
+            <i class="fas fa-video"></i> Webinar (Stream)
+        </a>
+        <a href="coach-dashboard.html#booking" class="nav-link">
+            <i class="fas fa-calendar-check"></i> Jadwal & Booking
+        </a>
+        
+        <a href="#" class="nav-link active">
+            <i class="fas fa-book-open"></i> Kelola Materi
+        </a>
+
+        <a onclick="logout()" class="nav-link" style="margin-top: auto; color: #ef4444; cursor: pointer;">
+            <i class="fas fa-sign-out-alt"></i> Keluar
+        </a>
+    </aside>
+
+    <main class="main">
+        <div class="header">
+            <h1 class="page-title">Materi & Ujian (CMS)</h1>
+            <div style="font-weight: 600; color: var(--primary);">
+                <i class="fas fa-user-tie"></i> <span id="coachName">Coach</span>
+            </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 30px;" class="grid-layout">
+            
+            <div class="card">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                    <h3 style="font-family:var(--font-head); font-weight:800;">Buat Modul Baru</h3>
+                    <button id="btnCancelEdit" class="btn btn-gray" style="display:none; font-size:0.8rem;" onclick="cancelEditMode()">Batal</button>
+                </div>
+                
+                <form onsubmit="handleCourseSubmit(event)">
+                    <div class="form-group">
+                        <label class="form-label">Judul Modul</label>
+                        <input type="text" id="c_title" class="form-input" required>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                        <div class="form-group">
+                            <label class="form-label">Kategori</label>
+                            <select id="c_sector" class="form-input">
+                                <option value="digital">Digital</option>
+                                <option value="finance">Finance</option>
+                                <option value="legal">Legal</option>
+                                <option value="ops">Ops</option>
+                                <option value="network">Network</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Level</label>
+                            <select id="c_level" class="form-input">
+                                <option value="Beginner">Beginner</option>
+                                <option value="Intermediate">Intermediate</option>
+                                <option value="Advanced">Advanced</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Deskripsi</label>
+                        <textarea id="c_desc" class="form-input" rows="3" required></textarea>
+                    </div>
+
+                    <div class="form-group" style="background:#fffbeb; padding:15px; border-radius:10px; border:1px dashed #f59e0b;">
+                        <label class="form-label" style="color:#b45309;">Link Konten</label>
+                        <input type="text" id="c_url" class="form-input" placeholder="YouTube URL" style="margin-bottom:10px;" required>
+                        <input type="text" id="c_file" class="form-input" placeholder="PDF/Drive URL (Opsional)">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" style="display:flex; justify-content:space-between; align-items:center;">
+                            <span>📝 Quiz Builder</span>
+                            <button type="button" class="btn btn-green" style="font-size:0.75rem; padding:6px 12px;" onclick="addQuestion()">+ Soal</button>
+                        </label>
+                        <div id="quizBuilder" class="quiz-container"></div>
+                    </div>
+
+                    <button type="submit" id="btnSubmitCourse" class="btn btn-blue" style="width:100%">Simpan & Publish</button>
+                </form>
+            </div>
+
+            <div class="card">
+                <h3 style="font-family:var(--font-head); font-weight:800; margin-bottom: 20px;">Daftar Materi</h3>
+                <table id="tableCourses">
+                    <thead><tr><th>Modul</th><th>Level</th><th>Aksi</th></tr></thead>
+                    <tbody><tr><td colspan="3">Memuat...</td></tr></tbody>
+                </table>
+            </div>
+
+        </div>
+    </main>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, getDocs, deleteDoc, updateDoc, doc, query, orderBy, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBIaLzkNM0KqPVKxuMNmardLqcrr2kYTWQ",
+            authDomain: "database-idbm.firebaseapp.com",
+            projectId: "database-idbm",
+            storageBucket: "database-idbm.firebasestorage.app",
+            messagingSenderId: "1052290789133",
+            appId: "1:1052290789133:web:36b513630b7a87154eca44",
+            measurementId: "G-EQLBB94DY2"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let isEditingCourse = false;
+        let editingCourseId = null;
+        let currentCoachName = "";
+
+        // 1. AUTH CHECK (Coach / Admin Only)
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                const snap = await getDoc(doc(db, "users_umkm", user.uid));
+                if (snap.exists() && (snap.data().role === 'coach' || snap.data().role === 'admin')) {
+                    currentCoachName = snap.data().nama_lengkap;
+                    document.getElementById('coachName').innerText = currentCoachName;
+                    loadCourses(); // Load data jika auth sukses
+                } else {
+                    window.location.href = "dashboard.html";
+                }
+            } else {
+                window.location.href = "login.html";
+            }
+        });
+
+        // 2. QUIZ BUILDER FUNCTION
+        window.addQuestion = (data = null) => {
+            const container = document.getElementById('quizBuilder');
+            const qCount = container.children.length + 1;
+            const qVal = data ? data.question : "";
+            const opts = data ? data.options : ["", "", "", ""];
+            const corr = data ? data.correct : 0;
+
+            const html = `
+            <div class="quiz-item" id="q-${qCount}">
+                <div class="quiz-delete" onclick="this.parentElement.remove()"><i class="fas fa-trash"></i></div>
+                <div class="form-group" style="margin-bottom:10px;">
+                    <label style="font-size:0.85rem;">Pertanyaan</label>
+                    <input type="text" class="form-input q-text" value="${qVal}" required>
+                </div>
+                <div class="option-row">
+                    ${opts.map((o, i) => `<input type="text" class="form-input q-opt-${i}" placeholder="Opsi ${String.fromCharCode(65+i)}" value="${o}" required>`).join('')}
+                </div>
+                <div style="margin-top:10px;">
+                    <label style="font-size:0.8rem;">Jawaban Benar:</label>
+                    <select class="form-input q-correct" style="width:100px;">
+                        ${[0,1,2,3].map(i => `<option value="${i}" ${corr === i ? 'selected' : ''}>${String.fromCharCode(65+i)}</option>`).join('')}
+                    </select>
+                </div>
+            </div>`;
+            container.insertAdjacentHTML('beforeend', html);
+        }
+
+        // 3. SUBMIT / UPDATE MATERI
+        window.handleCourseSubmit = async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('btnSubmitCourse');
+            
+            // Collect Quiz Data
+            const quizData = [];
+            document.querySelectorAll('.quiz-item').forEach(item => {
+                quizData.push({
+                    question: item.querySelector('.q-text').value,
+                    options: [0,1,2,3].map(i => item.querySelector(`.q-opt-${i}`).value),
+                    correct: parseInt(item.querySelector('.q-correct').value)
+                });
+            });
+
+            if (quizData.length === 0) { alert("Buat minimal 1 soal quiz!"); return; }
+            
+            btn.innerHTML = "Memproses..."; btn.disabled = true;
+
+            const payload = {
+                title: document.getElementById('c_title').value,
+                sector: document.getElementById('c_sector').value,
+                level: document.getElementById('c_level').value,
+                desc: document.getElementById('c_desc').value,
+                url: document.getElementById('c_url').value,
+                file_url: document.getElementById('c_file').value || "",
+                quiz_data: quizData,
+                author_name: currentCoachName,
+                author_id: auth.currentUser.uid,
+                timestamp: new Date()
+            };
+
+            try {
+                if (isEditingCourse) {
+                    await updateDoc(doc(db, "courses", editingCourseId), payload);
+                    alert("Materi berhasil diperbarui!"); cancelEditMode();
+                } else {
+                    await addDoc(collection(db, "courses"), payload);
+                    alert("Materi berhasil dibuat!"); e.target.reset(); document.getElementById('quizBuilder').innerHTML = "";
+                }
+                loadCourses();
+            } catch(e) { 
+                console.error(e);
+                alert("Gagal menyimpan: " + e.message); 
+            } finally { 
+                btn.innerHTML = isEditingCourse ? "Update" : "Simpan & Publish"; btn.disabled = false; 
+            }
+        }
+
+        // 4. LOAD & EDIT & DELETE
+        async function loadCourses() {
+            const tbody = document.querySelector('#tableCourses tbody');
+            const q = query(collection(db, "courses"), orderBy("timestamp", "desc"));
+            const snap = await getDocs(q);
+            tbody.innerHTML = "";
+            
+            if(snap.empty) {
+                tbody.innerHTML = `<tr><td colspan="3" align="center">Belum ada materi.</td></tr>`;
+                return;
+            }
+
+            snap.forEach(doc => {
+                const d = doc.data();
+                tbody.innerHTML += `
+                <tr>
+                    <td><strong>${d.title}</strong><br><small style="color:#64748b;">${d.sector}</small></td>
+                    <td><span style="background:#e0f2fe; color:#0369a1; padding:2px 8px; border-radius:4px; font-size:0.8rem;">${d.level}</span></td>
+                    <td>
+                        <button class="btn-warning" style="padding:6px;" onclick="editCourse('${doc.id}')"><i class="fas fa-edit"></i></button>
+                        <button class="btn-red" style="padding:6px;" onclick="deleteData('courses', '${doc.id}')"><i class="fas fa-trash"></i></button>
+                    </td>
+                </tr>`;
+            });
+        }
+
+        window.editCourse = async (id) => {
+            const snap = await getDoc(doc(db, "courses", id));
+            if(snap.exists()) {
+                const d = snap.data();
+                document.getElementById('c_title').value = d.title;
+                document.getElementById('c_sector').value = d.sector;
+                document.getElementById('c_level').value = d.level;
+                document.getElementById('c_desc').value = d.desc;
+                document.getElementById('c_url').value = d.url;
+                document.getElementById('c_file').value = d.file_url || "";
+                
+                const qb = document.getElementById('quizBuilder'); qb.innerHTML = "";
+                if(d.quiz_data) d.quiz_data.forEach(q => addQuestion(q));
+
+                isEditingCourse = true; editingCourseId = id;
+                document.getElementById('btnSubmitCourse').innerText = "Update Materi";
+                document.getElementById('btnCancelEdit').style.display = "block";
+                window.scrollTo(0,0);
+            }
+        }
+
+        window.cancelEditMode = () => {
+            isEditingCourse = false; editingCourseId = null;
+            document.querySelector('form').reset();
+            document.getElementById('quizBuilder').innerHTML = "";
+            document.getElementById('btnSubmitCourse').innerText = "Simpan & Publish";
+            document.getElementById('btnCancelEdit').style.display = "none";
+        }
+
+        window.deleteData = async (col, id) => {
+            if(confirm("Hapus materi ini?")) {
+                await deleteDoc(doc(db, col, id));
+                loadCourses();
+            }
+        }
+
+        window.logout = () => signOut(auth).then(() => window.location.href = "login.html");
+    </script>
+</body>
+</html>

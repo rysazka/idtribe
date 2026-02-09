@@ -224,8 +224,7 @@
                 // B. Update Display Name
                 await updateProfile(user, { displayName: name });
 
-                // C. Simpan ke Firestore (VERSI AMAN)
-                // Sanitasi Role (Hanya boleh 'umkm' atau 'coach')
+                // C. Simpan ke Firestore
                 let safeRole = 'umkm';
                 if (window.selectedRole === 'coach') {
                     safeRole = 'coach';
@@ -240,22 +239,23 @@
                     nama_usaha: safeRole === 'umkm' ? businessName : null,
                     spesialisasi: safeRole === 'coach' ? skill : null,
                     
-                    // Field default (HARDCODED UNTUK KEAMANAN)
+                    // Field default
                     join_date: new Date(),
                     completed_courses: [],
                     
-                    // PENTING: Semua pendaftar baru statusnya FALSE.
-                    // Coach harus menunggu persetujuan Admin untuk menjadi TRUE.
+                    // PENTING: status_setup harus "pending" dulu untuk UMKM
+                    status_setup: safeRole === 'umkm' ? "pending" : "completed",
                     is_verified: false 
                 });
 
                 // D. Redirect sesuai peran
-                alert("Pendaftaran Berhasil! " + (safeRole === 'coach' ? "Akun Anda sedang diverifikasi admin." : "Selamat datang!"));
+                alert("Pendaftaran Berhasil! Selamat datang " + name);
                 
                 if (safeRole === 'coach') {
                     window.location.href = "coach-dashboard.html";
                 } else {
-                    window.location.href = "dashboard.html";
+                    // JIKA UMKM -> WAJIB SETUP DULU
+                    window.location.href = "setup-umkm.html"; 
                 }
 
             } catch (error) {

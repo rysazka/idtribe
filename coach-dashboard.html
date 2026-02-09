@@ -14,77 +14,109 @@
     <script type="module" src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"></script>
 
     <style>
-        /* --- COPY CSS DARI FILE COACH-CHAT.HTML DI ATAS AGAR TAMPILAN SAMA PERSIS --- */
-        /* Paste semua CSS dari bagian <style> file coach-chat.html ke sini */
-        /* Saya akan menyertakan style dasar yang relevan untuk file ini saja */
-        
+        /* --- VARIABLES --- */
         :root {
-            --primary: #059669; --primary-dark: #047857; --accent: #f59e0b;
-            --dark: #0f172a; --bg-light: #f8fafc; --live-red: #ef4444;
+            --primary: #059669; --dark: #0f172a; --bg-light: #f8fafc; --live-red: #ef4444;
             --border: 1px solid #e2e8f0; --shadow: 0 4px 20px rgba(0,0,0,0.05);
             --sidebar-w: 280px; --font-head: 'Outfit', sans-serif; --font-body: 'Plus Jakarta Sans', sans-serif;
         }
         * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
         body { font-family: var(--font-body); background: var(--bg-light); color: var(--dark); height: 100vh; display: flex; overflow: hidden; }
 
-        .sidebar { width: var(--sidebar-w); background: #1e293b; color: white; display: flex; flex-direction: column; padding: 25px; flex-shrink: 0; z-index: 150; transition: transform 0.3s ease; }
+        /* --- SIDEBAR (Updated to match CMS) --- */
+        .menu-toggle { display: none; position: fixed; top: 15px; left: 15px; z-index: 200; background: white; border: none; padding: 10px; border-radius: 8px; box-shadow: var(--shadow); }
+        .sidebar { width: var(--sidebar-w); background: #1e293b; color: white; display: flex; flex-direction: column; padding: 25px; flex-shrink: 0; z-index: 150; transition: transform 0.3s; }
         .brand { font-family: var(--font-head); font-size: 1.5rem; font-weight: 800; margin-bottom: 40px; color: var(--primary); display: flex; align-items: center; gap: 10px; }
-        .nav-link { padding: 14px 15px; border-radius: 12px; color: #94a3b8; text-decoration: none; display: flex; align-items: center; gap: 12px; margin-bottom: 8px; transition: 0.3s; font-weight: 500; cursor: pointer; }
-        .nav-link:hover, .nav-link.active { background: rgba(255,255,255,0.1); color: white; }
-        .nav-link.active { background: var(--primary); font-weight: 700; box-shadow: 0 4px 15px rgba(5, 150, 105, 0.3); }
+        
+        .nav-link { 
+            padding: 14px 15px; border-radius: 12px; color: #94a3b8; text-decoration: none; 
+            display: flex; align-items: center; gap: 12px; margin-bottom: 8px; transition: 0.3s; 
+            cursor: pointer; font-weight: 500; 
+        }
+        .nav-link:hover { background: rgba(255,255,255,0.1); color: white; }
+        .nav-link.active { background: var(--primary); font-weight: 700; box-shadow: 0 4px 15px rgba(5, 150, 105, 0.3); color: white; }
+        
+        .sidebar-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 140; backdrop-filter: blur(2px); }
 
+        /* --- MAIN --- */
         .main { flex: 1; padding: 25px; overflow-y: auto; display: flex; flex-direction: column; }
         .status-header { display: flex; justify-content: space-between; align-items: center; background: white; padding: 20px 30px; border-radius: 20px; margin-bottom: 25px; box-shadow: var(--shadow); border: var(--border); }
         .coach-name h2 { font-family: var(--font-head); font-size: 1.6rem; margin-bottom: 5px; }
         .coach-name p { color: #64748b; font-size: 0.95rem; }
+        .toggle-switch { display: flex; align-items: center; gap: 8px; background: #f1f5f9; padding: 6px; border-radius: 50px; border: var(--border); }
         .toggle-btn { padding: 10px 24px; border-radius: 50px; border: none; cursor: pointer; font-weight: 800; font-size: 0.85rem; transition: 0.3s; }
         .toggle-btn.offline { background: transparent; color: #64748b; }
-        .toggle-btn.online { background: #22c55e; color: white; box-shadow: 0 4px 12px rgba(34, 197, 94, 0.4); animation: pulseGreen 2s infinite; }
+        .toggle-btn.online { background: #22c55e; color: white; box-shadow: 0 4px 12px rgba(34, 197, 94, 0.4); }
 
-        /* VIEW LOGIC */
+        /* --- VIEWS --- */
         .view-section { display: none; height: 100%; }
         .view-section.active { display: block; animation: fadeIn 0.3s ease; }
         @keyframes fadeIn { from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:translateY(0);} }
 
-        /* STUDIO & BOOKING STYLES */
+        /* --- STREAM STYLES --- */
         .studio-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 25px; height: 100%; }
         .studio-card { background: white; border-radius: 20px; padding: 25px; box-shadow: var(--shadow); border: var(--border); margin-bottom: 20px; }
         .card-head { font-family: var(--font-head); font-size: 1.2rem; font-weight: 800; margin-bottom: 20px; color: var(--dark); display: flex; justify-content: space-between; align-items: center; }
-        .preview-box { width: 100%; aspect-ratio: 16/9; background: #000; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: #64748b; border: 2px dashed #cbd5e1; margin-bottom: 20px; position: relative; }
+        .preview-box { width: 100%; aspect-ratio: 16/9; background: #000; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: #64748b; margin-bottom: 20px; overflow: hidden; position: relative; }
+        .live-badge { position: absolute; top: 15px; left: 15px; background: var(--live-red); color: white; padding: 5px 12px; border-radius: 5px; font-weight: 800; font-size: 0.8rem; display: none; align-items: center; gap: 5px; }
+        .live-badge.active { display: flex; animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+        
         .form-group { margin-bottom: 15px; }
         .form-label { display: block; font-weight: 700; margin-bottom: 5px; font-size: 0.9rem; }
         .form-input { width: 100%; padding: 12px; border: var(--border); border-radius: 8px; font-family: inherit; }
         .btn-action { width: 100%; padding: 15px; border-radius: 10px; border: none; font-weight: 800; cursor: pointer; transition: 0.3s; font-size: 1rem; }
         .btn-start { background: var(--primary); color: white; }
-        
-        table { width: 100%; border-collapse: collapse; background: white; border-radius: 12px; overflow: hidden; }
+        .btn-stop { background: var(--live-red); color: white; display: none; }
+
+        /* --- TABLE STYLES --- */
+        .tool-card { background: white; padding: 25px; border-radius: 20px; border: var(--border); box-shadow: var(--shadow); height: 100%; }
+        table { width: 100%; border-collapse: collapse; }
         th, td { padding: 15px 20px; text-align: left; border-bottom: 1px solid #f1f5f9; }
         th { background: #f8fafc; font-weight: 700; color: #64748b; font-size: 0.9rem; }
         .status-badge { padding: 4px 12px; border-radius: 50px; font-size: 0.8rem; font-weight: 700; }
         .status-pending { background: #fff7ed; color: #d97706; }
         .status-confirmed { background: #dcfce7; color: #166534; }
 
-        .menu-toggle { display: none; position: fixed; top: 15px; left: 15px; z-index: 200; background: white; border: none; padding: 10px; border-radius: 8px; box-shadow: var(--shadow); font-size: 1.2rem; }
+        @media (max-width: 1024px) { .studio-grid { grid-template-columns: 1fr; } }
         @media (max-width: 768px) {
             .menu-toggle { display: block; }
-            .sidebar { position: fixed; left: -100%; height: 100%; }
+            .sidebar { position: fixed; left: -100%; top:0; height: 100%; box-shadow: 5px 0 15px rgba(0,0,0,0.1); }
             .sidebar.active { left: 0; }
-            .studio-grid { grid-template-columns: 1fr; }
+            .sidebar-overlay.active { display: block; }
+            .main { padding: 15px; padding-top: 60px; }
             .status-header { flex-direction: column; align-items: flex-start; gap: 15px; }
+            .toggle-switch { width: 100%; justify-content: center; }
             table { display: block; overflow-x: auto; white-space: nowrap; }
         }
     </style>
 </head>
 <body>
 
-    <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('active')"><i class="fas fa-bars"></i></button>
+    <button class="menu-toggle" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+    <div class="sidebar-overlay" onclick="toggleSidebar()"></div>
 
     <aside class="sidebar">
-        <div class="brand"><i class="fas fa-rocket"></i> COACH STUDIO</div>
-        <a href="coach-chat.html" class="nav-link"><i class="fas fa-comments"></i> Konsultasi (Chat)</a>
-        <div class="nav-link" id="nav-stream" onclick="switchView('streamView', this)"><i class="fas fa-video"></i> Webinar (Stream)</div>
-        <div class="nav-link" id="nav-booking" onclick="switchView('bookingView', this)"><i class="fas fa-calendar-check"></i> Jadwal & Booking</div>
-        <a onclick="logout()" class="nav-link" style="margin-top: auto; color: #ef4444; cursor: pointer;"><i class="fas fa-sign-out-alt"></i> Keluar</a>
+        <div class="brand"><i class="fas fa-rocket"> </i> <span class="brand-text">ID-<span style="color: #f59e0b;">TRIBE</span></span></div>
+        
+        <a href="coach-chat.html" class="nav-link">
+            <i class="fas fa-comments"></i> Konsultasi (Chat)
+        </a>
+        
+        <div class="nav-link active" onclick="switchView('streamView', this)">
+            <i class="fas fa-video"></i> Webinar (Stream)
+        </div>
+        <div class="nav-link" onclick="switchView('bookingView', this)">
+            <i class="fas fa-calendar-check"></i> Jadwal & Booking
+        </div>
+        
+        <a href="coach-cms.html" class="nav-link">
+            <i class="fas fa-book-open"></i> Kelola Materi
+        </a>
+
+        <a onclick="logout()" class="nav-link" style="margin-top: auto; color: #ef4444; cursor: pointer;">
+            <i class="fas fa-sign-out-alt"></i> Keluar
+        </a>
     </aside>
 
     <div class="main">
@@ -93,34 +125,50 @@
                 <h2 id="coachName">Loading...</h2>
                 <p><i class="fas fa-certificate" style="color:var(--accent);"></i> <span id="coachSpec">Expertise...</span></p>
             </div>
-            <div style="display: flex; gap: 10px;">
+            <div class="toggle-switch">
                 <button class="toggle-btn" id="btnOffline" onclick="setStatus('offline')">OFFLINE</button>
                 <button class="toggle-btn" id="btnOnline" onclick="setStatus('online')">GO ONLINE</button>
             </div>
         </div>
 
-        <div id="streamView" class="view-section">
+        <div id="streamView" class="view-section active">
             <div class="studio-grid">
-                <div class="studio-card">
-                    <div class="card-head"><span><i class="fas fa-sliders-h"></i> Stream Controller</span></div>
-                    <div class="preview-box">
-                        <div style="text-align:center;"><i class="fas fa-video-slash fa-3x"></i><br>Preview Video</div>
+                <div class="left-col">
+                    <div class="studio-card">
+                        <div class="card-head">
+                            <span><i class="fas fa-sliders-h"></i> Stream Controller</span>
+                            <span id="streamStatusText" style="font-size:0.9rem; color:#64748b;">OFFLINE</span>
+                        </div>
+                        <div class="preview-box" id="previewScreen">
+                            <div class="live-badge" id="liveBadge"><i class="fas fa-circle"></i> ON AIR</div>
+                            <div style="text-align: center;">
+                                <i class="fas fa-video-slash fa-3x" style="margin-bottom: 10px;"></i><br>Preview Video
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Judul Sesi</label>
+                            <input type="text" id="streamTitle" class="form-input" placeholder="Contoh: Bedah Bisnis">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">YouTube URL</label>
+                            <input type="text" id="streamUrl" class="form-input" placeholder="Paste link YouTube Live...">
+                        </div>
+                        <button id="btnStartStream" onclick="toggleStream(true)" class="btn-action btn-start">MULAI STREAMING</button>
+                        <button id="btnStopStream" onclick="toggleStream(false)" class="btn-action btn-stop">AKHIRI SESI</button>
                     </div>
-                    <div class="form-group">
-                        <label class="form-label">Judul Sesi</label>
-                        <input type="text" class="form-input" placeholder="Contoh: Bedah Bisnis">
+                </div>
+                
+                <div class="right-col">
+                    <div class="studio-card">
+                        <div class="card-head"><span>Live Chat Stream</span></div>
+                        <div style="text-align:center; color:#94a3b8; padding:40px;">Chat akan muncul saat live.</div>
                     </div>
-                    <div class="form-group">
-                        <label class="form-label">YouTube URL</label>
-                        <input type="text" class="form-input" placeholder="Paste link YouTube Live...">
-                    </div>
-                    <button class="btn-action btn-start">MULAI STREAMING</button>
                 </div>
             </div>
         </div>
 
         <div id="bookingView" class="view-section">
-            <div class="studio-card">
+            <div class="tool-card">
                 <div class="card-head">
                     <span><i class="fas fa-calendar-check"></i> Booking Masuk</span>
                     <button onclick="loadBookings()" style="border:none; background:transparent; color:var(--primary); font-weight:bold; cursor:pointer;"><i class="fas fa-sync"></i> Refresh</button>
@@ -145,22 +193,26 @@
 
         let coachId = null, coachNameVar = "";
 
+        // UI LOGIC
+        window.toggleSidebar = () => {
+            document.querySelector('.sidebar').classList.toggle('active');
+            document.querySelector('.sidebar-overlay').style.display = document.querySelector('.sidebar').classList.contains('active') ? 'block' : 'none';
+        }
+
         window.switchView = (viewId, btn) => {
             document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
             document.getElementById(viewId).classList.add('active');
+            
+            // Remove active from all nav-links
             document.querySelectorAll('.nav-link').forEach(el => el.classList.remove('active'));
+            // Add active to the clicked button
             btn.classList.add('active');
-            if(window.innerWidth <= 768) document.querySelector('.sidebar').classList.remove('active');
+            
+            if(window.innerWidth <= 768) window.toggleSidebar();
             if(viewId === 'bookingView') loadBookings();
         };
 
-        // HANDLE HASH NAVIGATION (e.g. #booking or #stream)
-        window.onload = () => {
-            const hash = window.location.hash;
-            if(hash === '#booking') window.switchView('bookingView', document.getElementById('nav-booking'));
-            else window.switchView('streamView', document.getElementById('nav-stream'));
-        }
-
+        // AUTH & INIT
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 coachId = user.uid;
@@ -169,29 +221,37 @@
                     const data = snap.data();
                     coachNameVar = data.nama_lengkap;
                     document.getElementById('coachName').innerText = "Halo, " + data.nama_lengkap.split(' ')[0] + "!";
-                    document.getElementById('coachSpec').innerText = data.spesialisasi || "Coach";
+                    document.getElementById('coachSpec').innerText = "Expertise: " + (Array.isArray(data.spesialisasi) ? data.spesialisasi.join(", ") : (data.spesialisasi || "Generalist"));
                     updateStatusUI(data.status || 'offline');
+                    
+                    // Check hash for direct navigation
+                    const hash = window.location.hash;
+                    if(hash === '#booking') {
+                        // Find element that triggers booking view
+                        const bookingBtn = document.querySelectorAll('.nav-link')[2]; // Index 2 based on layout
+                        if(bookingBtn) window.switchView('bookingView', bookingBtn);
+                    }
                 } else { window.location.href = "login.html"; }
             } else { window.location.href = "login.html"; }
         });
 
+        // STATUS
         window.setStatus = async (status) => {
             if (!coachId) return;
-            await updateDoc(doc(db, "users_umkm", coachId), { status: status }); updateStatusUI(status);
+            try { await updateDoc(doc(db, "users_umkm", coachId), { status: status }); updateStatusUI(status); } catch (e) { alert("Gagal update status."); }
         };
 
         function updateStatusUI(status) {
             const btnOff = document.getElementById('btnOffline');
             const btnOn = document.getElementById('btnOnline');
             if (status === 'offline') {
-                btnOff.className = 'toggle-btn active'; btnOff.style.background = "#e2e8f0"; btnOff.style.color = "#334155";
-                btnOn.className = 'toggle-btn offline';
+                btnOff.className = 'toggle-btn active'; btnOn.className = 'toggle-btn offline';
             } else {
-                btnOff.className = 'toggle-btn offline';
-                btnOn.className = 'toggle-btn online';
+                btnOff.className = 'toggle-btn offline'; btnOn.className = 'toggle-btn online';
             }
         }
 
+        // BOOKING
         window.loadBookings = async () => {
             const tbody = document.getElementById('bookingTableBody');
             try {
@@ -211,6 +271,29 @@
         window.confirmBooking = async (id) => {
             if(confirm("Terima?")) { await updateDoc(doc(db, "bookings", id), { status: "Confirmed" }); loadBookings(); }
         }
+
+        // STREAM
+        window.toggleStream = (isStart) => {
+            if (isStart) {
+                const url = document.getElementById('streamUrl').value;
+                if(!url) { alert("Masukkan URL!"); return; }
+                document.getElementById('btnStartStream').style.display = 'none';
+                document.getElementById('btnStopStream').style.display = 'block';
+                document.getElementById('streamStatusText').innerText = "LIVE";
+                document.getElementById('streamStatusText').style.color = "var(--live-red)";
+                document.getElementById('liveBadge').classList.add('active');
+                
+                let vId = url.includes('v=') ? url.split('v=')[1].split('&')[0] : url.split('youtu.be/')[1];
+                document.getElementById('previewScreen').innerHTML = `<iframe width="100%" height="100%" src="https://www.youtube.com/embed/${vId}?autoplay=1" frameborder="0"></iframe>`;
+            } else {
+                document.getElementById('btnStartStream').style.display = 'block';
+                document.getElementById('btnStopStream').style.display = 'none';
+                document.getElementById('streamStatusText').innerText = "OFFLINE";
+                document.getElementById('streamStatusText').style.color = "#64748b";
+                document.getElementById('liveBadge').classList.remove('active');
+                document.getElementById('previewScreen').innerHTML = `<div style="text-align:center; padding-top:20px;"><i class="fas fa-video-slash fa-3x"></i><br>Preview Video</div>`;
+            }
+        };
 
         window.logout = () => signOut(auth).then(() => window.location.href = "login.html");
     </script>

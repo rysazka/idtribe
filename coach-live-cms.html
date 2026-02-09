@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kelola Live Stream - Coach Studio</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Plus+Jakarta+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <script type="module" src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
+    <script type="module" src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js"></script>
+    <script type="module" src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"></script>
+
+    <style>
+        :root { --primary: #059669; --dark: #0f172a; --bg-light: #f8fafc; --sidebar-w: 280px; font-family: 'Plus Jakarta Sans', sans-serif; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { background: var(--bg-light); color: var(--dark); display: flex; min-height: 100vh; }
+
+        /* SIDEBAR (Sama dengan dashboard coach lain) */
+        .sidebar { width: var(--sidebar-w); background: #1e293b; color: white; padding: 25px; position: fixed; height: 100vh; }
+        .brand { font-family: 'Outfit', sans-serif; font-size: 1.5rem; font-weight: 800; margin-bottom: 40px; color: var(--primary); }
+        .nav-link { padding: 14px 15px; border-radius: 12px; color: #94a3b8; text-decoration: none; display: flex; gap: 12px; margin-bottom: 8px; transition: 0.3s; cursor: pointer; }
+        .nav-link:hover, .nav-link.active { background: var(--primary); color: white; font-weight: 700; }
+
+        /* MAIN CONTENT */
+        .main { flex: 1; margin-left: var(--sidebar-w); padding: 40px; }
+        .card { background: white; padding: 30px; border-radius: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); margin-bottom: 25px; }
+        
+        .form-group { margin-bottom: 20px; }
+        .form-label { display: block; margin-bottom: 8px; font-weight: 700; }
+        .form-input { width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 10px; font-family: inherit; }
+        
+        .btn { padding: 12px 24px; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; color: white; }
+        .btn-green { background: var(--primary); }
+        .btn-red { background: #ef4444; }
+
+        .preview-box { margin-top: 10px; width: 100%; aspect-ratio: 16/9; background: #000; border-radius: 10px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        .preview-box img { width: 100%; height: 100%; object-fit: cover; }
+        .preview-placeholder { color: #64748b; text-align: center; }
+
+        /* TABLE */
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { padding: 15px; text-align: left; border-bottom: 1px solid #f1f5f9; }
+    </style>
+</head>
+<body>
+
+    <aside class="sidebar">
+        <div class="brand"><i class="fas fa-rocket"></i> COACH STUDIO</div>
+        <a href="coach-dashboard.html" class="nav-link"><i class="fas fa-home"></i> Dashboard</a>
+        <a href="#" class="nav-link active"><i class="fas fa-broadcast-tower"></i> Kelola Live</a>
+    </aside>
+
+    <main class="main">
+        <h1 style="margin-bottom: 30px;">Kelola Live Streaming</h1>
+
+        <div class="card">
+            <h3 style="margin-bottom: 20px;">Buat / Edit Live Stream</h3>
+            <form onsubmit="handleLiveSubmit(event)">
+                <input type="hidden" id="editId">
+                <div class="form-group">
+                    <label class="form-label">Judul Live</label>
+                    <input type="text" id="liveTitle" class="form-input" placeholder="Contoh: Strategi Digital Marketing 2026" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Link YouTube Live</label>
+                    <input type="text" id="liveUrl" class="form-input" placeholder="https://www.youtube.com/watch?v=..." oninput="updatePreview()" required>
+                    <small style="color:#64748b">Pastikan link dari YouTube agar thumbnail muncul otomatis.</small>
+                </div>
+
+                <div class="preview-box" id="previewArea">
+                    <div class="preview-placeholder">
+                        <i class="fab fa-youtube fa-3x"></i><br>Preview Thumbnail
+                    </div>
+                </div>
+                <br>
+
+                <div class="form-group">
+                    <label class="form-label">Deskripsi Singkat</label>
+                    <textarea id="liveDesc" class="form-input" rows="3" placeholder="Jelaskan topik yang akan dibahas..."></textarea>
+                </div>
+
+                <button type="submit" class="btn btn-green" id="btnSave">Tayangkan Live Sekarang</button>
+                <button type="button" class="btn" style="background:#94a3b8;" onclick="resetForm()">Batal</button>
+            </form>
+        </div>
+
+        <div class="card">
+            <h3>Live Sedang Aktif</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Thumbnail</th>
+                        <th>Judul</th>
+                        <th>Status</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody id="liveTableBody">
+                    <tr><td colspan="4">Memuat data...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, query, where, updateDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        const firebaseConfig = { apiKey: "AIzaSyBIaLzkNM0KqPVKxuMNmardLqcrr2kYTWQ", authDomain: "database-idbm.firebaseapp.com", projectId: "database-idbm", storageBucket: "database-idbm.firebasestorage.app", messagingSenderId: "1052290789133", appId: "1:1052290789133:web:36b513630b7a87154eca44", measurementId: "G-EQLBB94DY2" };
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let coachData = null;
+
+        // 1. AUTH & GET COACH DATA
+        onAuthStateChanged(auth, async (user) => {
+            if(user) {
+                const snap = await getDoc(doc(db, "users_umkm", user.uid));
+                if(snap.exists() && (snap.data().role === 'coach' || snap.data().role === 'admin')) {
+                    coachData = { ...snap.data(), uid: user.uid };
+                    loadLiveStreams();
+                } else {
+                    alert("Akses ditolak. Hanya untuk Coach.");
+                    window.location.href = "index.html";
+                }
+            } else {
+                window.location.href = "login.html";
+            }
+        });
+
+        // 2. HELPER: EXTRACT YOUTUBE ID
+        window.getYouTubeID = (url) => {
+            const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+            const match = url.match(regExp);
+            return (match && match[2].length === 11) ? match[2] : null;
+        }
+
+        window.updatePreview = () => {
+            const url = document.getElementById('liveUrl').value;
+            const videoId = getYouTubeID(url);
+            const preview = document.getElementById('previewArea');
+            if(videoId) {
+                preview.innerHTML = `<img src="https://img.youtube.com/vi/${videoId}/hqdefault.jpg">`;
+            } else {
+                preview.innerHTML = `<div class="preview-placeholder"><i class="fab fa-youtube fa-3x"></i><br>Invalid URL</div>`;
+            }
+        }
+
+        // 3. CRUD FUNCTIONS
+        window.handleLiveSubmit = async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('btnSave');
+            btn.innerHTML = "Menyimpan..."; btn.disabled = true;
+
+            const title = document.getElementById('liveTitle').value;
+            const url = document.getElementById('liveUrl').value;
+            const desc = document.getElementById('liveDesc').value;
+            const videoId = getYouTubeID(url);
+            const editId = document.getElementById('editId').value;
+
+            const thumbnail = videoId ? `https://img.youtube.com/vi/${videoId}/hqdefault.jpg` : 'https://via.placeholder.com/320x180?text=Live+Stream';
+
+            const payload = {
+                title: title,
+                url: url,
+                description: desc,
+                thumbnail: thumbnail,
+                mentor_name: coachData.nama_lengkap,
+                mentor_id: coachData.uid,
+                viewers: Math.floor(Math.random() * 500) + 50, // Mock viewer count untuk awal
+                is_active: true,
+                timestamp: new Date()
+            };
+
+            try {
+                if(editId) {
+                    await updateDoc(doc(db, "live_streams", editId), payload);
+                    alert("Live stream diperbarui!");
+                } else {
+                    await addDoc(collection(db, "live_streams"), payload);
+                    alert("Live stream ditayangkan!");
+                }
+                resetForm();
+                loadLiveStreams();
+            } catch(error) {
+                console.error(error);
+                alert("Gagal menyimpan.");
+            } finally {
+                btn.innerHTML = "Tayangkan Live Sekarang"; btn.disabled = false;
+            }
+        }
+
+        async function loadLiveStreams() {
+            const tbody = document.getElementById('liveTableBody');
+            tbody.innerHTML = "<tr><td colspan='4'>Memuat...</td></tr>";
+            
+            // Query hanya live milik coach ini
+            const q = query(collection(db, "live_streams"), where("mentor_id", "==", coachData.uid));
+            const snap = await getDocs(q);
+            
+            tbody.innerHTML = "";
+            if(snap.empty) {
+                tbody.innerHTML = "<tr><td colspan='4' align='center'>Belum ada live stream aktif.</td></tr>";
+                return;
+            }
+
+            snap.forEach(doc => {
+                const d = doc.data();
+                tbody.innerHTML += `
+                    <tr>
+                        <td><img src="${d.thumbnail}" style="width:80px; border-radius:8px;"></td>
+                        <td>
+                            <strong>${d.title}</strong><br>
+                            <small>${d.url}</small>
+                        </td>
+                        <td><span style="background:#dcfce7; color:#166534; padding:2px 8px; border-radius:4px; font-size:0.8rem;">Aktif</span></td>
+                        <td>
+                            <button class="btn btn-red" style="padding:6px 12px; font-size:0.8rem;" onclick="deleteLive('${doc.id}')"><i class="fas fa-trash"></i> Hapus</button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        window.deleteLive = async (id) => {
+            if(confirm("Hentikan dan hapus live stream ini?")) {
+                await deleteDoc(doc(db, "live_streams", id));
+                loadLiveStreams();
+            }
+        }
+
+        window.resetForm = () => {
+            document.querySelector('form').reset();
+            document.getElementById('editId').value = "";
+            document.getElementById('previewArea').innerHTML = `<div class="preview-placeholder"><i class="fab fa-youtube fa-3x"></i><br>Preview Thumbnail</div>`;
+            document.getElementById('btnSave').innerHTML = "Tayangkan Live Sekarang";
+        }
+    </script>
+</body>
+</html>

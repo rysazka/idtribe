@@ -14,57 +14,132 @@
     <script type="module" src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"></script>
 
     <style>
-        /* CSS SAMA PERSIS (Disingkat untuk fokus ke Logic) */
-        :root { --primary: #059669; --dark: #0f172a; --bg-light: #f8fafc; --live-red: #ef4444; --border: 1px solid #e2e8f0; --sidebar-w: 280px; --font-head: 'Outfit', sans-serif; --font-body: 'Plus Jakarta Sans', sans-serif; }
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+        /* CSS DISAMAKAN DENGAN DASHBOARD */
+        :root {
+            --primary: #059669; --primary-dark: #047857; --accent: #f59e0b;
+            --dark: #0f172a; --bg-light: #f8fafc; --live-red: #ef4444;
+            --border: 1px solid #e2e8f0; --shadow: 0 4px 20px rgba(0,0,0,0.05);
+            --sidebar-w: 280px; --font-head: 'Outfit', sans-serif; --font-body: 'Plus Jakarta Sans', sans-serif;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
         body { font-family: var(--font-body); background: var(--bg-light); color: var(--dark); height: 100vh; display: flex; overflow: hidden; }
+
+        /* SIDEBAR (SAMA PERSIS DENGAN CMS & DASHBOARD) */
+        .menu-toggle { display: none; position: fixed; top: 15px; left: 15px; z-index: 200; background: white; border: none; padding: 10px; border-radius: 8px; box-shadow: var(--shadow); color: var(--dark); font-size: 1.2rem; cursor: pointer; }
+        .sidebar { width: var(--sidebar-w); background: #1e293b; color: white; display: flex; flex-direction: column; padding: 25px; flex-shrink: 0; z-index: 150; transition: transform 0.3s ease-in-out; }
+        .brand { font-family: var(--font-head); font-size: 1.5rem; font-weight: 800; margin-bottom: 40px; color: var(--primary); display: flex; align-items: center; gap: 10px; }
         
-        .sidebar { width: var(--sidebar-w); background: #1e293b; color: white; display: flex; flex-direction: column; padding: 25px; flex-shrink: 0; }
-        .nav-link { padding: 14px 15px; color: #94a3b8; text-decoration: none; display: flex; align-items: center; gap: 12px; margin-bottom: 8px; border-radius: 12px; transition:0.3s; }
-        .nav-link.active { background: var(--primary); color: white; font-weight: 700; }
+        .nav-link { 
+            padding: 14px 15px; border-radius: 12px; color: #94a3b8; text-decoration: none; 
+            display: flex; align-items: center; gap: 12px; margin-bottom: 8px; transition: 0.3s; 
+            cursor: pointer; font-weight: 500; 
+        }
+        .nav-link:hover { background: rgba(255,255,255,0.1); color: white; transform: translateX(5px); }
+        .nav-link.active { background: var(--primary); font-weight: 700; box-shadow: 0 4px 15px rgba(5, 150, 105, 0.3); color: white; }
         
-        .main { flex: 1; padding: 25px; display: flex; flex-direction: column; }
-        .status-header { display: flex; justify-content: space-between; align-items: center; background: white; padding: 20px; border-radius: 20px; margin-bottom: 25px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); }
+        .sidebar-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 140; backdrop-filter: blur(2px); }
+
+        /* MAIN */
+        .main { flex: 1; padding: 25px; overflow-y: auto; display: flex; flex-direction: column; }
+        
+        .status-header { display: flex; justify-content: space-between; align-items: center; background: white; padding: 20px 30px; border-radius: 20px; margin-bottom: 25px; box-shadow: var(--shadow); border: var(--border); }
+        .coach-name h2 { font-family: var(--font-head); font-size: 1.6rem; margin-bottom: 5px; }
+        .coach-name p { color: #64748b; font-size: 0.95rem; }
         .toggle-btn { padding: 10px 24px; border-radius: 50px; border: none; cursor: pointer; font-weight: 800; transition: 0.3s; }
-        .toggle-btn.online { background: #22c55e; color: white; box-shadow: 0 4px 12px rgba(34, 197, 94, 0.4); animation: pulse 2s infinite; }
-        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(34, 197, 94, 0); } 100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); } }
+        .toggle-btn.offline { background: transparent; color: #64748b; }
+        .toggle-btn.online { background: #22c55e; color: white; box-shadow: 0 4px 12px rgba(34, 197, 94, 0.4); animation: pulseGreen 2s infinite; }
+        @keyframes pulseGreen { 0% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(34, 197, 94, 0); } 100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); } }
 
         .workspace { display: grid; grid-template-columns: 3fr 1.2fr; gap: 25px; height: 100%; min-height: 0; }
-        .chat-panel { background: white; border-radius: 24px; display: flex; flex-direction: column; border: var(--border); overflow: hidden; position: relative; height: 100%; }
+        .chat-panel { background: white; border-radius: 24px; display: flex; flex-direction: column; border: var(--border); overflow: hidden; position: relative; box-shadow: var(--shadow); height: 100%; }
         
-        /* STATE: WAITING (ONLINE) */
         .empty-state { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; background: white; z-index: 10; text-align: center; padding: 20px; }
-        
-        /* STATE: ACTIVE CHAT */
-        #activeChat { display: none; height: 100%; flex-direction: column; } /* Default Hidden */
-        
-        .chat-list { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 10px; background: #f8fafc; }
-        .msg { max-width: 75%; padding: 12px 16px; border-radius: 12px; font-size: 0.9rem; }
-        .msg.me { align-self: flex-end; background: var(--primary); color: white; }
-        .msg.client { align-self: flex-start; background: white; border: var(--border); }
-        
-        .tools-panel { display: flex; flex-direction: column; gap: 20px; }
-        .tool-card { background: white; padding: 20px; border-radius: 20px; border: var(--border); }
-        .btn-tool { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #e2e8f0; background: white; border-radius: 10px; cursor: pointer; font-weight: 600; }
-        .btn-tool.danger { background: #fee2e2; color: #b91c1c; border: none; }
+        .empty-icon { width: 100px; height: 100px; background: #f1f5f9; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 20px; color: #94a3b8; font-size: 3rem; }
 
-        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 999; align-items: center; justify-content: center; }
-        .modal-content { background: white; width: 400px; padding: 30px; border-radius: 20px; }
+        /* CHAT UI */
+        #activeChat { display: none; height: 100%; flex-direction: column; }
+        .chat-header { padding: 15px 25px; border-bottom: var(--border); background: rgba(255,255,255,0.9); display: flex; justify-content: space-between; align-items: center; }
+        .client-info { display: flex; align-items: center; gap: 15px; }
+        .client-avatar { width: 45px; height: 45px; border-radius: 12px; background: #e0e7ff; color: #4f46e5; display:flex; align-items:center; justify-content:center; font-weight:800; }
+        .chat-list { flex: 1; overflow-y: auto; padding: 25px; display: flex; flex-direction: column; gap: 12px; background: #f8fafc; }
+        .msg { max-width: 75%; padding: 14px 18px; border-radius: 18px; font-size: 0.95rem; position: relative; }
+        .msg.me { align-self: flex-end; background: var(--primary); color: white; border-bottom-right-radius: 4px; }
+        .msg.client { align-self: flex-start; background: white; border: var(--border); border-bottom-left-radius: 4px; }
+        
+        .template-area { padding: 10px 20px; border-top: var(--border); background: #fcfcfc; display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; }
+        .chip { padding: 6px 14px; background: white; border: 1px solid #cbd5e1; border-radius: 50px; font-size: 0.8rem; cursor: pointer; transition: 0.2s; white-space: nowrap; }
+        .chip:hover { border-color: var(--primary); color: var(--primary); background: #ecfdf5; }
+
+        .chat-input { padding: 15px 20px; background: white; display: flex; gap: 10px; align-items: center; border-top: var(--border); }
+        .input-box { flex: 1; padding: 12px 18px; border: var(--border); border-radius: 50px; outline: none; background: #f8fafc; transition: 0.3s; }
+        .input-box:focus { background: white; border-color: var(--primary); box-shadow: 0 0 0 4px rgba(5, 150, 105, 0.1); }
+        .btn-send { width: 45px; height: 45px; border-radius: 50%; background: var(--dark); color: white; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .btn-attach { width: 40px; height: 40px; border-radius: 50%; border: none; background: #f1f5f9; color: #64748b; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; position: relative; }
+        .hidden-file { position: absolute; width: 100%; height: 100%; top: 0; left: 0; opacity: 0; cursor: pointer; }
+        .chat-img { max-width: 100%; border-radius: 8px; margin-bottom: 5px; cursor: pointer; }
+
+        .tools-panel { display: flex; flex-direction: column; gap: 20px; }
+        .tool-card { background: white; padding: 25px; border-radius: 20px; border: var(--border); box-shadow: var(--shadow); }
+        .timer-big { font-size: 3rem; font-weight: 800; color: var(--dark); text-align: center; margin: 15px 0; font-family: monospace; letter-spacing: -2px; }
+        .btn-tool { width: 100%; padding: 14px; border: var(--border); background: white; border-radius: 12px; cursor: pointer; font-weight: 700; margin-bottom: 10px; display: flex; align-items: center; gap: 12px; transition: 0.2s; font-size: 0.95rem; }
+        .btn-tool:hover { background: #f8fafc; border-color: var(--primary); color: var(--primary); }
+        .btn-tool.danger { color: #ef4444; border-color: #fecaca; background: #fef2f2; justify-content: center; }
+
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 999; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
+        .modal-content { background: white; width: 90%; max-width: 500px; padding: 30px; border-radius: 20px; animation: popUp 0.3s; }
+        @keyframes popUp { from { transform: scale(0.9); } to { transform: scale(1); } }
+        .verdict-opt { display: flex; gap: 10px; margin-bottom: 15px; }
+        .v-btn { flex: 1; padding: 15px; border: 2px solid #e2e8f0; border-radius: 12px; cursor: pointer; text-align: center; font-weight: 800; transition: 0.2s; }
+        .v-btn.selected-yes { border-color: var(--primary); background: #ecfdf5; color: var(--primary); }
+        .v-btn.selected-no { border-color: #ef4444; background: #fef2f2; color: #ef4444; }
+
+        @media (max-width: 1024px) { .workspace { grid-template-columns: 1fr; } .tools-panel { display: grid; grid-template-columns: 1fr 1fr; } }
+        @media (max-width: 768px) {
+            .menu-toggle { display: block; }
+            .sidebar { position: fixed; left: -100%; top:0; height: 100%; box-shadow: 5px 0 15px rgba(0,0,0,0.1); }
+            .sidebar.active { left: 0; }
+            .sidebar-overlay.active { display: block; }
+            .main { padding: 15px; padding-top: 60px; height: 100vh; }
+            .status-header { flex-direction: column; align-items: flex-start; gap: 15px; }
+            .toggle-switch { width: 100%; justify-content: center; }
+            .workspace { grid-template-columns: 1fr; gap: 15px; }
+            .chat-panel { flex: 1; min-height: 400px; }
+            .tools-panel { grid-template-columns: 1fr; }
+        }
     </style>
 </head>
 <body>
 
+    <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('active'); document.querySelector('.sidebar-overlay').classList.toggle('active');"><i class="fas fa-bars"></i></button>
+    <div class="sidebar-overlay" onclick="document.querySelector('.sidebar').classList.remove('active'); document.querySelector('.sidebar-overlay').classList.remove('active');"></div>
+
     <aside class="sidebar">
-        <div style="font-family:var(--font-head); font-weight:800; font-size:1.5rem; color:var(--primary); margin-bottom:40px;">COACH STUDIO</div>
-        <a href="#" class="nav-link active"><i class="fas fa-comments"></i> Konsultasi</a>
-        <a href="coach-dashboard.html" class="nav-link"><i class="fas fa-arrow-left"></i> Kembali ke Dashboard</a>
+        <div class="brand"><i class="fas fa-rocket"> </i> <span class="brand-text">ID-<span style="color: var(--accent);">TRIBE</span></span></div>
+        
+        <a href="coach-chat.html" class="nav-link active">
+            <i class="fas fa-comments"></i> Konsultasi (Chat)
+        </a>
+        <a href="coach-dashboard.html#stream" class="nav-link">
+            <i class="fas fa-video"></i> Webinar (Stream)
+        </a>
+        <a href="coach-dashboard.html#booking" class="nav-link">
+            <i class="fas fa-calendar-check"></i> Jadwal & Booking
+        </a>
+        
+        <a href="coach-cms.html" class="nav-link">
+            <i class="fas fa-book-open"></i> Kelola Materi
+        </a>
+
+        <a onclick="logout()" class="nav-link" style="margin-top: auto; color: #ef4444; cursor: pointer;">
+            <i class="fas fa-sign-out-alt"></i> Keluar
+        </a>
     </aside>
 
     <div class="main">
         <div class="status-header">
-            <div>
-                <h2 style="font-family:var(--font-head); font-weight:800;" id="coachName">Coach</h2>
-                <p style="color:#64748b; font-size:0.9rem;">Workspace Konsultasi</p>
+            <div class="coach-name">
+                <h2 id="coachName">Coach</h2>
+                <p>Workspace Konsultasi</p>
             </div>
             <div style="display: flex; gap: 10px;">
                 <button class="toggle-btn" id="btnOffline" onclick="setStatus('offline')">OFFLINE</button>
@@ -75,34 +150,58 @@
         <div class="workspace">
             <div class="chat-panel">
                 <div id="emptyState" class="empty-state">
-                    <i class="fas fa-satellite-dish fa-3x" style="color:#cbd5e1; margin-bottom:20px;"></i>
-                    <h3 id="statusLabel" style="font-family:var(--font-head);">Status: OFFLINE</h3>
-                    <p style="color:#64748b; max-width:300px;">Klik "GO ONLINE". Panel ini akan otomatis terbuka saat User memilih Anda.</p>
+                    <div class="empty-icon"><i class="fas fa-satellite-dish"></i></div>
+                    <h3 id="statusLabel">Status: OFFLINE</h3>
+                    <p style="color:#64748b; max-width:300px;">Klik "GO ONLINE". Sistem akan otomatis menghubungkan saat User memilih Anda.</p>
                 </div>
 
                 <div id="activeChat">
-                    <div style="padding:15px; border-bottom:var(--border); display:flex; justify-content:space-between; align-items:center;">
-                        <div>
-                            <h4 style="margin:0;" id="clientName">User</h4>
-                            <span style="font-size:0.8rem; color:#64748b;" id="sessionTopic">Topik...</span>
+                    <div class="chat-header">
+                        <div class="client-info">
+                            <div class="client-avatar" id="clientInitial">U</div>
+                            <div>
+                                <h4 style="margin:0; font-size:1rem; font-weight:800;" id="clientName">User</h4>
+                                <span style="font-size:0.8rem; color:#64748b;" id="sessionTopic">Topik: ...</span>
+                            </div>
                         </div>
-                        <span style="background:#dcfce7; color:#166534; padding:4px 10px; border-radius:50px; font-size:0.75rem; font-weight:700;">LIVE</span>
+                        <span style="background:#dcfce7; color:#166534; padding:4px 10px; border-radius:50px; font-size:0.75rem; font-weight:700;">● ACTIVE</span>
                     </div>
 
                     <div class="chat-list" id="chatList"></div>
 
-                    <div style="padding:15px; border-top:var(--border); display:flex; gap:10px;">
-                        <input type="text" id="coachInput" style="flex:1; padding:10px; border:var(--border); border-radius:50px; outline:none;" placeholder="Ketik pesan..." onkeypress="handleEnter(event)">
-                        <button onclick="sendReply()" style="width:40px; height:40px; border-radius:50%; background:var(--dark); color:white; border:none; cursor:pointer;"><i class="fas fa-paper-plane"></i></button>
+                    <div class="template-area">
+                        <div class="chip" onclick="useTemplate('Halo! Selamat datang, ada yang bisa saya bantu?')">👋 Halo</div>
+                        <div class="chip" onclick="useTemplate('Boleh diceritakan detail masalahnya?')">❓ Detail</div>
+                        <div class="chip" onclick="useTemplate('Mohon tunggu sebentar, saya cek data.')">⏳ Tunggu</div>
+                        <div class="chip" onclick="useTemplate('Apakah penjelasannya sudah cukup jelas?')">✅ Jelas</div>
+                    </div>
+
+                    <div class="chat-input">
+                        <button class="btn-attach" title="Kirim Gambar">
+                            <i class="far fa-image"></i>
+                            <input type="file" class="hidden-file" accept="image/*" onchange="handleFile(this, 'image')">
+                        </button>
+                        <button class="btn-attach" title="Kirim File">
+                            <i class="fas fa-paperclip"></i>
+                            <input type="file" class="hidden-file" accept=".pdf,.doc,.docx,.xls,.xlsx" onchange="handleFile(this, 'file')">
+                        </button>
+                        <input type="text" id="coachInput" class="input-box" placeholder="Ketik pesan..." onkeypress="handleEnter(event)">
+                        <button class="btn-send" onclick="sendReply()"><i class="fas fa-paper-plane"></i></button>
                     </div>
                 </div>
             </div>
 
             <div class="tools-panel">
                 <div class="tool-card">
-                    <div style="font-weight: 800; margin-bottom: 10px;">⏱️ Sisa Waktu</div>
-                    <div id="timer" style="font-size: 2.5rem; font-weight: 800; text-align: center; margin: 15px 0;">45:00</div>
-                    <button class="btn-tool danger" onclick="endSession()">SELESAIKAN SESI</button>
+                    <div style="font-weight: 800; margin-bottom: 10px;"><i class="fas fa-stopwatch" style="color:var(--primary);"></i> Sisa Waktu</div>
+                    <div class="timer-big" id="timer">45:00</div>
+                    <button class="btn-tool danger" onclick="endSession()">
+                        <i class="fas fa-flag-checkered"></i> SELESAIKAN SESI
+                    </button>
+                </div>
+                <div class="tool-card">
+                    <div style="font-weight: 800; margin-bottom: 10px;">Expert Actions</div>
+                    <button class="btn-tool" onclick="sendUnlockTicket()"><i class="fas fa-lock-open" style="color:var(--primary);"></i> Unlock Fitur</button>
                 </div>
             </div>
         </div>
@@ -111,15 +210,19 @@
     <div id="verdictModal" class="modal">
         <div class="modal-content">
             <h3>Laporan Sesi</h3>
-            <p>Berikan rekomendasi untuk user ini.</p>
-            <textarea id="notes" rows="4" style="width:100%; padding:10px; border:1px solid #e2e8f0; margin:10px 0;" placeholder="Catatan..."></textarea>
-            <button onclick="submitVerdict()" style="width:100%; padding:10px; background:var(--primary); color:white; border:none; border-radius:8px; cursor:pointer;">SIMPAN & AKHIRI</button>
+            <p style="color:#64748b; margin-bottom:15px;">Rekomendasi Unlock?</p>
+            <div class="verdict-opt">
+                <div class="v-btn" id="btnYes" onclick="selectVerdict('yes')">YES (Layak)</div>
+                <div class="v-btn" id="btnNo" onclick="selectVerdict('no')">NO (Belum)</div>
+            </div>
+            <textarea id="notes" rows="4" style="width:100%; padding:12px; border:2px solid #e2e8f0; border-radius:12px; font-family:inherit;" placeholder="Catatan..."></textarea>
+            <button onclick="submitVerdict()" style="width:100%; padding:15px; background:var(--primary); color:white; border:none; border-radius:12px; font-weight:800; margin-top:10px; cursor:pointer;">SIMPAN & AKHIRI</button>
         </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
         import { getFirestore, doc, getDoc, updateDoc, collection, addDoc, onSnapshot, serverTimestamp, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = { apiKey: "AIzaSyBIaLzkNM0KqPVKxuMNmardLqcrr2kYTWQ", authDomain: "database-idbm.firebaseapp.com", projectId: "database-idbm", storageBucket: "database-idbm.firebasestorage.app", messagingSenderId: "1052290789133", appId: "1:1052290789133:web:36b513630b7a87154eca44", measurementId: "G-EQLBB94DY2" };
@@ -127,9 +230,10 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        let coachId = null, currentSessionId = null;
-        let unsubscribeChat = null, timerInterval;
+        let coachId = null, currentSessionId = null, sessionDataGlobal = null;
+        let unsubscribeChat = null, verdict = null, timerInterval;
 
+        // AUTH & INIT
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 coachId = user.uid;
@@ -137,33 +241,38 @@
                 if (snap.exists() && (snap.data().role === 'coach' || snap.data().role === 'admin')) {
                     const data = snap.data();
                     document.getElementById('coachName').innerText = data.nama_lengkap;
+                    
+                    if (data.current_session) {
+                        const sessionCheck = await getDoc(doc(db, "chat_sessions", data.current_session));
+                        if (!sessionCheck.exists() || sessionCheck.data().status === 'completed') {
+                            console.log("Auto-Fix: Membersihkan sesi hantu...");
+                            await updateDoc(doc(db, "users_umkm", coachId), { current_session: null });
+                            resetWorkspace();
+                        }
+                    }
+
                     updateStatusUI(data.status || 'offline');
                     
-                    // --- REALTIME LISTENER STATUS COACH ---
-                    // Ini kunci agar otomatis berubah saat user connect/disconnect
                     onSnapshot(doc(db, "users_umkm", coachId), (docSnap) => {
                         const d = docSnap.data();
                         const session = d.current_session;
 
-                        // 1. Jika ada User masuk (session terisi)
                         if (session && currentSessionId !== session) {
                             currentSessionId = session;
                             loadActiveSession(session);
-                        } 
-                        // 2. Jika sesi kosong (User belum ada atau Sesi baru saja berakhir)
-                        else if (!session) { 
-                            resetWorkspace(); // Kembali ke mode standby
+                        } else if (!session) { 
+                            resetWorkspace(); 
                         }
                     });
-                }
+                } else { window.location.href = "login.html"; }
             } else { window.location.href = "login.html"; }
         });
 
+        // STATUS MANAGEMENT
         window.setStatus = async (status) => {
             if (!coachId) return;
-            // Saat klik Offline, bersihkan sesi jika ada (Reset Total)
             let updateData = { status: status };
-            if(status === 'offline') updateData.current_session = null;
+            if(status === 'offline') updateData.current_session = null; 
             
             await updateDoc(doc(db, "users_umkm", coachId), updateData);
             updateStatusUI(status);
@@ -175,89 +284,133 @@
             const label = document.getElementById('statusLabel');
             
             if (status === 'offline') {
-                btnOff.style.background = "#cbd5e1"; btnOn.className = "toggle-btn";
+                btnOff.className = 'toggle-btn offline'; btnOff.style.background = "#e2e8f0"; btnOff.style.color = "#334155";
+                btnOn.className = 'toggle-btn offline'; btnOn.style.background = "transparent"; btnOn.style.boxShadow = "none"; btnOn.style.animation = "none";
                 label.innerText = "Status: OFFLINE"; label.style.color = "#64748b";
+                resetWorkspace();
             } else {
-                btnOff.style.background = "transparent"; btnOn.className = "toggle-btn online";
+                btnOff.className = 'toggle-btn offline'; btnOff.style.background = "transparent";
+                btnOn.className = 'toggle-btn online'; 
+                btnOn.style.background = "#22c55e"; btnOn.style.color = "white"; btnOn.style.boxShadow = "0 4px 12px rgba(34, 197, 94, 0.4)"; btnOn.style.animation = "pulseGreen 2s infinite";
                 label.innerText = "Status: ONLINE (Menunggu User...)"; label.style.color = "#22c55e";
             }
         }
 
-        // FUNGSI RESET: Kembalikan tampilan ke "Menunggu User"
+        // RESET WORKSPACE
         function resetWorkspace() {
-            currentSessionId = null;
-            document.getElementById('emptyState').style.display = 'flex'; // Tampilkan Layar Tunggu
-            document.getElementById('activeChat').style.display = 'none'; // Sembunyikan Chat
-            
-            if (unsubscribeChat) unsubscribeChat();
-            if (timerInterval) clearInterval(timerInterval);
+            currentSessionId = null; sessionDataGlobal = null;
+            document.getElementById('emptyState').style.display = 'flex';
+            document.getElementById('activeChat').style.display = 'none';
             document.getElementById('timer').innerText = "45:00";
             document.getElementById('chatList').innerHTML = "";
+            if (unsubscribeChat) unsubscribeChat();
+            if (timerInterval) clearInterval(timerInterval);
         }
 
-        // FUNGSI LOAD SESI: Hanya dipanggil jika current_session di database terisi
+        // LOAD ACTIVE SESSION
         async function loadActiveSession(sessionId) {
-            document.getElementById('emptyState').style.display = 'none'; // Sembunyikan Layar Tunggu
-            document.getElementById('activeChat').style.display = 'flex'; // Tampilkan Chat
-            
             const sessionSnap = await getDoc(doc(db, "chat_sessions", sessionId));
-            if (!sessionSnap.exists()) return;
-            const data = sessionSnap.data();
+            if (!sessionSnap.exists() || sessionSnap.data().status === 'completed') {
+                await updateDoc(doc(db, "users_umkm", coachId), { current_session: null });
+                return;
+            }
+
+            document.getElementById('emptyState').style.display = 'none';
+            document.getElementById('activeChat').style.display = 'flex';
             
+            const data = sessionSnap.data();
+            sessionDataGlobal = data;
             document.getElementById('sessionTopic').innerText = data.category;
             
-            // Ambil Nama User
             const userSnap = await getDoc(doc(db, "users_umkm", data.user_id));
-            if(userSnap.exists()) document.getElementById('clientName').innerText = userSnap.data().nama_lengkap;
+            if(userSnap.exists()) {
+                document.getElementById('clientName').innerText = userSnap.data().nama_lengkap;
+                document.getElementById('clientInitial').innerText = userSnap.data().nama_lengkap.charAt(0).toUpperCase();
+            }
 
-            // Timer
-            startTimer(data.start_time.toDate());
+            if(data.start_time) startTimer(data.start_time.toDate());
 
-            // Chat Listener
             const q = query(collection(db, "chat_sessions", sessionId, "messages"), orderBy("timestamp", "asc"));
+            if (unsubscribeChat) unsubscribeChat();
+            
             unsubscribeChat = onSnapshot(q, (snapshot) => {
                 const list = document.getElementById('chatList');
                 list.innerHTML = "";
                 snapshot.forEach(d => {
                     const msg = d.data();
+                    const isMe = msg.sender_id === coachId;
                     const div = document.createElement('div');
-                    div.className = `msg ${msg.sender_id === coachId ? 'me' : 'client'}`;
-                    div.innerText = msg.text;
+                    const time = msg.timestamp ? msg.timestamp.toDate().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '..';
+                    
+                    let contentHTML = "";
+                    if (msg.type === 'text') contentHTML = `${msg.text}`;
+                    else if (msg.type === 'unlock_ticket') contentHTML = `<b>🔒 REKOMENDASI UNLOCK DIKIRIM</b><br>Fitur: ${msg.feature_name}`;
+                    else if (msg.type === 'file') contentHTML = `📁 <b>File Terlampir:</b><br><a href="${msg.content}" download="${msg.filename}" style="color:inherit; text-decoration:none;"><i>${msg.filename}</i></a>`;
+                    else if (msg.type === 'image') contentHTML = `📷 <b>Gambar Terlampir:</b><br><img src="${msg.content}" class="chat-img" onclick="window.open('${msg.content}')">`;
+
+                    div.className = `msg ${isMe ? 'me' : 'client'}`;
+                    if (msg.type === 'unlock_ticket') { div.style.background = '#fffbeb'; div.style.border = '1px solid #f59e0b'; div.style.color = '#b45309'; }
+                    div.innerHTML = `${contentHTML} <span style="display:block; text-align:right; font-size:0.65rem; opacity:0.7; margin-top:4px;">${time}</span>`;
                     list.appendChild(div);
                 });
                 list.scrollTop = list.scrollHeight;
             });
         }
 
+        // CHAT FUNCTIONS
+        window.useTemplate = (text) => { document.getElementById('coachInput').value = text; document.getElementById('coachInput').focus(); }
+        
         window.sendReply = async () => {
             const input = document.getElementById('coachInput');
-            if (!input.value.trim() || !currentSessionId) return;
-            await addDoc(collection(db, "chat_sessions", currentSessionId, "messages"), { 
-                text: input.value, sender_id: coachId, timestamp: serverTimestamp() 
-            });
+            const text = input.value.trim();
+            if (!text || !currentSessionId) return;
             input.value = "";
+            await addDoc(collection(db, "chat_sessions", currentSessionId, "messages"), { text: text, sender_id: coachId, timestamp: serverTimestamp(), type: "text" });
         }
         window.handleEnter = (e) => { if(e.key === 'Enter') sendReply(); };
 
-        window.endSession = () => document.getElementById('verdictModal').style.display = 'flex';
+        window.handleFile = (input, type) => {
+            const file = input.files[0];
+            if(!file) return;
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                const base64 = e.target.result;
+                if(file.size > 1000000) { alert("File max 1MB"); return; }
+                await addDoc(collection(db, "chat_sessions", currentSessionId, "messages"), {
+                    content: base64, filename: file.name, type: type, sender_id: coachId, timestamp: serverTimestamp()
+                });
+            };
+            reader.readAsDataURL(file);
+        };
 
-        // LOGIC PENTING: MENGAKHIRI SESI & AUTO-ONLINE KEMBALI
+        window.sendUnlockTicket = async () => {
+            if(!currentSessionId || !confirm("Kirim rekomendasi unlock fitur?")) return;
+            let feature = "General";
+            if (sessionDataGlobal && sessionDataGlobal.category) {
+                if(sessionDataGlobal.category === 'Finance') feature = 'Financing';
+                else if(sessionDataGlobal.category === 'Digital') feature = 'Digital Tools';
+                else feature = 'Partnership';
+            }
+            await addDoc(collection(db, "chat_sessions", currentSessionId, "messages"), { text: "UNLOCK", feature_name: feature, sender_id: coachId, timestamp: serverTimestamp(), type: "unlock_ticket" });
+        };
+
+        window.endSession = () => { if(!currentSessionId) return; document.getElementById('verdictModal').style.display = 'flex'; };
+        
+        window.selectVerdict = (val) => {
+            verdict = val;
+            document.getElementById('btnYes').className = val === 'yes' ? 'v-btn selected-yes' : 'v-btn';
+            document.getElementById('btnNo').className = val === 'no' ? 'v-btn selected-no' : 'v-btn';
+        };
+
         window.submitVerdict = async () => {
             const notes = document.getElementById('notes').value;
+            if (!verdict || !notes) { alert("Lengkapi data."); return; }
             try {
-                // 1. Tandai Sesi Selesai
-                await updateDoc(doc(db, "chat_sessions", currentSessionId), { 
-                    status: "completed", coach_notes: notes, ended_at: serverTimestamp() 
-                });
-                
-                // 2. KOSONGKAN 'current_session' TAPI TETAPKAN STATUS 'online'
-                // Ini membuat listener onSnapshot di atas mendeteksi perubahan -> memanggil resetWorkspace() -> Coach siap terima order baru
-                await updateDoc(doc(db, "users_umkm", coachId), { 
-                    current_session: null 
-                });
-                
+                await updateDoc(doc(db, "chat_sessions", currentSessionId), { status: "completed", coach_notes: notes, verdict: verdict, ended_at: serverTimestamp() });
+                await updateDoc(doc(db, "users_umkm", coachId), { current_session: null });
+                alert("Sesi Selesai. Kembali ke antrean Online.");
                 document.getElementById('verdictModal').style.display = 'none';
-                alert("Sesi Berakhir. Anda kembali Online.");
+                resetWorkspace();
             } catch(e) { console.error(e); }
         };
 
@@ -272,6 +425,8 @@
                 document.getElementById('timer').innerText = `${m}:${s < 10 ? '0'+s : s}`;
             }, 1000);
         }
+
+        window.logout = () => signOut(auth).then(() => window.location.href = "login.html");
     </script>
 </body>
 </html>
