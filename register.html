@@ -27,13 +27,13 @@
             font-family: var(--font-body);
             background: #f0fdf4;
             display: flex; align-items: center; justify-content: center;
-            min-height: 100vh; padding: 20px;
+            min-height: 100vh; padding: 40px 20px;
             background-image: radial-gradient(#d1fae5 1px, transparent 1px);
             background-size: 20px 20px;
         }
 
         .register-container {
-            background: white; width: 100%; max-width: 500px;
+            background: white; width: 100%; max-width: 700px;
             padding: 40px; border-radius: 24px;
             box-shadow: 0 20px 40px rgba(0,0,0,0.05);
             border: 1px solid rgba(255,255,255,0.8);
@@ -43,36 +43,39 @@
         .brand { font-family: var(--font-head); font-weight: 800; font-size: 1.8rem; color: var(--primary); margin-bottom: 5px; }
         .subtitle { color: #64748b; font-size: 0.95rem; }
 
-        /* ROLE SELECTOR CARDS */
-        .role-selector { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 25px; }
+        /* ROLE SELECTOR */
+        .role-selector { 
+            display: grid; grid-template-columns: repeat(3, 1fr); 
+            gap: 12px; margin-bottom: 25px; 
+        }
         
         .role-card {
-            border: 2px solid #e2e8f0; border-radius: 16px; padding: 15px;
-            text-align: center; cursor: pointer; transition: 0.3s;
-            background: #f8fafc; opacity: 0.7;
+            border: 2px solid #e2e8f0; border-radius: 12px; padding: 15px 10px;
+            text-align: center; cursor: pointer; transition: 0.2s;
+            background: #f8fafc; opacity: 0.7; display: flex; flex-direction: column; align-items: center; justify-content: center;
+            min-height: 100px;
         }
-        .role-card:hover { transform: translateY(-3px); }
-        
+        .role-card:hover { transform: translateY(-3px); border-color: var(--primary); opacity: 1; }
         .role-card.active {
             border-color: var(--primary); background: #ecfdf5;
-            opacity: 1; box-shadow: 0 4px 15px rgba(5, 150, 105, 0.1);
+            opacity: 1; box-shadow: 0 4px 10px rgba(5, 150, 105, 0.15); transform: scale(1.02);
         }
-        
         .role-icon { font-size: 1.5rem; margin-bottom: 8px; color: #64748b; }
         .role-card.active .role-icon { color: var(--primary); }
-        
-        .role-title { font-weight: 700; font-size: 0.9rem; color: var(--dark); }
-        .role-desc { font-size: 0.75rem; color: #64748b; line-height: 1.2; margin-top: 5px; }
+        .role-title { font-weight: 700; font-size: 0.8rem; color: var(--dark); }
 
-        /* FORM */
-        .form-group { margin-bottom: 20px; }
+        /* FORM GRID SYSTEM */
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .form-group { margin-bottom: 15px; }
+        .form-full { grid-column: 1 / -1; } /* Span full width */
+
         .form-label { display: block; font-weight: 700; margin-bottom: 8px; color: var(--dark); font-size: 0.9rem; }
-        .form-input {
-            width: 100%; padding: 14px; border: 2px solid #e2e8f0;
-            border-radius: 12px; font-family: inherit; font-size: 1rem;
+        .form-input, .form-select {
+            width: 100%; padding: 12px; border: 2px solid #e2e8f0;
+            border-radius: 10px; font-family: inherit; font-size: 0.95rem;
             transition: 0.3s; outline: none;
         }
-        .form-input:focus { border-color: var(--primary); background: #f0fdf4; }
+        .form-input:focus, .form-select:focus { border-color: var(--primary); background: #f0fdf4; }
 
         .btn-submit {
             width: 100%; padding: 15px; background: linear-gradient(135deg, var(--primary), var(--primary-dark));
@@ -85,10 +88,14 @@
         .footer-link { text-align: center; margin-top: 25px; font-size: 0.9rem; color: #64748b; }
         .footer-link a { color: var(--primary); text-decoration: none; font-weight: 700; }
         
-        /* Alert Error */
         .alert-error {
             background: #fee2e2; color: #b91c1c; padding: 12px; border-radius: 8px;
             font-size: 0.9rem; margin-bottom: 20px; display: none; text-align: center;
+        }
+
+        @media (max-width: 600px) {
+            .role-selector { grid-template-columns: repeat(2, 1fr); }
+            .form-grid { grid-template-columns: 1fr; } /* Stack on mobile */
         }
     </style>
 </head>
@@ -97,51 +104,86 @@
     <div class="register-container">
         <div class="header">
             <div class="brand">ID-TRIBE</div>
-            <p class="subtitle">Bergabung dengan ekosistem digital terbesar.</p>
+            <p class="subtitle">Lengkapi profil agar partner mudah menemukan Anda.</p>
         </div>
 
         <div class="role-selector">
             <div class="role-card active" onclick="selectRole('umkm')" id="card-umkm">
-                <div class="role-icon"><i class="fas fa-store"></i></div>
-                <div class="role-title">Pemilik UMKM</div>
-                <div class="role-desc">Saya ingin belajar & mengembangkan bisnis.</div>
+                <div class="role-icon"><i class="fas fa-store"></i></div><div class="role-title">UMKM</div>
+            </div>
+            <div class="role-card" onclick="selectRole('bumn')" id="card-bumn">
+                <div class="role-icon"><i class="fas fa-building"></i></div><div class="role-title">BUMN</div>
+            </div>
+            <div class="role-card" onclick="selectRole('government')" id="card-government">
+                <div class="role-icon"><i class="fas fa-landmark"></i></div><div class="role-title">Pemerintah</div>
+            </div>
+            <div class="role-card" onclick="selectRole('university')" id="card-university">
+                <div class="role-icon"><i class="fas fa-graduation-cap"></i></div><div class="role-title">Kampus</div>
             </div>
             <div class="role-card" onclick="selectRole('coach')" id="card-coach">
-                <div class="role-icon"><i class="fas fa-chalkboard-teacher"></i></div>
-                <div class="role-title">Expert / Coach</div>
-                <div class="role-desc">Saya ingin mengajar & membuka kelas live.</div>
+                <div class="role-icon"><i class="fas fa-user-tie"></i></div><div class="role-title">Coach</div>
             </div>
         </div>
 
         <div id="errorBox" class="alert-error"></div>
 
         <form onsubmit="handleRegister(event)">
-            <div class="form-group">
-                <label class="form-label">Nama Lengkap</label>
-                <input type="text" id="regName" class="form-input" placeholder="Nama Anda" required>
+            <div class="form-grid">
+                
+                <div class="form-group form-full">
+                    <label class="form-label" id="lbl-name">Nama Lengkap PIC</label>
+                    <input type="text" id="regName" class="form-input" placeholder="Nama Anda" required>
+                </div>
+
+                <div class="form-group form-full" id="fieldEntity">
+                    <label class="form-label" id="lbl-entity">Nama Usaha / Bisnis</label>
+                    <input type="text" id="regEntityName" class="form-input" placeholder="Contoh: Keripik Juara" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Kategori / Sektor</label>
+                    <select id="regCategory" class="form-select" required>
+                        <option value="">Pilih Kategori...</option>
+                        <option value="F&B">F&B (Kuliner)</option>
+                        <option value="Fashion">Fashion & Kriya</option>
+                        <option value="Jasa">Jasa / Services</option>
+                        <option value="Teknologi">Teknologi / Digital</option>
+                        <option value="Agrikultur">Pertanian / Agrikultur</option>
+                        <option value="Pendidikan">Pendidikan</option>
+                        <option value="Logistik">Logistik</option>
+                        <option value="Energi">Energi & Tambang</option>
+                        <option value="Pemerintahan">Pemerintahan</option>
+                        <option value="Lainnya">Lainnya</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Berdiri Sejak (Tahun)</label>
+                    <input type="number" id="regYear" class="form-input" placeholder="2020" min="1900" max="2099" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">No. WhatsApp</label>
+                    <input type="tel" id="regPhone" class="form-input" placeholder="0812xxxx" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Link Website / Sosmed</label>
+                    <input type="text" id="regWeb" class="form-input" placeholder="instagram.com/akun" required>
+                </div>
+
+                <div class="form-group form-full">
+                    <label class="form-label">Email Login</label>
+                    <input type="email" id="regEmail" class="form-input" placeholder="email@contoh.com" required>
+                </div>
+                
+                <div class="form-group form-full">
+                    <label class="form-label">Password</label>
+                    <input type="password" id="regPass" class="form-input" placeholder="Minimal 6 karakter" required>
+                </div>
             </div>
 
-            <div class="form-group" id="fieldUsaha">
-                <label class="form-label">Nama Usaha / Bisnis</label>
-                <input type="text" id="regBusiness" class="form-input" placeholder="Contoh: Keripik Pedas Juara">
-            </div>
-
-            <div class="form-group" id="fieldSkill" style="display: none;">
-                <label class="form-label">Spesialisasi / Keahlian</label>
-                <input type="text" id="regSkill" class="form-input" placeholder="Contoh: Digital Marketing, Finance...">
-            </div>
-
-            <div class="form-group">
-                <label class="form-label">Email</label>
-                <input type="email" id="regEmail" class="form-input" placeholder="email@contoh.com" required>
-            </div>
-            
-            <div class="form-group">
-                <label class="form-label">Password</label>
-                <input type="password" id="regPass" class="form-input" placeholder="Minimal 6 karakter" required>
-            </div>
-
-            <button type="submit" id="btnReg" class="btn-submit">Daftar Sekarang</button>
+            <button type="submit" id="btnReg" class="btn-submit">Daftar & Buat Profil</button>
         </form>
 
         <div class="footer-link">
@@ -168,106 +210,113 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // GLOBAL STATE
         window.selectedRole = 'umkm';
 
-        // 1. LOGIC PILIH PERAN
         window.selectRole = (role) => {
             window.selectedRole = role;
-            
-            // UI Update
             document.querySelectorAll('.role-card').forEach(c => c.classList.remove('active'));
             document.getElementById(`card-${role}`).classList.add('active');
 
-            // Form Logic
-            if (role === 'umkm') {
-                document.getElementById('fieldUsaha').style.display = 'block';
-                document.getElementById('fieldSkill').style.display = 'none';
-            } else {
-                document.getElementById('fieldUsaha').style.display = 'none';
-                document.getElementById('fieldSkill').style.display = 'block';
+            const lblEntity = document.getElementById('lbl-entity');
+            const inputEntity = document.getElementById('regEntityName');
+            const catSelect = document.getElementById('regCategory');
+
+            switch(role) {
+                case 'umkm':
+                    lblEntity.innerText = "Nama Usaha / Bisnis";
+                    inputEntity.placeholder = "Contoh: Keripik Pedas Juara";
+                    break;
+                case 'bumn':
+                    lblEntity.innerText = "Nama Perusahaan (BUMN)";
+                    inputEntity.placeholder = "Contoh: PT Pertamina (Persero)";
+                    catSelect.value = "Energi"; // Auto suggest
+                    break;
+                case 'government':
+                    lblEntity.innerText = "Nama Instansi / Dinas";
+                    inputEntity.placeholder = "Contoh: Dinas Koperasi Jabar";
+                    catSelect.value = "Pemerintahan";
+                    break;
+                case 'university':
+                    lblEntity.innerText = "Nama Universitas";
+                    inputEntity.placeholder = "Contoh: Universitas Indonesia";
+                    catSelect.value = "Pendidikan";
+                    break;
+                case 'coach':
+                    lblEntity.innerText = "Nama Personal Brand";
+                    inputEntity.placeholder = "Contoh: Coach Budi";
+                    catSelect.value = "Jasa";
+                    break;
             }
         }
 
-        // 2. REGISTER HANDLER
         window.handleRegister = async (e) => {
             e.preventDefault();
             
             const btn = document.getElementById('btnReg');
             const errorBox = document.getElementById('errorBox');
             
+            // Ambil Data Input
             const name = document.getElementById('regName').value;
+            const entityName = document.getElementById('regEntityName').value;
+            const category = document.getElementById('regCategory').value;
+            const year = document.getElementById('regYear').value;
+            const phone = document.getElementById('regPhone').value;
+            const web = document.getElementById('regWeb').value;
             const email = document.getElementById('regEmail').value;
             const pass = document.getElementById('regPass').value;
-            
-            // Data opsional sesuai peran
-            const businessName = document.getElementById('regBusiness').value;
-            const skill = document.getElementById('regSkill').value;
-
-            // Validasi Sederhana
-            if(window.selectedRole === 'umkm' && !businessName) {
-                alert("Harap isi nama usaha!"); return;
-            }
-            if(window.selectedRole === 'coach' && !skill) {
-                alert("Harap isi keahlian Anda!"); return;
-            }
 
             btn.innerText = "Memproses...";
             btn.disabled = true;
             errorBox.style.display = 'none';
 
             try {
-                // A. Buat Akun Auth
+                // 1. Buat Auth
                 const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
                 const user = userCredential.user;
 
-                // B. Update Display Name
                 await updateProfile(user, { displayName: name });
 
-                // C. Simpan ke Firestore
-                let safeRole = 'umkm';
-                if (window.selectedRole === 'coach') {
-                    safeRole = 'coach';
-                }
-
+                // 2. Simpan Lengkap ke Firestore
+                let roleLabel = window.selectedRole.toUpperCase();
+                
                 await setDoc(doc(db, "users_umkm", user.uid), {
+                    uid: user.uid,
                     nama_lengkap: name,
                     email: email,
-                    role: safeRole, 
+                    role: roleLabel,
                     
-                    // Field khusus
-                    nama_usaha: safeRole === 'umkm' ? businessName : null,
-                    spesialisasi: safeRole === 'coach' ? skill : null,
+                    // Field yang dipakai di Profile
+                    nama_usaha: entityName,
+                    kategori: category,
+                    berdiri_sejak: year, // Tahun Berdiri
+                    no_hp: phone, // Kontak WA
+                    website: web, // Sosmed
                     
-                    // Field default
+                    lokasi: "Indonesia", // Default, nanti user bisa edit
+                    deskripsi: `Profil resmi ${entityName}. Bergerak di bidang ${category}.`,
+                    
+                    verified: (window.selectedRole !== 'umkm'), // Auto verify non-UMKM (Simulasi)
                     join_date: new Date(),
-                    completed_courses: [],
-                    
-                    // PENTING: status_setup harus "pending" dulu untuk UMKM
-                    status_setup: safeRole === 'umkm' ? "pending" : "completed",
-                    is_verified: false 
+                    status_setup: "pending"
                 });
 
-                // D. Redirect sesuai peran
-                alert("Pendaftaran Berhasil! Selamat datang " + name);
-                
-                if (safeRole === 'coach') {
-                    window.location.href = "coach-dashboard.html";
-                } else {
-                    // JIKA UMKM -> WAJIB SETUP DULU
-                    window.location.href = "setup-umkm.html"; 
-                }
+                alert("Pendaftaran Berhasil!");
+                if (window.selectedRole === 'umkm') {
+    // UMKM butuh assessment mendalam
+    window.location.href = "setup-umkm.html"; 
+} else {
+    // Institusi lain (BUMN, Gov, Kampus, Coach) ke setup khusus mereka
+    window.location.href = "setup-institution.html"; 
+}
 
             } catch (error) {
                 console.error(error);
-                let msg = "Terjadi kesalahan.";
-                if (error.code === 'auth/email-already-in-use') msg = "Email sudah terdaftar.";
-                if (error.code === 'auth/weak-password') msg = "Password terlalu lemah (min 6 karakter).";
-                
+                let msg = "Terjadi kesalahan: " + error.message;
+                if (error.code === 'auth/email-already-in-use') msg = "Email ini sudah terdaftar.";
                 errorBox.innerText = msg;
                 errorBox.style.display = 'block';
             } finally {
-                btn.innerText = "Daftar Sekarang";
+                btn.innerText = "Daftar & Buat Profil";
                 btn.disabled = false;
             }
         }

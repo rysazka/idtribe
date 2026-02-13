@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Profil Saya - ID-TRIBE</title>
+    <link rel="icon" type="image/png" href="favicon.png">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script type="module" src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
+    <script type="module" src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js"></script>
+    <script type="module" src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"></script>
+
+    <style>
+        :root {
+            --primary: #059669; --primary-dark: #047857; --primary-light: #d1fae5;
+            --accent: #f59e0b; --dark: #0f172a; --text-gray: #64748b; --border: #e2e8f0;
+            --font-head: 'Outfit', sans-serif; --font-body: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { font-family: var(--font-body); background: #f8fafc; color: var(--dark); padding-bottom: 40px; }
+
+        /* HEADER BG */
+        .profile-header-bg {
+            height: 200px; width: 100%;
+            background: linear-gradient(135deg, var(--primary), #064e3b);
+            position: relative; border-radius: 0 0 30px 30px;
+        }
+        .nav-back {
+            position: absolute; top: 20px; left: 20px;
+            background: rgba(255,255,255,0.2); backdrop-filter: blur(5px);
+            color: white; padding: 8px 15px; border-radius: 20px;
+            text-decoration: none; font-weight: 600; font-size: 0.9rem;
+            display: flex; align-items: center; gap: 8px; transition: 0.2s;
+        }
+        .nav-back:hover { background: rgba(255,255,255,0.3); }
+
+        /* CONTAINER */
+        .container { max-width: 800px; margin: -80px auto 0 auto; padding: 0 20px; position: relative; z-index: 10; }
+
+        /* MAIN CARD */
+        .profile-card {
+            background: white; border-radius: 24px; padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.08); text-align: center;
+            border: 1px solid var(--border);
+        }
+
+        .avatar-container { position: relative; display: inline-block; margin-bottom: 15px; }
+        .avatar-lg {
+            width: 120px; height: 120px; background: white; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 3rem; font-weight: 800; color: var(--primary);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1); border: 5px solid white;
+            object-fit: cover;
+        }
+        .btn-edit-photo {
+            position: absolute; bottom: 5px; right: 5px;
+            background: var(--dark); color: white; width: 35px; height: 35px;
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            border: 3px solid white; cursor: pointer; font-size: 0.9rem;
+        }
+
+        .p-name { font-family: var(--font-head); font-size: 1.8rem; font-weight: 800; margin-bottom: 5px; color: var(--dark); }
+        .p-role { 
+            display: inline-block; background: var(--primary-light); color: var(--primary-dark); 
+            padding: 5px 15px; border-radius: 50px; font-weight: 700; font-size: 0.8rem; 
+            text-transform: uppercase; letter-spacing: 1px; margin-bottom: 20px;
+        }
+
+        /* STATS GRID */
+        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 30px; }
+        .stat-box { background: #f8fafc; padding: 15px; border-radius: 12px; border: 1px solid var(--border); }
+        .stat-val { font-weight: 800; font-size: 1.1rem; color: var(--dark); display: block; }
+        .stat-lbl { font-size: 0.75rem; color: var(--text-gray); text-transform: uppercase; }
+
+        /* SECTIONS */
+        .section-title { text-align: left; font-weight: 700; font-size: 1.1rem; margin-bottom: 15px; border-bottom: 1px solid var(--border); padding-bottom: 10px; color: var(--dark); display: flex; justify-content: space-between; align-items: center; }
+        .btn-edit-section { background: none; border: none; color: var(--primary); font-weight: 600; cursor: pointer; font-size: 0.9rem; }
+        .btn-edit-section:hover { text-decoration: underline; }
+
+        .info-row { display: flex; margin-bottom: 15px; text-align: left; align-items: flex-start; }
+        .info-icon { width: 30px; color: var(--text-gray); font-size: 1.1rem; margin-top: 2px; }
+        .info-content h5 { margin: 0 0 3px 0; font-size: 0.85rem; color: var(--text-gray); font-weight: 600; }
+        .info-content p { margin: 0; font-size: 1rem; color: var(--dark); font-weight: 500; }
+        .info-link { color: var(--primary); text-decoration: none; font-weight: 600; }
+
+        .about-text { text-align: left; color: #475569; line-height: 1.6; margin-bottom: 30px; white-space: pre-line; }
+
+        /* EDIT MODAL */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6); backdrop-filter: blur(5px);
+            z-index: 3000; display: none; align-items: center; justify-content: center; padding: 20px;
+        }
+        .modal-overlay.active { display: flex; animation: fadeIn 0.3s ease; }
+        .modal-card { background: white; width: 100%; max-width: 500px; border-radius: 24px; padding: 30px; position: relative; animation: slideUp 0.4s ease; max-height: 90vh; overflow-y: auto; }
+        @keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        
+        .form-group { margin-bottom: 15px; text-align: left; }
+        .form-label { display: block; font-weight: 700; margin-bottom: 5px; font-size: 0.9rem; }
+        .form-input, .form-textarea { width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 10px; font-family: inherit; }
+        .btn-save { width: 100%; padding: 14px; background: var(--primary); color: white; border: none; border-radius: 12px; font-weight: 700; cursor: pointer; margin-top: 10px; }
+        .btn-close { position: absolute; top: 20px; right: 20px; background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-gray); }
+
+    </style>
+</head>
+<body>
+
+    <div class="profile-header-bg">
+        <a href="dashboard.html" class="nav-back"><i class="fas fa-arrow-left"></i> Dashboard</a>
+    </div>
+
+    <div class="container">
+        <div class="profile-card">
+            
+            <div class="avatar-container">
+                <div class="avatar-lg" id="viewAvatar">U</div>
+                <div class="btn-edit-photo" onclick="alert('Fitur ganti foto coming soon!')"><i class="fas fa-camera"></i></div>
+            </div>
+            
+            <h1 class="p-name" id="viewName">Nama Usaha</h1>
+            <span class="p-role" id="viewRole">UMKM</span>
+
+            <div class="stats-grid">
+                <div class="stat-box">
+                    <span class="stat-val" id="viewYear">2024</span>
+                    <span class="stat-lbl">Sejak</span>
+                </div>
+                <div class="stat-box">
+                    <span class="stat-val" id="viewCat">Umum</span>
+                    <span class="stat-lbl">Kategori</span>
+                </div>
+                <div class="stat-box">
+                    <span class="stat-val">Active</span>
+                    <span class="stat-lbl">Status</span>
+                </div>
+            </div>
+
+            <div class="section-title">
+                Tentang Bisnis
+                <button class="btn-edit-section" onclick="openEditModal()"><i class="fas fa-edit"></i> Edit Profil</button>
+            </div>
+            <p class="about-text" id="viewDesc">Belum ada deskripsi.</p>
+
+            <div class="section-title">Informasi Kontak & Lokasi</div>
+            
+            <div class="info-row">
+                <div class="info-icon"><i class="fas fa-map-marker-alt"></i></div>
+                <div class="info-content">
+                    <h5>Lokasi</h5>
+                    <p id="viewLoc">-</p>
+                </div>
+            </div>
+
+            <div class="info-row">
+                <div class="info-icon"><i class="fas fa-phone"></i></div>
+                <div class="info-content">
+                    <h5>WhatsApp</h5>
+                    <p id="viewPhone">-</p>
+                </div>
+            </div>
+
+            <div class="info-row">
+                <div class="info-icon"><i class="fas fa-envelope"></i></div>
+                <div class="info-content">
+                    <h5>Email Resmi</h5>
+                    <p id="viewEmail">-</p>
+                </div>
+            </div>
+
+            <div class="info-row">
+                <div class="info-icon"><i class="fas fa-globe"></i></div>
+                <div class="info-content">
+                    <h5>Website / Sosmed</h5>
+                    <p><a href="#" target="_blank" class="info-link" id="viewWeb">-</a></p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="editModal">
+        <div class="modal-card">
+            <button class="btn-close" onclick="closeEditModal()">&times;</button>
+            <h2 style="font-family:var(--font-head); margin-bottom:20px;">Edit Profil</h2>
+            
+            <form onsubmit="saveProfile(event)">
+                <div class="form-group">
+                    <label class="form-label">Nama Usaha / Instansi</label>
+                    <input type="text" id="editName" class="form-input" required>
+                </div>
+
+                <div class="form-group" style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                    <div>
+                        <label class="form-label">Kategori</label>
+                        <input type="text" id="editCat" class="form-input" readonly style="background:#f1f5f9;">
+                    </div>
+                    <div>
+                        <label class="form-label">Tahun Berdiri</label>
+                        <input type="number" id="editYear" class="form-input">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Lokasi / Kota</label>
+                    <input type="text" id="editLoc" class="form-input" placeholder="Contoh: Surabaya, Jawa Timur">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Deskripsi Bisnis</label>
+                    <textarea id="editDesc" class="form-textarea" rows="4" placeholder="Ceritakan tentang bisnis Anda..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">No. WhatsApp</label>
+                    <input type="text" id="editPhone" class="form-input">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Link Website / Instagram</label>
+                    <input type="text" id="editWeb" class="form-input">
+                </div>
+
+                <button type="submit" class="btn-save" id="btnSave">Simpan Perubahan</button>
+            </form>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBIaLzkNM0KqPVKxuMNmardLqcrr2kYTWQ",
+            authDomain: "database-idbm.firebaseapp.com",
+            projectId: "database-idbm",
+            storageBucket: "database-idbm.firebasestorage.app",
+            messagingSenderId: "1052290789133",
+            appId: "1:1052290789133:web:36b513630b7a87154eca44",
+            measurementId: "G-EQLBB94DY2"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let currentUser = null;
+
+        // 1. AUTH CHECK
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                currentUser = user;
+                loadUserProfile();
+            } else {
+                window.location.href = "login.html";
+            }
+        });
+
+        // 2. LOAD DATA
+        async function loadUserProfile() {
+            try {
+                const docRef = doc(db, "users_umkm", currentUser.uid);
+                const docSnap = await getDoc(docRef);
+
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    renderProfile(data);
+                } else {
+                    console.log("No such document!");
+                }
+            } catch (e) {
+                console.error("Error getting document:", e);
+            }
+        }
+
+        function renderProfile(data) {
+            // View Mode
+            document.getElementById('viewName').innerText = data.nama_usaha || data.nama_lengkap;
+            document.getElementById('viewRole').innerText = data.role || "User";
+            document.getElementById('viewYear').innerText = data.berdiri_sejak || "-";
+            document.getElementById('viewCat').innerText = data.kategori || "Umum";
+            document.getElementById('viewLoc').innerText = data.lokasi || "Indonesia";
+            document.getElementById('viewDesc').innerText = data.deskripsi || "Belum ada deskripsi.";
+            document.getElementById('viewPhone').innerText = data.no_hp || "-";
+            document.getElementById('viewEmail').innerText = data.email || "-";
+            
+            const web = data.website || "#";
+            const webDisplay = data.website ? (data.website.replace('https://', '').replace('http://', '')) : "-";
+            const webEl = document.getElementById('viewWeb');
+            webEl.innerText = webDisplay;
+            webEl.href = web.startsWith('http') ? web : `https://${web}`;
+
+            // Avatar
+            const initial = (data.nama_usaha || "U").charAt(0).toUpperCase();
+            document.getElementById('viewAvatar').innerText = initial;
+
+            // Fill Edit Form values
+            document.getElementById('editName').value = data.nama_usaha || "";
+            document.getElementById('editCat').value = data.kategori || "";
+            document.getElementById('editYear').value = data.berdiri_sejak || "";
+            document.getElementById('editLoc').value = data.lokasi || "";
+            document.getElementById('editDesc').value = data.deskripsi || "";
+            document.getElementById('editPhone').value = data.no_hp || "";
+            document.getElementById('editWeb').value = data.website || "";
+        }
+
+        // 3. EDIT FUNCTIONS
+        window.openEditModal = () => document.getElementById('editModal').classList.add('active');
+        window.closeEditModal = () => document.getElementById('editModal').classList.remove('active');
+
+        window.saveProfile = async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('btnSave');
+            btn.innerText = "Menyimpan...";
+            btn.disabled = true;
+
+            const updates = {
+                nama_usaha: document.getElementById('editName').value,
+                berdiri_sejak: document.getElementById('editYear').value,
+                lokasi: document.getElementById('editLoc').value,
+                deskripsi: document.getElementById('editDesc').value,
+                no_hp: document.getElementById('editPhone').value,
+                website: document.getElementById('editWeb').value
+            };
+
+            try {
+                const docRef = doc(db, "users_umkm", currentUser.uid);
+                await updateDoc(docRef, updates);
+                
+                // Update UI langsung tanpa refresh
+                renderProfile({ ...updates, role: document.getElementById('viewRole').innerText, kategori: document.getElementById('viewCat').innerText, email: document.getElementById('viewEmail').innerText });
+                
+                closeEditModal();
+                Swal.fire({ icon: 'success', title: 'Tersimpan!', timer: 1500, showConfirmButton: false });
+
+            } catch (error) {
+                console.error(error);
+                Swal.fire('Error', 'Gagal menyimpan data.', 'error');
+            } finally {
+                btn.innerText = "Simpan Perubahan";
+                btn.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>

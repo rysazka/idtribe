@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Partnership Hub - ID-TRIBE</title>
+    <link rel="icon" type="image/png" href="favicon.png">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <script type="module" src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
+    <script type="module" src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js"></script>
+    <script type="module" src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"></script>
+
+    <style>
+        /* --- 1. BASE STYLES --- */
+        :root {
+            --primary: #059669; --primary-dark: #047857; --primary-light: #d1fae5;
+            --accent: #f59e0b; --dark: #0f172a; --text-gray: #64748b; --border: #e2e8f0;
+            --font-head: 'Outfit', sans-serif; --font-body: 'Plus Jakarta Sans', sans-serif;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body {
+            font-family: var(--font-body); background-color: #f0fdf4; color: var(--dark);
+            padding-top: 80px; padding-bottom: 100px; min-height: 100vh;
+            background-image: radial-gradient(at 0% 0%, hsla(152,100%,93%,1) 0, transparent 50%), 
+                              radial-gradient(at 100% 100%, hsla(43,100%,93%,1) 0, transparent 50%);
+        }
+
+        /* NAVIGATION */
+        .top-nav {
+            position: fixed; top: 0; left: 0; width: 100%; height: 70px;
+            background: rgba(255,255,255,0.95); backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255,255,255,0.6); display: flex; align-items: center; justify-content: space-between;
+            padding: 0 5%; z-index: 1000; box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+        }
+        .brand { font-family: var(--font-head); font-size: 1.4rem; font-weight: 800; color: var(--dark); text-decoration: none; }
+        .brand span { color: var(--primary); }
+        .nav-back { text-decoration: none; color: var(--text-gray); font-weight: 600; display: flex; align-items: center; gap: 8px; }
+
+        .main-container { max-width: 1100px; margin: 0 auto; padding: 0 20px; }
+        
+        /* TABS */
+        .tab-switcher { display: flex; gap: 10px; margin-bottom: 30px; justify-content: center; }
+        .tab-btn {
+            padding: 10px 25px; border-radius: 30px; border: none; font-weight: 700; cursor: pointer;
+            font-family: var(--font-body); transition: 0.3s; background: rgba(255,255,255,0.6); color: var(--text-gray);
+        }
+        .tab-btn.active { background: var(--primary); color: white; box-shadow: 0 4px 15px rgba(5,150,105,0.3); }
+
+        .view-section { display: none; animation: fadeIn 0.4s ease-out; }
+        .view-section.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* FILTER BAR */
+        .filter-container { 
+            max-width: 900px; margin: 0 auto 30px auto; display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;
+            background: white; padding: 15px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+        }
+        .search-input, .filter-select { padding: 12px; border-radius: 10px; border: 1px solid #cbd5e1; outline: none; font-family: var(--font-body); font-size: 0.9rem; }
+        .search-input { flex: 2; min-width: 200px; } .filter-select { flex: 1; min-width: 140px; cursor: pointer; }
+        
+        /* --- MARKETPLACE CARD (GRID) --- */
+        .partner-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; }
+        
+        .partner-card {
+            background: white; border-radius: 16px; padding: 20px; border: 1px solid #f1f5f9;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            display: flex; flex-direction: column; gap: 12px; position: relative; cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.02); overflow: hidden;
+            border-top: 5px solid #e2e8f0; 
+        }
+        .partner-card:hover { transform: translateY(-5px); box-shadow: 0 20px 40px rgba(0,0,0,0.08); border-color: var(--primary-light); }
+        
+        .card-image-space {
+            width: 100%; height: 160px; background: #f8fafc; border-radius: 10px;
+            display: flex; align-items: center; justify-content: center; color: #cbd5e1;
+            margin-bottom: 5px; overflow: hidden; border: 1px solid #e2e8f0;
+        }
+        .card-image-space img { width: 100%; height: 100%; object-fit: cover; }
+        
+        .card-head { display: flex; align-items: center; gap: 12px; }
+        .card-avatar { width: 45px; height: 45px; background: var(--primary-light); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.1rem; color: var(--primary-dark); }
+        
+        .badge { font-size: 0.7rem; padding: 4px 10px; border-radius: 6px; font-weight: 700; text-transform: uppercase; display: inline-block; }
+        .badge-umkm { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+        .badge-bumn { background: #dbeafe; color: #1e40af; border: 1px solid #bfdbfe; }
+        .badge-gov { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+        .badge-cat { background: #fef3c7; color: #b45309; border: 1px solid #fde68a; }
+
+        .card-desc { font-size: 0.85rem; color: var(--text-gray); line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .btn-card { width: 100%; padding: 10px; border-radius: 8px; border: none; font-weight: 700; font-size: 0.85rem; cursor: pointer; transition: 0.3s; background: #f8fafc; color: var(--dark); border: 1px solid #e2e8f0; margin-top: auto; }
+        .btn-card:hover { background: var(--dark); color: white; border-color: var(--dark); }
+
+        /* --- STATUS LIST STYLES (SESUAI SCREENSHOT) --- */
+        .status-container { max-width: 800px; margin: 0 auto; display: flex; flex-direction: column; gap: 15px; }
+        
+        .request-card {
+            background: white; border-radius: 12px; padding: 20px;
+            display: flex; flex-direction: column; gap: 5px; cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.03); border: 1px solid #f1f5f9;
+            border-left: 6px solid #cbd5e1; /* Default Border */
+            transition: transform 0.2s; position: relative;
+        }
+        .request-card:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,0,0,0.05); }
+
+        .req-top-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
+        .req-partner-name { font-family: var(--font-head); font-weight: 700; font-size: 1rem; color: var(--dark); display: flex; align-items: center; gap: 8px; }
+
+        .dir-badge { font-size: 0.65rem; padding: 2px 6px; border-radius: 4px; font-weight: 600; text-transform: uppercase; }
+        .dir-in { background: #eff6ff; color: #3b82f6; border: 1px solid #dbeafe; } 
+        .dir-out { background: #f3f4f6; color: #64748b; border: 1px solid #e5e7eb; }
+
+        .status-pill { font-size: 0.7rem; padding: 4px 12px; border-radius: 20px; font-weight: 700; text-transform: capitalize; }
+        .st-review { background: #fef3c7; color: #d97706; } /* Kuning Review */
+        .st-active { background: #dcfce7; color: #166534; } /* Hijau Active */
+        .st-rejected { background: #f3f4f6; color: #64748b; } /* Abu Rejected */
+
+        /* Border Colors */
+        .br-review { border-left-color: #f59e0b; }
+        .br-active { border-left-color: #10b981; }
+        .br-rejected { border-left-color: #94a3b8; opacity: 0.7; }
+
+        .req-title { font-weight: 600; font-size: 0.9rem; color: #334155; }
+        .req-date { font-size: 0.75rem; color: #94a3b8; margin-top: 2px; }
+
+        /* FORM POPUP */
+        .form-container { max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
+        .form-input, .form-textarea { width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 10px; margin-bottom: 15px; }
+        .btn-primary { width: 100%; padding: 14px; background: var(--primary); color: white; border: none; border-radius: 12px; font-weight: 700; cursor: pointer; }
+
+        /* FAB & MODAL */
+        .fab-container { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); z-index: 2000; }
+        .fab-btn { width: 65px; height: 65px; border-radius: 50%; border: none; background: linear-gradient(135deg, var(--primary), #34d399); color: white; font-size: 2rem; display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 25px rgba(16, 185, 129, 0.4); cursor: pointer; }
+        
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); backdrop-filter: blur(5px); z-index: 3000; display: none; align-items: center; justify-content: center; padding: 20px; }
+        .modal-overlay.active { display: flex; animation: fadeIn 0.3s ease; }
+        .upload-card { background: white; width: 100%; max-width: 500px; border-radius: 24px; padding: 25px; max-height: 90vh; overflow-y: auto; }
+        .close-modal { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-gray); }
+        .img-preview { width: 100%; height: 150px; object-fit: cover; border-radius: 10px; display: none; margin-bottom: 15px; border: 2px dashed #e2e8f0; }
+        .img-preview.active { display: block; }
+    </style>
+</head>
+<body>
+
+    <nav class="top-nav">
+        <a href="dashboard.html" class="nav-back"><i class="fas fa-arrow-left"></i> Dashboard</a>
+        <div class="brand">ID<span>TRIBE</span></div>
+        <div style="width: 80px;"></div>
+    </nav>
+
+    <div class="main-container">
+        <div class="tab-switcher">
+            <button class="tab-btn active" onclick="switchTab('marketplace')" id="btn-market">Bursa Peluang</button>
+            <button class="tab-btn" onclick="switchTab('status')" id="btn-status">Status Pengajuan</button>
+        </div>
+
+        <div id="view-marketplace" class="view-section active">
+            <div style="text-align: center; margin-bottom: 30px;">
+                <h2 style="font-family: var(--font-head); font-size: 1.8rem; margin-bottom: 5px;">Bursa Kolaborasi</h2>
+                <p style="color: var(--text-gray);">Temukan peluang dari Partner, BUMN, Pemerintah, dan Kampus.</p>
+            </div>
+            
+            <div class="filter-container">
+                <input type="text" id="searchInput" class="search-input" placeholder="Cari Peluang..." onkeyup="applyFilter()">
+                <select id="filterType" class="filter-select" onchange="applyFilter()">
+                    <option value="">Semua Institusi</option>
+                    <option value="UMKM">UMKM</option>
+                    <option value="BUMN">BUMN</option>
+                    <option value="Government">Pemerintah</option>
+                </select>
+                <select id="filterCategory" class="filter-select" onchange="applyFilter()">
+                    <option value="">Semua Kategori</option>
+                    <option value="F&B">F&B</option>
+                    <option value="Teknologi">Teknologi</option>
+                    <option value="Jasa">Jasa</option>
+                </select>
+            </div>
+            
+            <div id="loadingGrid" style="text-align:center; padding:40px; color:gray;">
+                <i class="fas fa-circle-notch fa-spin"></i> Memuat Data...
+            </div>
+            <div class="partner-grid" id="partnerGrid"></div>
+        </div>
+
+        <div id="view-status" class="view-section">
+            <div style="max-width: 800px; margin: 0 auto;">
+                <div class="filter-container" style="margin-bottom:20px;">
+                    <select id="filterStatusType" class="search-input" onchange="renderStatusLists()">
+                        <option value="all">Semua Status</option>
+                        <option value="in">Masuk (Incoming)</option>
+                        <option value="out">Keluar (Outgoing)</option>
+                    </select>
+                </div>
+
+                <h4 style="color:#059669; margin: 20px 0 10px 0; font-family:var(--font-head);"><i class="fas fa-handshake"></i> Partnership Aktif <span id="count-active" style="background:#059669; color:white; padding:2px 8px; border-radius:10px; font-size:0.7rem;">0</span></h4>
+                <div id="list-active" class="status-container"></div>
+
+                <h4 style="color:#f59e0b; margin: 30px 0 10px 0; font-family:var(--font-head);"><i class="fas fa-clock"></i> Dalam Proses <span id="count-pending" style="background:#f59e0b; color:white; padding:2px 8px; border-radius:10px; font-size:0.7rem;">0</span></h4>
+                <div id="list-pending" class="status-container"></div>
+
+                <h4 style="color:#64748b; margin: 30px 0 10px 0; font-family:var(--font-head);"><i class="fas fa-history"></i> Riwayat <span id="count-history" style="background:#64748b; color:white; padding:2px 8px; border-radius:10px; font-size:0.7rem;">0</span></h4>
+                <div id="list-history" class="status-container"></div>
+            </div>
+        </div>
+
+        <div id="view-form" class="view-section">
+            <div class="form-container">
+                <button onclick="closeForm()" style="background:none; border:none; color:var(--text-gray); cursor:pointer; margin-bottom:15px; font-weight:600;"><i class="fas fa-arrow-left"></i> Batal</button>
+                <h2 style="font-family: var(--font-head); margin-bottom: 15px;">Formulir Pengajuan</h2>
+                <form onsubmit="submitProposal(event)">
+                    <input type="hidden" id="formTargetID"> 
+                    <label style="font-weight: 700; display: block; margin-bottom: 5px;">Target Partner</label>
+                    <input type="text" id="formTargetName" class="form-input" readonly style="background: #f8fafc; font-weight: 600;">
+                    <label style="font-weight: 700; display: block; margin-bottom: 5px;">Judul Kerjasama</label>
+                    <input type="text" id="formTitle" class="form-input" placeholder="Judul..." required>
+                    <label style="font-weight: 700; display: block; margin-bottom: 5px;">Pesan / Proposal</label>
+                    <textarea id="formDesc" class="form-textarea" rows="5" required placeholder="Jelaskan detail..."></textarea>
+                    <button type="submit" class="btn-primary">Kirim Pengajuan</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="fab-container">
+        <button class="fab-btn" onclick="openUploadModal()"><i class="fas fa-plus"></i></button>
+    </div>
+
+    <div class="modal-overlay" id="uploadModal">
+        <div class="upload-card">
+            <div style="display:flex; justify-content:space-between; margin-bottom:20px;">
+                <h3 style="margin:0;">Buat Peluang Baru</h3>
+                <button onclick="closeUploadModal()" style="border:none; background:none; font-size:1.5rem;">&times;</button>
+            </div>
+            
+            <img id="previewImg" class="img-preview">
+            <label style="font-weight:700; font-size:0.9rem; display:block; margin-bottom:5px;">Foto (Opsional)</label>
+            <input type="file" id="newOppImage" accept="image/*" class="form-input" onchange="previewImage(this)" style="margin-bottom:15px;">
+
+            <input type="text" id="newOppTitle" class="form-input" placeholder="Judul Peluang">
+            <select id="newOppCat" class="form-input">
+                <option value="Jasa">Jasa</option><option value="Teknologi">Teknologi</option><option value="F&B">F&B</option>
+            </select>
+            <textarea id="newOppDesc" class="form-textarea" rows="3" placeholder="Deskripsi..."></textarea>
+            <button class="btn-primary" id="btnPublish" onclick="publishOpportunity()">Posting Sekarang</button>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, collection, getDocs, addDoc, query, where, onSnapshot, orderBy, serverTimestamp, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBIaLzkNM0KqPVKxuMNmardLqcrr2kYTWQ",
+            authDomain: "database-idbm.firebaseapp.com",
+            projectId: "database-idbm",
+            storageBucket: "database-idbm.firebasestorage.app",
+            messagingSenderId: "1052290789133",
+            appId: "1:1052290789133:web:36b513630b7a87154eca44",
+            measurementId: "G-EQLBB94DY2"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let currentUser = null;
+        let currentUserData = null;
+        let partnersData = [];
+        let requestsData = [];
+
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                currentUser = user;
+                const docRef = doc(db, "users_umkm", user.uid);
+                const docSnap = await getDoc(docRef);
+                if(docSnap.exists()) currentUserData = docSnap.data();
+
+                // SETUP LISTENERS
+                setupPartnersListener();
+                setupStatusListener();
+
+                // HANDLE ACTION FROM PROFILE
+                const urlParams = new URLSearchParams(window.location.search);
+                const action = urlParams.get('action');
+                if (action === 'apply') {
+                    const targetId = urlParams.get('id');
+                    const targetName = decodeURIComponent(urlParams.get('target') || '');
+                    const title = decodeURIComponent(urlParams.get('title') || '');
+                    if(targetId) openProposalForm(targetId, targetName, title);
+                }
+            } else {
+                window.location.href = "login.html";
+            }
+        });
+
+        // --- SUBMIT PROPOSAL (REALTIME WRITE) ---
+        window.submitProposal = async (e) => {
+            e.preventDefault();
+            const btn = document.querySelector('.btn-primary');
+            const targetUid = document.getElementById('formTargetID').value;
+            const targetName = document.getElementById('formTargetName').value;
+            const title = document.getElementById('formTitle').value;
+            const desc = document.getElementById('formDesc').value;
+
+            if(!targetUid) { Swal.fire('Error', 'ID Target tidak ditemukan.', 'error'); return; }
+
+            btn.innerHTML = 'Mengirim...'; btn.disabled = true;
+
+            try {
+                await addDoc(collection(db, "partnership_requests"), {
+                    senderId: currentUser.uid,
+                    senderName: currentUserData?.nama_usaha || "User",
+                    targetId: targetUid,
+                    targetName: targetName,
+                    title: title, desc: desc,
+                    status: "pending", createdAt: serverTimestamp(), type: "General",
+                    direction: "out"
+                });
+
+                Swal.fire('Berhasil', 'Pengajuan dikirim.', 'success');
+                // Clean URL & Switch Tab
+                window.history.replaceState({}, document.title, "partnership.html");
+                closeForm();
+                switchTab('status');
+
+            } catch (error) {
+                Swal.fire('Gagal', error.message, 'error');
+            } finally {
+                btn.innerHTML = 'Kirim Pengajuan'; btn.disabled = false;
+            }
+        }
+
+        // --- STATUS LIST (CLEAN UI) ---
+        function setupStatusListener() {
+            // Listen Outgoing
+            const qOut = query(collection(db, "partnership_requests"), where("senderId", "==", currentUser.uid));
+            onSnapshot(qOut, (snap) => updateLocalData(snap, 'out'));
+
+            // Listen Incoming
+            const qIn = query(collection(db, "partnership_requests"), where("targetId", "==", currentUser.uid));
+            onSnapshot(qIn, (snap) => updateLocalData(snap, 'in'));
+        }
+
+        function updateLocalData(snapshot, direction) {
+            snapshot.docChanges().forEach(change => {
+                const data = change.doc.data();
+                const id = change.doc.id;
+                if (change.type === "added" || change.type === "modified") {
+                    const idx = requestsData.findIndex(r => r.id === id);
+                    const item = { ...data, id, direction };
+                    if (idx > -1) requestsData[idx] = item; else requestsData.push(item);
+                }
+            });
+            renderStatusLists();
+        }
+
+        window.renderStatusLists = () => {
+            requestsData.sort((a,b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+
+            const listActive = document.getElementById('list-active');
+            const listPending = document.getElementById('list-pending');
+            const listHistory = document.getElementById('list-history');
+            
+            listActive.innerHTML = ""; listPending.innerHTML = ""; listHistory.innerHTML = "";
+            let cAct = 0, cPen = 0, cHis = 0;
+
+            const filterType = document.getElementById('filterStatusType')?.value || 'all';
+
+            requestsData.forEach(req => {
+                if(filterType !== 'all' && req.direction !== filterType) return;
+
+                // UI LOGIC SESUAI SCREENSHOT
+                let container, statusClass, borderClass, statusLabel;
+                
+                if (req.status === 'accepted' || req.status === 'active') {
+                    container = listActive; statusClass = 'st-active'; borderClass = 'br-active'; statusLabel = 'Aktif'; cAct++;
+                } else if (req.status === 'pending' || req.status === 'review') {
+                    container = listPending; statusClass = 'st-review'; borderClass = 'br-review'; statusLabel = 'Review'; cPen++;
+                } else {
+                    container = listHistory; statusClass = 'st-rejected'; borderClass = 'br-rejected'; statusLabel = req.status; cHis++;
+                }
+
+                // Partner Name Logic
+                const partnerName = req.direction === 'in' ? req.senderName : req.targetName;
+                const dirBadgeClass = req.direction === 'in' ? 'dir-in' : 'dir-out';
+                const dirText = req.direction === 'in' ? 'Masuk' : 'Keluar';
+                const dateStr = req.createdAt?.toDate ? req.createdAt.toDate().toLocaleDateString() : "Baru Saja";
+
+                // HTML STRUCTURE (PERSIS SCREENSHOT)
+                const html = `
+                <div class="request-card ${borderClass}" onclick="window.location.href='request-detail.html?id=${req.id}'">
+                    <div class="req-top-row">
+                        <div class="req-partner-name">
+                            ${partnerName} 
+                            <span class="dir-badge ${dirBadgeClass}">${dirText}</span>
+                        </div>
+                        <span class="status-pill ${statusClass}">${statusLabel}</span>
+                    </div>
+                    <div class="req-title">${req.title}</div>
+                    <div class="req-date">${dateStr}</div>
+                </div>`;
+
+                container.insertAdjacentHTML('beforeend', html);
+            });
+
+            document.getElementById('count-active').innerText = cAct;
+            document.getElementById('count-pending').innerText = cPen;
+            document.getElementById('count-history').innerText = cHis;
+        }
+
+        // --- MARKETPLACE & UPLOAD ---
+        function setupPartnersListener() {
+            const loading = document.getElementById('loadingGrid');
+            const q = query(collection(db, "opportunities"), orderBy("createdAt", "desc"));
+            onSnapshot(q, (snap) => {
+                loading.style.display = 'none';
+                partnersData = [];
+                snap.forEach(doc => {
+                    const d = doc.data();
+                    partnersData.push({...d, id: d.ownerId}); 
+                });
+                renderPartnerGrid(partnersData);
+            });
+        }
+
+        function renderPartnerGrid(data) {
+            const grid = document.getElementById('partnerGrid');
+            grid.innerHTML = "";
+            if(data.length === 0) { grid.innerHTML = "<p style='text-align:center; grid-column:1/-1; color:gray;'>Belum ada peluang.</p>"; return; }
+
+            data.forEach(p => {
+                let borderColor = "var(--primary)";
+                if(p.role === 'BUMN') borderColor = "#1d4ed8";
+                
+                let imgContent = `<i class="fas fa-handshake" style="font-size:3rem; opacity:0.3;"></i>`;
+                if(p.image) imgContent = `<img src="${p.image}" alt="Img">`;
+
+                grid.innerHTML += `
+                <div class="partner-card" style="border-top:5px solid ${borderColor}" onclick="window.location.href='partner-profile.html?id=${p.id}'">
+                    <div class="card-image-space">${imgContent}</div>
+                    <div class="card-head">
+                        <div class="card-avatar">${p.ownerName?p.ownerName.charAt(0):'U'}</div>
+                        <div><h4>${p.title}</h4><span>${p.ownerName}</span></div>
+                    </div>
+                    <div style="margin-top:10px;"><span class="badge badge-umkm">${p.role}</span></div>
+                    <button class="btn-card">Lihat Profil</button>
+                </div>`;
+            });
+        }
+
+        // UPLOAD & IMAGE LOGIC
+        const toBase64 = file => new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = error => reject(error);
+        });
+
+        window.previewImage = (input) => {
+            if(input.files && input.files[0]){
+                const reader = new FileReader();
+                reader.onload = (e) => { 
+                    const img = document.getElementById('previewImg');
+                    img.src = e.target.result; img.classList.add('active'); 
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        const modal = document.getElementById('uploadModal');
+        window.openUploadModal = () => modal.classList.add('active');
+        window.closeUploadModal = () => { modal.classList.remove('active'); document.getElementById('newOppImage').value = ""; document.getElementById('previewImg').classList.remove('active'); }
+
+        window.publishOpportunity = async () => {
+            const btn = document.getElementById('btnPublish');
+            const title = document.getElementById('newOppTitle').value;
+            const cat = document.getElementById('newOppCat').value;
+            const desc = document.getElementById('newOppDesc').value;
+            const fileInput = document.getElementById('newOppImage');
+
+            if(!title) return;
+            btn.innerText = "Proses..."; btn.disabled = true;
+
+            try {
+                let imageBase64 = null;
+                if(fileInput.files.length > 0) imageBase64 = await toBase64(fileInput.files[0]);
+
+                await addDoc(collection(db, "opportunities"), {
+                    ownerId: currentUser.uid, ownerName: currentUserData?.nama_usaha,
+                    title, desc, category: cat, role: currentUserData?.role || "UMKM",
+                    image: imageBase64, createdAt: serverTimestamp()
+                });
+                closeUploadModal();
+                Swal.fire('Sukses', 'Peluang tayang!', 'success');
+            } catch(e) { Swal.fire('Error', e.message, 'error'); } 
+            finally { btn.innerText = "Posting Sekarang"; btn.disabled = false; }
+        }
+
+        // UI HELPERS
+        window.openProposalForm = (id, name, title) => {
+            document.querySelector('.tab-switcher').style.display='none';
+            document.getElementById('view-marketplace').classList.remove('active');
+            document.getElementById('view-status').classList.remove('active');
+            document.getElementById('view-form').classList.add('active');
+            
+            document.getElementById('formTargetID').value = id;
+            document.getElementById('formTargetName').value = name;
+            if(title) document.getElementById('formTitle').value = title;
+        }
+        window.closeForm = () => {
+            document.getElementById('view-form').classList.remove('active');
+            document.getElementById('view-marketplace').classList.add('active');
+            document.querySelector('.tab-switcher').style.display='flex';
+        }
+        window.switchTab = (t) => {
+            document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+            document.getElementById(t==='marketplace'?'btn-market':'btn-status').classList.add('active');
+            document.querySelectorAll('.view-section').forEach(v=>v.classList.remove('active')); 
+            if(t==='marketplace') document.getElementById('view-marketplace').classList.add('active');
+            else document.getElementById('view-status').classList.add('active');
+        }
+        window.applyFilter = () => {
+            const s = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = partnersData.filter(p => p.title.toLowerCase().includes(s));
+            renderPartnerGrid(filtered);
+        }
+    </script>
+</body>
+</html>

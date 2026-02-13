@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profil Partner - ID-TRIBE</title>
+    <link rel="icon" type="image/png" href="favicon.png">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <script type="module" src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
+    <script type="module" src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <style>
+        :root {
+            --primary: #059669; --primary-dark: #047857; --primary-light: #d1fae5;
+            --accent: #f59e0b; --dark: #0f172a; --text-gray: #64748b; --border: #e2e8f0;
+            --font-head: 'Outfit', sans-serif; --font-body: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: var(--font-body); background: #f0fdf4; color: var(--dark); padding-bottom: 60px; }
+
+        /* HEADER */
+        .cover-bg { height: 180px; width: 100%; background: linear-gradient(120deg, var(--primary), #064e3b); position: relative; }
+        .nav-back { position: absolute; top: 20px; left: 20px; background: rgba(255,255,255,0.2); backdrop-filter: blur(8px); color: white; padding: 8px 16px; border-radius: 30px; text-decoration: none; font-weight: 600; font-size: 0.9rem; transition: 0.2s; display: flex; align-items: center; gap: 8px; z-index: 10; }
+        .nav-back:hover { background: rgba(255,255,255,0.3); transform: translateX(-3px); }
+
+        /* LAYOUT */
+        .container { max-width: 1100px; margin: 0 auto; padding: 0 20px; position: relative; margin-top: -60px; }
+        .profile-grid { display: grid; grid-template-columns: 350px 1fr; gap: 25px; }
+
+        /* SIDEBAR CARD */
+        .profile-card { background: white; border-radius: 20px; padding: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); border: 1px solid var(--border); text-align: center; position: sticky; top: 20px; }
+        
+        .avatar-lg { width: 110px; height: 110px; background: white; border-radius: 25px; display: flex; align-items: center; justify-content: center; font-size: 3rem; font-weight: 800; color: var(--primary); box-shadow: 0 8px 20px rgba(0,0,0,0.08); border: 4px solid white; margin: 0 auto 15px auto; object-fit: cover; }
+        
+        .p-role { display: inline-block; background: var(--primary-light); color: var(--primary-dark); padding: 4px 12px; border-radius: 50px; font-weight: 700; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
+        .p-name { font-family: var(--font-head); font-size: 1.6rem; font-weight: 800; margin-bottom: 5px; line-height: 1.3; }
+        .p-loc { color: var(--text-gray); font-size: 0.9rem; margin-bottom: 20px; display: flex; align-items: center; justify-content: center; gap: 5px; }
+        
+        /* STATS GRID (DATA RIL) */
+        .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 25px; text-align: left; }
+        .stat-item { background: #f8fafc; padding: 12px; border-radius: 12px; border: 1px solid var(--border); }
+        .stat-lbl { font-size: 0.7rem; color: var(--text-gray); text-transform: uppercase; font-weight: 600; display: block; margin-bottom: 4px; }
+        .stat-val { font-weight: 700; font-size: 0.9rem; color: var(--dark); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+        .contact-list { list-style: none; text-align: left; margin-top: 20px; border-top: 1px dashed var(--border); padding-top: 20px; }
+        .contact-list li { margin-bottom: 12px; display: flex; align-items: center; gap: 12px; color: var(--dark); font-size: 0.9rem; font-weight: 500; }
+        .contact-icon { width: 32px; height: 32px; background: #f1f5f9; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--text-gray); flex-shrink: 0; }
+        .contact-link { color: var(--dark); text-decoration: none; transition: 0.2s; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 220px; display: block; }
+        .contact-link:hover { color: var(--primary); }
+
+        /* MAIN CONTENT */
+        .content-area { display: flex; flex-direction: column; gap: 25px; padding-top: 60px; }
+        .card-box { background: white; border-radius: 16px; padding: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.02); border: 1px solid var(--border); }
+        .box-title { font-family: var(--font-head); font-size: 1.2rem; font-weight: 700; margin-bottom: 15px; display: flex; align-items: center; gap: 10px; }
+        .box-title i { color: var(--primary); }
+
+        /* DNA TAGS (Visual Dummy for Now) */
+        .dna-tags { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 15px; }
+        .dna-tag { padding: 6px 14px; border-radius: 8px; font-size: 0.85rem; font-weight: 600; display: flex; align-items: center; gap: 6px; }
+        .tag-cap { background: #e0f2fe; color: #0284c7; } 
+        .tag-leg { background: #dcfce7; color: #166534; } 
+        .tag-exp { background: #f3e8ff; color: #7e22ce; }
+
+        /* OPPORTUNITIES LIST */
+        .opp-list { display: grid; gap: 15px; }
+        .opp-card { border: 1px solid var(--border); border-radius: 12px; padding: 20px; background: white; transition: 0.3s; position: relative; overflow: hidden; }
+        .opp-card:hover { border-color: var(--primary); box-shadow: 0 8px 25px rgba(5, 150, 105, 0.1); transform: translateY(-3px); }
+        .opp-type { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; background: #fef3c7; color: #b45309; padding: 4px 10px; border-radius: 6px; display: inline-block; margin-bottom: 8px; }
+        .opp-title { font-weight: 700; font-size: 1.05rem; margin-bottom: 5px; color: var(--dark); }
+        .opp-desc { font-size: 0.9rem; color: var(--text-gray); line-height: 1.6; margin-bottom: 20px; }
+        
+        .btn-apply { display: inline-flex; align-items: center; justify-content: center; gap: 8px; background: var(--dark); color: white; padding: 12px 20px; border-radius: 10px; text-decoration: none; font-weight: 600; font-size: 0.9rem; transition: 0.2s; cursor: pointer; border: none; width: 100%; }
+        .btn-apply:hover { background: var(--primary); }
+
+        #loadingState { text-align: center; padding: 50px; font-size: 1.2rem; color: var(--text-gray); grid-column: 1/-1; }
+
+        @media (max-width: 900px) { 
+            .profile-grid { grid-template-columns: 1fr; } 
+            .container { margin-top: -80px; }
+            .profile-card { position: relative; top: 0; }
+            .content-area { padding-top: 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="cover-bg">
+        <a href="partnership.html" class="nav-back"><i class="fas fa-arrow-left"></i> Kembali ke Bursa</a>
+    </div>
+
+    <div class="container">
+        <div id="loadingState"><i class="fas fa-circle-notch fa-spin"></i> Memuat Profil...</div>
+
+        <div class="profile-grid" id="mainContent" style="display: none;">
+            <aside>
+                <div class="profile-card">
+                    <div class="avatar-lg" id="pAvatar">U</div>
+                    
+                    <span class="p-role" id="pRole">UMKM</span>
+                    <h1 class="p-name">
+                        <span id="pName">Nama Bisnis</span> 
+                        <i class="fas fa-check-circle" style="color:#3b82f6; font-size:1rem; display:none;" id="pVerified" title="Terverifikasi"></i>
+                    </h1>
+                    <div class="p-loc"><i class="fas fa-map-marker-alt"></i> <span id="pLoc">Indonesia</span></div>
+                    
+                    <div class="stat-grid">
+                        <div class="stat-item">
+                            <span class="stat-lbl">Kategori</span>
+                            <span class="stat-val" id="pCat">-</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-lbl">Berdiri Sejak</span>
+                            <span class="stat-val" id="pYear">-</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-lbl">Skala Bisnis</span>
+                            <span class="stat-val">Mikro (UMi)</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-lbl">Rating</span>
+                            <span class="stat-val" style="color:var(--accent);">⭐ 4.8</span>
+                        </div>
+                    </div>
+
+                    <ul class="contact-list">
+                        <li>
+                            <div class="contact-icon"><i class="fas fa-envelope"></i></div> 
+                            <span class="contact-link" id="pEmail">-</span>
+                        </li>
+                        <li>
+                            <div class="contact-icon"><i class="fas fa-phone"></i></div> 
+                            <a href="#" target="_blank" class="contact-link" id="pPhone">-</a>
+                        </li>
+                        <li>
+                            <div class="contact-icon"><i class="fas fa-globe"></i></div> 
+                            <a href="#" target="_blank" class="contact-link" id="pWeb">-</a>
+                        </li>
+                    </ul>
+
+                    <div style="margin-top: 20px; padding: 12px; border: 1px dashed var(--border); border-radius: 10px; background: #f9fafb; font-size: 0.75rem; color: var(--text-gray);">
+                        <i class="fas fa-info-circle"></i> Ajukan partnership untuk membuka kontak lebih detail.
+                    </div>
+                </div>
+            </aside>
+
+            <main class="content-area">
+                <div class="card-box">
+                    <div class="box-title"><i class="fas fa-info-circle"></i> Tentang Bisnis</div>
+                    <p id="pDesc" style="color:var(--text-gray); line-height:1.7;">Deskripsi belum diisi.</p>
+                    
+                    <div style="margin-top: 20px; padding-top: 15px; border-top: 1px dashed var(--border);">
+                        <div style="font-size:0.8rem; font-weight:700; color:var(--dark); margin-bottom:10px;">BUSINESS DNA & KAPABILITAS</div>
+                        <div class="dna-tags">
+                            <span class="dna-tag tag-cap"><i class="fas fa-box"></i> Kapasitas: Fleksibel</span>
+                            <span class="dna-tag tag-leg"><i class="fas fa-file-contract"></i> Legalitas Lengkap</span>
+                            <span class="dna-tag tag-exp"><i class="fas fa-truck"></i> Pengiriman Nasional</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-box" style="background: #f0fdf4; border-color: var(--primary-light);">
+                    <div class="box-title" style="color: var(--primary-dark);"><i class="fas fa-handshake"></i> Peluang Kerjasama Terbuka</div>
+                    <div id="oppList" class="opp-list">
+                        <div style="text-align:center; color:gray; font-size:0.9rem;">Tidak ada peluang terbuka saat ini.</div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, doc, getDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        // CONFIG (SAME AS REGISTER)
+        const firebaseConfig = {
+            apiKey: "AIzaSyBIaLzkNM0KqPVKxuMNmardLqcrr2kYTWQ",
+            authDomain: "database-idbm.firebaseapp.com",
+            projectId: "database-idbm",
+            storageBucket: "database-idbm.firebasestorage.app",
+            messagingSenderId: "1052290789133",
+            appId: "1:1052290789133:web:36b513630b7a87154eca44",
+            measurementId: "G-EQLBB94DY2"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // 1. AMBIL ID DARI URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const targetId = urlParams.get('id');
+
+        async function loadProfile() {
+            if (!targetId) {
+                document.getElementById('loadingState').innerText = "ID Partner tidak ditemukan.";
+                return;
+            }
+
+            try {
+                // A. Cari di 'users_umkm'
+                const userRef = doc(db, "users_umkm", targetId);
+                const userSnap = await getDoc(userRef);
+
+                if (userSnap.exists()) {
+                    renderUserData(userSnap.data());
+                    loadOpportunities(targetId);
+                } else {
+                    document.getElementById('loadingState').innerHTML = `
+                        <h3>Data tidak ditemukan</h3>
+                        <p>Partner ini mungkin sudah menghapus akunnya.</p>
+                        <a href="partnership.html" style="color:var(--primary); font-weight:700;">Kembali</a>
+                    `;
+                }
+            } catch (error) {
+                console.error("Error:", error);
+                document.getElementById('loadingState').innerText = "Terjadi kesalahan memuat data.";
+            }
+        }
+
+        function renderUserData(data) {
+            document.getElementById('loadingState').style.display = 'none';
+            document.getElementById('mainContent').style.display = 'grid';
+
+            // 1. Text Data Basic
+            document.getElementById('pName').innerText = data.nama_usaha || "Tanpa Nama";
+            document.getElementById('pRole').innerText = data.role || "UMKM"; 
+            document.getElementById('pLoc').innerText = data.lokasi || "Indonesia";
+            document.getElementById('pDesc').innerText = data.deskripsi || "Tidak ada deskripsi.";
+            
+            // 2. Data Ril (Kategori, Tahun, Kontak)
+            document.getElementById('pCat').innerText = data.kategori || "-";
+            document.getElementById('pYear').innerText = data.berdiri_sejak || "-";
+            
+            document.getElementById('pEmail').innerText = data.email || "-";
+            
+            // Phone Logic
+            const phone = data.no_hp || "-";
+            const phoneEl = document.getElementById('pPhone');
+            phoneEl.innerText = phone;
+            if (phone !== "-") {
+                // Remove 08.., add 628..
+                let cleanPhone = phone.replace(/^0/, "62").replace(/\D/g,''); 
+                phoneEl.href = `https://wa.me/${cleanPhone}`;
+            }
+
+            // Web Logic
+            const web = data.website || "-";
+            const webEl = document.getElementById('pWeb');
+            webEl.innerText = web;
+            if (web !== "-") {
+                webEl.href = web.startsWith('http') ? web : `https://${web}`;
+            }
+
+            // Avatar
+            const initial = (data.nama_usaha || "U").charAt(0).toUpperCase();
+            document.getElementById('pAvatar').innerText = initial;
+
+            // Verified
+            if(data.verified) document.getElementById('pVerified').style.display = 'inline-block';
+        }
+
+        async function loadOpportunities(uid) {
+            const oppList = document.getElementById('oppList');
+            oppList.innerHTML = '<div style="text-align:center;"><i class="fas fa-spinner fa-spin"></i> Mencari peluang...</div>';
+
+            try {
+                const q = query(collection(db, "opportunities"), where("ownerId", "==", uid));
+                const querySnapshot = await getDocs(q);
+
+                if (querySnapshot.empty) {
+                    // Placeholder jika kosong
+                    oppList.innerHTML = `
+                        <div class="opp-card">
+                            <span class="opp-type">General</span>
+                            <div class="opp-title">Open Partnership</div>
+                            <div class="opp-desc">Menerima penawaran kerjasama umum untuk pengembangan bisnis ${document.getElementById('pCat').innerText}.</div>
+                            <button class="btn-apply" onclick="apply('Open Partnership')">Ajukan Kerjasama <i class="fas fa-arrow-right"></i></button>
+                        </div>
+                    `;
+                } else {
+                    oppList.innerHTML = ""; 
+                    querySnapshot.forEach((doc) => {
+                        const opp = doc.data();
+                        const html = `
+                        <div class="opp-card">
+                            <span class="opp-type">${opp.category || "Umum"}</span>
+                            <div class="opp-title">${opp.title}</div>
+                            <div class="opp-desc">${opp.desc}</div>
+                            <button class="btn-apply" onclick="apply('${opp.title}')">
+                                Ajukan Kerjasama <i class="fas fa-arrow-right"></i>
+                            </button>
+                        </div>`;
+                        oppList.innerHTML += html;
+                    });
+                }
+            } catch (e) {
+                console.error("Error:", e);
+                oppList.innerHTML = "Gagal memuat peluang.";
+            }
+        }
+
+        window.apply = (title) => {
+            const targetName = document.getElementById('pName').innerText;
+            // Gunakan ID dari URL
+            const url = `partnership.html?action=apply&target=${encodeURIComponent(targetName)}&title=${encodeURIComponent(title)}&id=${targetId}`;
+            window.location.href = url;
+        }
+
+        loadProfile();
+    </script>
+</body>
+</html>
