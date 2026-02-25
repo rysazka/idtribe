@@ -60,7 +60,7 @@
         }
 
         /* --- CONTAINER --- */
-        .setup-container { width: 100%; max-width: 800px; position: relative; z-index: 10; }
+        .setup-container { width: 100%; max-width: 850px; position: relative; z-index: 10; }
 
         .glass-card {
             background: var(--glass-bg);
@@ -75,29 +75,25 @@
         .header-title h2 { font-size: 1.8rem; color: var(--forest-green); font-weight: 700; margin-bottom: 5px; }
         .header-title p { color: var(--text-muted); }
 
-        /* --- WIZARD PROGRESS --- */
+        /* --- WIZARD PROGRESS (5 STEPS) --- */
         .wizard-progress {
             display: flex; justify-content: space-between; margin-bottom: 40px; position: relative;
-            max-width: 600px; margin-left: auto; margin-right: auto;
+            max-width: 700px; margin-left: auto; margin-right: auto;
         }
         .wizard-progress::before {
             content: ''; position: absolute; top: 15px; left: 0; width: 100%; height: 3px;
             background: #e2e8f0; z-index: 0;
         }
-        .step-indicator {
-            position: relative; z-index: 1; text-align: center; width: 80px;
-        }
+        .step-indicator { position: relative; z-index: 1; text-align: center; width: 70px; }
         .step-circle {
             width: 34px; height: 34px; background: white; border: 2px solid #cbd5e1;
             border-radius: 50%; margin: 0 auto 8px; display: flex; align-items: center; justify-content: center;
             font-size: 0.9rem; font-weight: bold; color: var(--text-muted); transition: all 0.3s;
         }
-        .step-label { font-size: 0.8rem; color: var(--text-muted); font-weight: 600; }
+        .step-label { font-size: 0.75rem; color: var(--text-muted); font-weight: 600; }
         
-        /* Active & Completed States */
         .step-indicator.active .step-circle { border-color: var(--forest-green); background: var(--forest-green); color: white; box-shadow: 0 0 0 4px rgba(46, 92, 72, 0.2); }
         .step-indicator.active .step-label { color: var(--forest-green); }
-        
         .step-indicator.completed .step-circle { border-color: var(--golden-orange); background: var(--golden-orange); color: white; }
         .step-indicator.completed .step-label { color: var(--golden-orange); }
 
@@ -118,33 +114,32 @@
             transition: all 0.3s;
         }
         .form-input:focus { outline: none; border-color: var(--forest-green); box-shadow: 0 0 0 4px rgba(46, 92, 72, 0.1); }
-        select.form-input { cursor: pointer; }
+        
+        /* INFO NOTE (Excel Format) */
+        .info-note {
+            background: #f0fdf4; border-left: 4px solid var(--forest-green);
+            padding: 15px; border-radius: 8px; font-size: 0.85rem; color: #334155;
+            margin-top: 5px; line-height: 1.5;
+        }
+        .info-note ul { margin-left: 20px; margin-top: 5px; }
 
         /* --- CHECKBOX TAGS --- */
         .checkbox-group { display: flex; flex-wrap: wrap; gap: 10px; }
         .checkbox-label {
-            display: flex; align-items: center; gap: 8px;
-            background: white; padding: 10px 20px;
+            display: flex; align-items: center; gap: 8px; background: white; padding: 10px 20px;
             border-radius: 50px; cursor: pointer; border: 2px solid #e2e8f0; transition: all 0.3s;
             color: var(--text-muted); font-weight: 500; font-size: 0.9rem;
         }
         .checkbox-label:hover { border-color: var(--golden-orange); }
-        .checkbox-label input { display: none; } /* Hide default checkbox */
-        
-        /* Checked State */
+        .checkbox-label input { display: none; } 
         .checkbox-label input:checked + span { color: white; }
-        .checkbox-label:has(input:checked) {
-            background: var(--forest-green); border-color: var(--forest-green); color: white;
-        }
+        .checkbox-label:has(input:checked) { background: var(--forest-green); border-color: var(--forest-green); color: white; }
 
         /* --- BUTTONS --- */
         .btn-group { display: flex; justify-content: space-between; margin-top: 40px; gap: 15px; border-top: 1px solid #e2e8f0; padding-top: 25px; }
-        .btn {
-            padding: 12px 28px; border-radius: 12px; font-weight: 700; cursor: pointer; border: none; font-family: inherit; transition: all 0.2s; font-size: 1rem;
-        }
+        .btn { padding: 12px 28px; border-radius: 12px; font-weight: 700; cursor: pointer; border: none; font-family: inherit; transition: all 0.2s; font-size: 1rem; }
         .btn-prev { background: #f1f5f9; color: var(--text-muted); }
         .btn-prev:hover { background: #e2e8f0; color: var(--text-dark); }
-        
         .btn-next { background: var(--golden-orange); color: white; flex: 1; max-width: 200px; margin-left: auto; box-shadow: 0 4px 15px rgba(242, 153, 74, 0.4); }
         .btn-next:hover { background: var(--golden-orange-dark); transform: translateY(-2px); }
 
@@ -152,7 +147,7 @@
             .form-grid { grid-template-columns: 1fr; }
             .full-width { grid-column: span 1; }
             .wizard-progress::before { top: 12px; }
-            .step-label { display: none; } /* Hide text on mobile */
+            .step-label { display: none; }
             .setup-container { padding: 0 10px; }
             .glass-card { padding: 25px; }
         }
@@ -166,51 +161,27 @@
     <div class="setup-container">
         <div class="glass-card">
             <div class="header-title">
-                <h2>Lengkapi Identitas UMKM</h2>
-                <p>Data yang lengkap meningkatkan kepercayaan investor & pembeli.</p>
+                <h2>Lengkapi Data Inkubasi UMKM</h2>
+                <p>Data ini digunakan untuk penilaian kesehatan bisnis dan *matching* dengan Investor.</p>
             </div>
 
             <div class="wizard-progress">
-                <div class="step-indicator active" id="ind-1">
-                    <div class="step-circle">1</div>
-                    <div class="step-label">Profil</div>
-                </div>
-                <div class="step-indicator" id="ind-2">
-                    <div class="step-circle">2</div>
-                    <div class="step-label">Ops</div>
-                </div>
-                <div class="step-indicator" id="ind-3">
-                    <div class="step-circle">3</div>
-                    <div class="step-label">Legal</div>
-                </div>
-                <div class="step-indicator" id="ind-4">
-                    <div class="step-circle">4</div>
-                    <div class="step-label">Digital</div>
-                </div>
+                <div class="step-indicator active" id="ind-1"><div class="step-circle">1</div><div class="step-label">Profil</div></div>
+                <div class="step-indicator" id="ind-2"><div class="step-circle">2</div><div class="step-label">Ops</div></div>
+                <div class="step-indicator" id="ind-3"><div class="step-circle">3</div><div class="step-label">Keuangan</div></div>
+                <div class="step-indicator" id="ind-4"><div class="step-circle">4</div><div class="step-label">Legal</div></div>
+                <div class="step-indicator" id="ind-5"><div class="step-circle">5</div><div class="step-label">Digital</div></div>
             </div>
 
             <form id="setupForm" onsubmit="handleFinalSubmit(event)">
                 
                 <div id="step-1" class="step-content active">
                     <h3 style="margin-bottom: 20px; color: var(--forest-green);">1. Profil Dasar Bisnis</h3>
+                    <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:20px;">*Nama Usaha dan Kategori telah diisi saat registrasi.</p>
                     <div class="form-grid">
                         <div class="form-group full-width">
-                            <label class="form-label">Nama Brand / Usaha</label>
-                            <input type="text" id="nama_brand" class="form-input" required placeholder="Nama brand yang dikenal konsumen">
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Kategori / Sektor</label>
-                            <select id="kategori" class="form-input" required>
-                                <option value="kuliner">Kuliner</option>
-                                <option value="fashion">Fashion</option>
-                                <option value="craft">Kerajinan</option>
-                                <option value="jasa">Jasa</option>
-                                <option value="agri">Agribisnis</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
                             <label class="form-label">Tahun Berdiri</label>
-                            <input type="number" id="tahun_berdiri" class="form-input" placeholder="Contoh: 2020">
+                            <input type="number" id="tahun_berdiri" class="form-input" required placeholder="Contoh: 2020">
                         </div>
                         <div class="form-group full-width">
                             <label class="form-label">Lokasi Usaha (Kota/Kab)</label>
@@ -236,9 +207,20 @@
                             </select>
                         </div>
                         <div class="form-group full-width">
-                            <label class="form-label">Kapasitas Produksi (Per Bulan)</label>
-                            <input type="text" id="kapasitas" class="form-input" placeholder="Contoh: 1000 pcs / 500 porsi">
-                        </div>
+    <label class="form-label">Kapasitas Produksi (Per Bulan)</label>
+    <div style="display: flex; gap: 10px;">
+        <input type="number" id="kapasitas_jumlah" class="form-input" style="flex: 2;" placeholder="Contoh: 1000" min="0">
+        <select id="kapasitas_satuan" class="form-input" style="flex: 1;">
+            <option value="Pcs">Pcs</option>
+            <option value="Buah">Buah</option>
+            <option value="Porsi">Porsi</option>
+            <option value="Pack">Pack</option>
+            <option value="Kg">Kg</option>
+            <option value="Liter">Liter</option>
+            <option value="Lainnya">Lainnya</option>
+        </select>
+    </div>
+</div>
                         <div class="form-group full-width">
                             <label class="form-label">Model Bisnis</label>
                             <select id="model_bisnis" class="form-input">
@@ -256,33 +238,99 @@
                 </div>
 
                 <div id="step-3" class="step-content">
-                    <h3 style="margin-bottom: 20px; color: var(--forest-green);">3. Legalitas & Sertifikasi</h3>
+                    <h3 style="margin-bottom: 20px; color: var(--forest-green);">3. Keuangan & Dokumen Finansial</h3>
                     
-                    <div class="form-grid">
-                        <div class="form-group full-width">
-                            <label class="form-label">Nomor NIB</label>
-                            <input type="text" id="nib" class="form-input" placeholder="Nomor Induk Berusaha">
-                        </div>
-                        
-                        <div class="form-group full-width">
-                            <label class="form-label">Upload Bukti NIB (PDF/Gambar)</label>
-                            <input type="file" id="nib_file" class="form-input" accept=".pdf,image/*">
-                            <small style="color:var(--text-muted); font-size:0.8rem;">Maksimal 2MB.</small>
-                        </div>
+                    <div style="background: #f8fafc; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0; margin-bottom: 25px;">
+    <h4 style="margin-bottom: 15px; color: var(--dark);">Kalkulator HPP (Harga Pokok Produksi) Detail</h4>
+    <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 20px;">Hitung HPP untuk satu jenis produk utama Anda. Pisahkan biaya tetap dan variabel untuk perhitungan akurat.</p>
+    
+    <h5 style="margin-bottom: 10px; color: var(--forest-green); border-bottom: 1px solid #cbd5e1; padding-bottom: 5px;">A. Informasi Produksi</h5>
+    <div class="form-grid">
+        <div class="form-group full-width">
+            <label class="form-label">Nama Produk yang Dihitung</label>
+            <input type="text" id="hpp_nama_produk" class="form-input" placeholder="Contoh: Keripik Pisang Rasa Coklat">
+        </div>
+        <div class="form-group">
+            <label class="form-label">Periode Produksi</label>
+            <select id="hpp_periode" class="form-input">
+                <option value="batch">Per Batch / Sekali Produksi</option>
+                <option value="harian">Harian</option>
+                <option value="mingguan">Mingguan</option>
+                <option value="bulanan">Bulanan</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label class="form-label">Jumlah Unit Dihasilkan</label>
+            <input type="number" id="hpp_unit" class="form-input" value="1" min="1" oninput="calculateHPP()" placeholder="Harus > 0">
+            <small id="unit_error" style="color: red; display: none; font-size: 0.8rem; margin-top:5px;">Jumlah tidak valid/realistis.</small>
+        </div>
+    </div>
 
-                        <div class="form-group full-width">
-                            <label class="form-label">Sertifikasi Halal</label>
-                            <select id="halal" class="form-input">
-                                <option value="belum">Belum Ada</option>
-                                <option value="proses">Sedang Proses</option>
-                                <option value="ada">Sudah Ada</option>
-                            </select>
-                        </div>
-                        <div class="form-group full-width">
-                            <label class="form-label">Izin Edar (PIRT / BPOM)</label>
-                            <input type="text" id="izin_edar" class="form-input" placeholder="Nomor PIRT/MD (Khusus F&B)">
+    <h5 style="margin-bottom: 10px; margin-top: 15px; color: var(--forest-green); border-bottom: 1px solid #cbd5e1; padding-bottom: 5px;">B. Biaya Variabel (Berubah sesuai jumlah unit diproduksi)</h5>
+    <div class="form-grid">
+        <div class="form-group"><label class="form-label">Bahan Baku Utama (Rp)</label><input type="number" id="hpp_bahan_utama" class="form-input" oninput="calculateHPP()" placeholder="0"></div>
+        <div class="form-group"><label class="form-label">Bahan Tambahan/Bumbu (Rp)</label><input type="number" id="hpp_bahan_tambahan" class="form-input" oninput="calculateHPP()" placeholder="0"></div>
+        <div class="form-group"><label class="form-label">Kemasan & Labeling (Rp)</label><input type="number" id="hpp_kemasan" class="form-input" oninput="calculateHPP()" placeholder="0"></div>
+        <div class="form-group">
+            <label class="form-label">Tenaga Kerja Lepas/Borongan (Rp)</label>
+            <input type="number" id="hpp_tk_variabel" class="form-input" oninput="calculateHPP()" placeholder="0">
+        </div>
+    </div>
+
+    <h5 style="margin-bottom: 10px; margin-top: 15px; color: var(--forest-green); border-bottom: 1px solid #cbd5e1; padding-bottom: 5px;">C. Biaya Tetap (Dialokasikan ke periode ini)</h5>
+    <div class="form-grid">
+        <div class="form-group"><label class="form-label">Gaji Karyawan Tetap (Rp)</label><input type="number" id="hpp_gaji_tetap" class="form-input" oninput="calculateHPP()" placeholder="0"></div>
+        <div class="form-group">
+            <label class="form-label">Overhead (Listrik, Gas, Air) (Rp)</label>
+            <input type="number" id="hpp_overhead" class="form-input" oninput="calculateHPP()" placeholder="0">
+            <small style="color:var(--text-muted); font-size:0.75rem;">Estimasi porsi biaya listrik dll per periode ini.</small>
+        </div>
+        <div class="form-group"><label class="form-label">Sewa Tempat (Proporsional) (Rp)</label><input type="number" id="hpp_sewa" class="form-input" oninput="calculateHPP()" placeholder="0"></div>
+        <div class="form-group"><label class="form-label">Biaya Lain-lain/Penyusutan (Rp)</label><input type="number" id="hpp_lainnya" class="form-input" oninput="calculateHPP()" placeholder="0"></div>
+    </div>
+
+    <h5 style="margin-bottom: 10px; margin-top: 15px; color: var(--forest-green); border-bottom: 1px solid #cbd5e1; padding-bottom: 5px;">D. Ringkasan HPP</h5>
+    <div class="form-grid">
+        <div class="form-group"><label class="form-label">Total Biaya Variabel</label><input type="text" id="hpp_total_variabel" class="form-input" readonly style="background:#f1f5f9; color:var(--text-muted);" placeholder="Rp 0"></div>
+        <div class="form-group"><label class="form-label">Total Biaya Tetap</label><input type="text" id="hpp_total_tetap" class="form-input" readonly style="background:#f1f5f9; color:var(--text-muted);" placeholder="Rp 0"></div>
+        <div class="form-group"><label class="form-label">Total HPP Keseluruhan</label><input type="text" id="hpp_total" class="form-input" readonly style="background:#e2e8f0; font-weight:bold; color:var(--dark);" placeholder="Rp 0"></div>
+        <div class="form-group"><label class="form-label">HPP per Unit (Satuan)</label><input type="text" id="hpp_per_unit" class="form-input" readonly style="background:#dcfce7; color:#166534; font-weight:bold; border-color:#86efac;" placeholder="Rp 0"></div>
+    </div>
+</div>
+
+                    <div class="form-group">
+                        <label class="form-label">Catatan Arus Kas / Cash Flow Record (Opsional)</label>
+                        <input type="file" id="file_cashflow" class="form-input" accept=".xlsx, .xls, .csv">
+                        <div class="info-note">
+                            <strong>Detail Format Kolom Ideal:</strong>
+                            <ul>
+                                <li>Tanggal Transaksi</li>
+                                <li>Sumber Pemasukan / Jenis Pengeluaran</li>
+                                <li>Kategori (Bahan baku, Listrik, Penjualan, dll)</li>
+                                <li>Uang Masuk & Uang Keluar (Nominal)</li>
+                                <li>Metode Pembayaran & Bukti (Link Nota/Faktur)</li>
+                            </ul>
                         </div>
                     </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Data Omzet per Produk (Opsional)</label>
+                        <input type="file" id="file_omzet" class="form-input" accept=".xlsx, .xls, .csv">
+                        <div class="info-note">
+                            <strong>Detail Format Kolom Ideal:</strong>
+                            Periode, Nama Produk, Jumlah Terjual, Harga Satuan, Total Omzet.
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Data Stok / Inventory Data (Opsional)</label>
+                        <input type="file" id="file_inventory" class="form-input" accept=".xlsx, .xls, .csv">
+                        <div class="info-note">
+                            <strong>Detail Format Kolom Ideal:</strong>
+                            Nama Produk, Stok Awal, Barang Masuk, Barang Keluar, Stok Akhir, Minimum Stock Level.
+                        </div>
+                    </div>
+
                     <div class="btn-group">
                         <button type="button" class="btn btn-prev" onclick="prevStep(2)">&larr; Kembali</button>
                         <button type="button" class="btn btn-next" onclick="nextStep(4)">Lanjut &rarr;</button>
@@ -290,39 +338,170 @@
                 </div>
 
                 <div id="step-4" class="step-content">
-                    <h3 style="margin-bottom: 20px; color: var(--forest-green);">4. Data Digital & Penjualan</h3>
+                    <h3 style="margin-bottom: 20px; color: var(--forest-green);">4. Legalitas & Sertifikasi</h3>
                     
-                    <div class="form-group">
-                        <label class="form-label">Kanal Penjualan (Pilih yang aktif)</label>
-                        <div class="checkbox-group">
-                            <label class="checkbox-label"><input type="checkbox" value="Shopee" name="kanal"> <span>Shopee</span></label>
-                            <label class="checkbox-label"><input type="checkbox" value="Tokopedia" name="kanal"> <span>Tokopedia</span></label>
-                            <label class="checkbox-label"><input type="checkbox" value="Tiktok" name="kanal"> <span>TikTok Shop</span></label>
-                            <label class="checkbox-label"><input type="checkbox" value="Instagram" name="kanal"> <span>Instagram</span></label>
-                            <label class="checkbox-label"><input type="checkbox" value="Offline" name="kanal"> <span>Toko Fisik</span></label>
-                            <label class="checkbox-label"><input type="checkbox" value="WhatsApp" name="kanal"> <span>WhatsApp</span></label>
+                    <div class="form-group full-width" style="margin-bottom: 30px;">
+                        <label class="form-label">Sektor Usaha Utama (Mempengaruhi Pilihan Sertifikasi)</label>
+                        <select id="sektor_usaha" class="form-input" onchange="toggleSertifikasi()">
+                            <option value="fnb">Food & Beverage (F&B) / Kuliner</option>
+                            <option value="fashion">Fashion & Kriya</option>
+                            <option value="kosmetik">Kosmetik & Skincare</option>
+                            <option value="lainnya">Lainnya / Jasa</option>
+                        </select>
+                    </div>
+
+                    <h5 style="margin-bottom: 10px; color: var(--forest-green); border-bottom: 1px solid #cbd5e1; padding-bottom: 5px;">A. Legalitas Dasar</h5>
+                    <div class="form-grid">
+                        <div class="form-group"><label class="form-label">Nomor NIB (Opsional)</label><input type="text" id="nib" class="form-input" placeholder="Nomor Induk Berusaha"></div>
+                        <div class="form-group"><label class="form-label">Upload NIB (Opsional)</label><input type="file" id="nib_file" class="form-input" accept=".pdf,image/*"></div>
+                        
+                        <div class="form-group"><label class="form-label">NPWP Usaha/Pribadi (Opsional)</label><input type="text" id="npwp" class="form-input" placeholder="Nomor NPWP"></div>
+                        <div class="form-group">
+                            <label class="form-label">Bentuk Badan Usaha</label>
+                            <select id="badan_usaha" class="form-input">
+                                <option value="perorangan">Perorangan / Belum Berbadan Hukum</option>
+                                <option value="cv">CV (Commanditaire Vennootschap)</option>
+                                <option value="pt">PT / PT Perorangan</option>
+                                <option value="koperasi">Koperasi</option>
+                            </select>
+                        </div>
+                        <div class="form-group full-width"><label class="form-label">Upload Akta Pendirian (Opsional)</label><input type="file" id="akta_file" class="form-input" accept=".pdf,image/*"></div>
+                    </div>
+
+                    <h5 style="margin-bottom: 10px; margin-top: 15px; color: var(--forest-green); border-bottom: 1px solid #cbd5e1; padding-bottom: 5px;">B. Sertifikasi Produk</h5>
+                    
+                    <div id="cert_fnb" style="display: block;">
+                        <div class="form-grid" style="background: #f8fafc; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                            <div class="form-group full-width"><strong style="color: var(--dark);">Sertifikat Halal</strong></div>
+                            <div class="form-group"><label class="form-label">Status</label><select id="status_halal" class="form-input"><option value="belum">Belum</option><option value="proses">Proses</option><option value="aktif">Aktif</option></select></div>
+                            <div class="form-group"><label class="form-label">Nomor Sertifikat</label><input type="text" id="nomor_halal" class="form-input" placeholder="-"></div>
+                            <div class="form-group full-width"><label class="form-label">Upload Bukti (Opsional)</label><input type="file" id="file_halal" class="form-input" accept=".pdf,image/*"></div>
+                        </div>
+                        <div class="form-grid" style="background: #f8fafc; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                            <div class="form-group full-width"><strong style="color: var(--dark);">Izin Edar PIRT</strong></div>
+                            <div class="form-group"><label class="form-label">Status</label><select id="status_pirt" class="form-input"><option value="belum">Belum</option><option value="aktif">Aktif</option></select></div>
+                            <div class="form-group"><label class="form-label">Nomor PIRT</label><input type="text" id="nomor_pirt" class="form-input" placeholder="-"></div>
+                            <div class="form-group full-width"><label class="form-label">Upload Bukti (Opsional)</label><input type="file" id="file_pirt" class="form-input" accept=".pdf,image/*"></div>
+                        </div>
+                        <div class="form-grid" style="background: #f8fafc; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                            <div class="form-group full-width"><strong style="color: var(--dark);">Izin Edar BPOM (MD/ML)</strong></div>
+                            <div class="form-group"><label class="form-label">Status</label><select id="status_bpom" class="form-input"><option value="belum">Belum</option><option value="aktif">Aktif</option></select></div>
+                            <div class="form-group"><label class="form-label">Nomor BPOM</label><input type="text" id="nomor_bpom" class="form-input" placeholder="-"></div>
+                            <div class="form-group full-width"><label class="form-label">Upload Bukti (Opsional)</label><input type="file" id="file_bpom" class="form-input" accept=".pdf,image/*"></div>
                         </div>
                     </div>
 
-                    <div class="form-group">
-                        <label class="form-label">Range Omzet Bulanan</label>
-                        <select id="omzet" class="form-input" required>
-                            <option value="mikro_bawah">&lt; 5 Juta</option>
-                            <option value="mikro_atas">5 - 10 Juta</option>
-                            <option value="kecil_bawah">10 - 50 Juta</option>
-                            <option value="kecil_atas">50 - 300 Juta</option>
-                            <option value="menengah">&gt; 300 Juta</option>
-                        </select>
-                        <small style="color: var(--text-muted); font-size: 0.8rem;">Data bersifat rahasia untuk matching investor.</small>
+                    <div id="cert_fashion" style="display: none;">
+                        <div class="form-grid" style="background: #f8fafc; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                            <div class="form-group full-width"><strong style="color: var(--dark);">HKI / Merek Dagang</strong></div>
+                            <div class="form-group"><label class="form-label">Status</label><select id="status_hki_fashion" class="form-input"><option value="belum">Belum</option><option value="proses">Proses</option><option value="terdaftar">Terdaftar</option></select></div>
+                            <div class="form-group"><label class="form-label">Nomor Pendaftaran</label><input type="text" id="nomor_hki_fashion" class="form-input" placeholder="-"></div>
+                            <div class="form-group full-width"><label class="form-label">Upload Bukti (Opsional)</label><input type="file" id="file_hki_fashion" class="form-input" accept=".pdf,image/*"></div>
+                        </div>
                     </div>
 
+                    <div id="cert_kosmetik" style="display: none;">
+                        <div class="form-grid" style="background: #f8fafc; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                            <div class="form-group full-width"><strong style="color: var(--dark);">Izin Edar BPOM (NA)</strong></div>
+                            <div class="form-group"><label class="form-label">Status</label><select id="status_bpom_na" class="form-input"><option value="belum">Belum</option><option value="aktif">Aktif</option></select></div>
+                            <div class="form-group"><label class="form-label">Nomor BPOM NA</label><input type="text" id="nomor_bpom_na" class="form-input" placeholder="-"></div>
+                            <div class="form-group full-width"><label class="form-label">Upload Bukti (Opsional)</label><input type="file" id="file_bpom_na" class="form-input" accept=".pdf,image/*"></div>
+                        </div>
+                        <div class="form-grid" style="background: #f8fafc; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                            <div class="form-group full-width"><strong style="color: var(--dark);">HKI / Merek Dagang</strong></div>
+                            <div class="form-group"><label class="form-label">Status</label><select id="status_hki_kosmetik" class="form-input"><option value="belum">Belum</option><option value="proses">Proses</option><option value="terdaftar">Terdaftar</option></select></div>
+                            <div class="form-group"><label class="form-label">Nomor Pendaftaran</label><input type="text" id="nomor_hki_kosmetik" class="form-input" placeholder="-"></div>
+                            <div class="form-group full-width"><label class="form-label">Upload Bukti (Opsional)</label><input type="file" id="file_hki_kosmetik" class="form-input" accept=".pdf,image/*"></div>
+                        </div>
+                    </div>
+
+                    <h5 style="margin-bottom: 10px; margin-top: 15px; color: var(--forest-green); border-bottom: 1px solid #cbd5e1; padding-bottom: 5px;">C. Standar Tambahan (Opsional)</h5>
                     <div class="form-group">
-                        <label class="form-label">Media Sosial Utama (Username)</label>
-                        <input type="text" id="sosmed" class="form-input" placeholder="Contoh: @keripikjuara (IG/TikTok)">
+                        <label class="form-label">Centang standar yang sudah dimiliki:</label>
+                        <div class="checkbox-group">
+                            <label class="checkbox-label"><input type="checkbox" value="HACCP" id="chk_haccp"> <span>HACCP</span></label>
+                            <label class="checkbox-label"><input type="checkbox" value="ISO 22000" id="chk_iso"> <span>ISO 22000</span></label>
+                            <label class="checkbox-label"><input type="checkbox" value="Laik Hygiene" id="chk_hygiene"> <span>Laik Hygiene</span></label>
+                            <label class="checkbox-label"><input type="checkbox" value="TKDN" id="chk_tkdn"> <span>TKDN</span></label>
+                            <label class="checkbox-label"><input type="checkbox" value="SNI" id="chk_sni"> <span>SNI</span></label>
+                        </div>
                     </div>
 
                     <div class="btn-group">
                         <button type="button" class="btn btn-prev" onclick="prevStep(3)">&larr; Kembali</button>
+                        <button type="button" class="btn btn-next" onclick="nextStep(5)">Lanjut &rarr;</button>
+                    </div>
+                </div>
+
+                <div id="step-5" class="step-content">
+                    <h3 style="margin-bottom: 20px; color: var(--forest-green);">5. Data Digital & Penjualan</h3>
+                    
+                    <div class="form-grid">
+                        <div class="form-group full-width">
+                            <label class="form-label">1. Kanal Penjualan Aktif (Bisa pilih lebih dari satu)</label>
+                            <div class="checkbox-group">
+                                <label class="checkbox-label"><input type="checkbox" value="Shopee" name="kanal"> <span>Shopee</span></label>
+                                <label class="checkbox-label"><input type="checkbox" value="Tokopedia" name="kanal"> <span>Tokopedia</span></label>
+                                <label class="checkbox-label"><input type="checkbox" value="TikTok Shop" name="kanal"> <span>TikTok Shop</span></label>
+                                <label class="checkbox-label"><input type="checkbox" value="Instagram" name="kanal"> <span>Instagram</span></label>
+                                <label class="checkbox-label"><input type="checkbox" value="WhatsApp Business" name="kanal"> <span>WhatsApp Business</span></label>
+                                <label class="checkbox-label"><input type="checkbox" value="Toko Fisik" name="kanal"> <span>Toko Fisik</span></label>
+                            </div>
+                        </div>
+
+                        <div class="form-group full-width">
+                            <label class="form-label">2. Kanal Utama Penyumbang Omzet</label>
+                            <select id="kanal_utama" class="form-input">
+                                <option value="Shopee">Shopee</option>
+                                <option value="Tokopedia">Tokopedia</option>
+                                <option value="TikTok Shop">TikTok Shop</option>
+                                <option value="Instagram">Instagram</option>
+                                <option value="WhatsApp Business">WhatsApp Business</option>
+                                <option value="Toko Fisik">Toko Fisik</option>
+                                <option value="Lainnya">Lainnya</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group full-width">
+                            <label class="form-label">Range Omzet Bulanan Rata-Rata Keseluruhan</label>
+                            <select id="omzet" class="form-input" required>
+                                <option value="mikro_bawah">&lt; 5 Juta</option>
+                                <option value="mikro_atas">5 - 10 Juta</option>
+                                <option value="kecil_bawah">10 - 50 Juta</option>
+                                <option value="kecil_atas">50 - 300 Juta</option>
+                                <option value="menengah">&gt; 300 Juta</option>
+                            </select>
+                            <small style="color: var(--text-muted); font-size: 0.8rem;">Data bersifat rahasia untuk matching investor.</small>
+                        </div>
+                    </div>
+
+                    <h5 style="margin-bottom: 10px; margin-top: 15px; color: var(--forest-green); border-bottom: 1px solid #cbd5e1; padding-bottom: 5px;">3. Media Sosial Utama</h5>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label">Platform</label>
+                            <select id="sosmed_platform" class="form-input">
+                                <option value="Instagram">Instagram</option>
+                                <option value="TikTok">TikTok</option>
+                                <option value="Facebook">Facebook</option>
+                                <option value="X">X (Twitter)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Username</label>
+                            <input type="text" id="sosmed_username" class="form-input" placeholder="Contoh: @keripikjuara">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Followers (Opsional)</label>
+                            <input type="number" id="sosmed_followers" class="form-input" placeholder="Contoh: 1500" min="0">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Rata-rata Posting / Minggu (Opsional)</label>
+                            <input type="number" id="sosmed_posting" class="form-input" placeholder="Contoh: 3" min="0">
+                        </div>
+                    </div>
+
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-prev" onclick="prevStep(4)">&larr; Kembali</button>
                         <button type="submit" class="btn btn-next" style="background: var(--forest-green);">Simpan & Selesai ✓</button>
                     </div>
                 </div>
@@ -358,18 +537,54 @@
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 currentUser = user;
-                console.log("User terdeteksi:", user.uid);
             } else {
                 window.location.href = 'login.html';
             }
         });
+
+        // KALKULATOR HPP OTOMATIS
+        // KALKULATOR HPP OTOMATIS
+        window.calculateHPP = function() {
+            // 1. Ambil Biaya Variabel
+            const bahanUtama = parseFloat(document.getElementById('hpp_bahan_utama').value) || 0;
+            const bahanTambahan = parseFloat(document.getElementById('hpp_bahan_tambahan').value) || 0;
+            const kemasan = parseFloat(document.getElementById('hpp_kemasan').value) || 0;
+            const tkVariabel = parseFloat(document.getElementById('hpp_tk_variabel').value) || 0;
+            
+            // 2. Ambil Biaya Tetap
+            const gajiTetap = parseFloat(document.getElementById('hpp_gaji_tetap').value) || 0;
+            const overhead = parseFloat(document.getElementById('hpp_overhead').value) || 0;
+            const sewa = parseFloat(document.getElementById('hpp_sewa').value) || 0;
+            const lainnya = parseFloat(document.getElementById('hpp_lainnya').value) || 0;
+
+            // 3. Ambil jumlah unit & handle validasi
+            const unit = parseInt(document.getElementById('hpp_unit').value) || 0;
+            const errorMsg = document.getElementById('unit_error');
+            
+            if (unit <= 0) {
+                errorMsg.style.display = 'block';
+            } else {
+                errorMsg.style.display = 'none';
+            }
+
+            // 4. Proses Perhitungan
+            const totalVariabel = bahanUtama + bahanTambahan + kemasan + tkVariabel;
+            const totalTetap = gajiTetap + overhead + sewa + lainnya;
+            const total = totalVariabel + totalTetap;
+            const perUnit = unit > 0 ? total / unit : 0;
+
+            // 5. Cetak Output
+            document.getElementById('hpp_total_variabel').value = "Rp " + totalVariabel.toLocaleString('id-ID');
+            document.getElementById('hpp_total_tetap').value = "Rp " + totalTetap.toLocaleString('id-ID');
+            document.getElementById('hpp_total').value = "Rp " + total.toLocaleString('id-ID');
+            document.getElementById('hpp_per_unit').value = "Rp " + perUnit.toLocaleString('id-ID');
+        }
 
         // NAVIGASI STEP
         window.nextStep = function(step) {
             document.querySelectorAll('.step-content').forEach(el => el.classList.remove('active'));
             document.getElementById(`step-${step}`).classList.add('active');
             
-            // Update Indikator
             for(let i=1; i<=step; i++) {
                 document.getElementById(`ind-${i}`).classList.add('active');
                 if(i < step) document.getElementById(`ind-${i}`).classList.add('completed');
@@ -384,62 +599,151 @@
             document.getElementById(`ind-${step}`).classList.remove('completed');
         }
 
-        // SUBMIT DATA (UPDATED WITH FILE UPLOAD)
+        // FUNGSI UPLOAD HELPER
+        async function uploadFileToStorage(fileInputId, folderName) {
+            const file = document.getElementById(fileInputId).files[0];
+            if (!file) return "";
+            if (file.size > 5 * 1024 * 1024) throw new Error(`File ${file.name} terlalu besar (Max 5MB)`);
+            
+            const storageRef = ref(storage, `${folderName}/${currentUser.uid}_${Date.now()}_${file.name}`);
+            await uploadBytes(storageRef, file);
+            return await getDownloadURL(storageRef);
+        }
+
+        // SUBMIT DATA
+        // Fungsi untuk menghapus field yang bernilai undefined secara menyeluruh (recursive)
+function cleanObject(obj) {
+    Object.keys(obj).forEach(key => {
+        if (obj[key] && typeof obj[key] === 'object' && !Array.isArray(obj[key])) {
+            cleanObject(obj[key]); // Bersihkan objek di dalamnya
+            if (Object.keys(obj[key]).length === 0) delete obj[key]; // Hapus jika objek jadi kosong
+        } else if (obj[key] === undefined) {
+            delete obj[key]; // Hapus jika undefined
+        }
+    });
+    return obj;
+}
+        
         window.handleFinalSubmit = async function(e) {
             e.preventDefault();
             const btn = e.target.querySelector('button[type="submit"]');
-            btn.innerText = "Mengupload File...";
+            btn.innerText = "Mengupload Dokumen... (Mohon Tunggu)";
             btn.disabled = true;
 
             try {
-                // 1. Upload File NIB (Jika ada)
-                const nibFile = document.getElementById('nib_file').files[0];
-                let nibUrl = "";
+                // 1. Proses Upload Semua File
+                const nibUrl = await uploadFileToStorage('nib_file', 'nib_files');
+                const cashflowUrl = await uploadFileToStorage('file_cashflow', 'finance_files');
+                const omzetUrl = await uploadFileToStorage('file_omzet', 'finance_files');
+                const inventoryUrl = await uploadFileToStorage('file_inventory', 'finance_files');
 
-                if (nibFile) {
-                    if (nibFile.size > 2 * 1024 * 1024) { throw new Error("Ukuran file NIB maksimal 2MB"); }
-                    
-                    const storageRef = ref(storage, `nib_files/${currentUser.uid}_${nibFile.name}`);
-                    await uploadBytes(storageRef, nibFile);
-                    nibUrl = await getDownloadURL(storageRef);
-                }
+                const aktaUrl = await uploadFileToStorage('akta_file', 'legal_files');
+                const halalUrl = await uploadFileToStorage('file_halal', 'legal_files');
+                const pirtUrl = await uploadFileToStorage('file_pirt', 'legal_files');
+                const bpomUrl = await uploadFileToStorage('file_bpom', 'legal_files');
+                const hkiFashionUrl = await uploadFileToStorage('file_hki_fashion', 'legal_files');
+                const bpomNaUrl = await uploadFileToStorage('file_bpom_na', 'legal_files');
+                const hkiKosmetikUrl = await uploadFileToStorage('file_hki_kosmetik', 'legal_files');
 
-                btn.innerText = "Menyimpan Data...";
+                btn.innerText = "Menyimpan Data UMKM...";
 
-                // 2. Ambil Checkbox
+                // 2. Ambil Checkbox Kanal
                 let kanalJual = [];
                 document.querySelectorAll('input[name="kanal"]:checked').forEach((checkbox) => {
                     kanalJual.push(checkbox.value);
                 });
 
-                // 3. Data Object
+                // 3. Susun Data Object (Catatan: brand & kategori tidak ditimpa agar data register aman)
+                // 3. Susun Data Object
                 const umkmData = {
-                    brand: document.getElementById('nama_brand').value,
-                    kategori: document.getElementById('kategori').value,
+                    // Profil
                     tahun_berdiri: document.getElementById('tahun_berdiri').value,
                     lokasi: document.getElementById('lokasi').value,
                     
+                    // Ops
                     jumlah_karyawan: document.getElementById('karyawan').value,
-                    kapasitas_produksi: document.getElementById('kapasitas').value,
+                    kapasitas_produksi: document.getElementById('kapasitas_jumlah').value + " " + document.getElementById('kapasitas_satuan').value,
                     model_bisnis: document.getElementById('model_bisnis').value,
                     
-                    nib: document.getElementById('nib').value,
-                    nib_file_url: nibUrl, // Simpan URL file
-                    status_halal: document.getElementById('halal').value,
-                    izin_edar: document.getElementById('izin_edar').value,
-                    
+                    // Keuangan (HPP & Dokumen Excel)
+                    hpp_data: {
+                        nama_produk: document.getElementById('hpp_nama_produk').value,
+                        periode_produksi: document.getElementById('hpp_periode').value,
+                        jumlah_unit: document.getElementById('hpp_unit').value || 1,
+                        biaya_variabel: {
+                            bahan_utama: document.getElementById('hpp_bahan_utama').value || 0,
+                            bahan_tambahan: document.getElementById('hpp_bahan_tambahan').value || 0,
+                            kemasan: document.getElementById('hpp_kemasan').value || 0,
+                            tenaga_kerja_harian: document.getElementById('hpp_tk_variabel').value || 0,
+                            total_variabel: document.getElementById('hpp_total_variabel').value
+                        },
+                        biaya_tetap: {
+                            gaji_tetap: document.getElementById('hpp_gaji_tetap').value || 0,
+                            overhead: document.getElementById('hpp_overhead').value || 0,
+                            sewa: document.getElementById('hpp_sewa').value || 0,
+                            lainnya: document.getElementById('hpp_lainnya').value || 0,
+                            total_tetap: document.getElementById('hpp_total_tetap').value
+                        },
+                        total_hpp: document.getElementById('hpp_total').value,
+                        hpp_per_unit: document.getElementById('hpp_per_unit').value
+                    },
+                    dokumen_keuangan: {
+                        cashflow_url: cashflowUrl,
+                        omzet_produk_url: omzetUrl,
+                        inventory_url: inventoryUrl
+                    },
+
+                    // Legal & Sertifikasi Terstruktur
+                    nib: document.getElementById('nib').value, 
+                    legalitas: {
+                        sektor_usaha: document.getElementById('sektor_usaha').value,
+                        nib: document.getElementById('nib').value,
+                        nib_file_url: nibUrl || "",
+                        npwp: document.getElementById('npwp').value,
+                        badan_usaha: document.getElementById('badan_usaha').value,
+                        akta_file_url: aktaUrl || "",
+                        
+                        sertifikasi: {
+                            halal: { status: document.getElementById('status_halal').value, nomor: document.getElementById('nomor_halal').value, file_url: halalUrl || undefined },
+                            pirt: { status: document.getElementById('status_pirt').value, nomor: document.getElementById('nomor_pirt').value, file_url: pirtUrl || undefined },
+                            bpom_md: { status: document.getElementById('status_bpom').value, nomor: document.getElementById('nomor_bpom').value, file_url: bpomUrl || undefined },
+                            hki_fashion: { status: document.getElementById('status_hki_fashion').value, nomor: document.getElementById('nomor_hki_fashion').value, file_url: hkiFashionUrl || undefined },
+                            bpom_na: { status: document.getElementById('status_bpom_na').value, nomor: document.getElementById('nomor_bpom_na').value, file_url: bpomNaUrl || undefined },
+                            hki_kosmetik: { status: document.getElementById('status_hki_kosmetik').value, nomor: document.getElementById('nomor_hki_kosmetik').value, file_url: hkiKosmetikUrl || undefined }
+                        },
+                        standar_tambahan: [
+                            document.getElementById('chk_haccp').checked ? 'HACCP' : null,
+                            document.getElementById('chk_iso').checked ? 'ISO 22000' : null,
+                            document.getElementById('chk_hygiene').checked ? 'Laik Hygiene' : null,
+                            document.getElementById('chk_tkdn').checked ? 'TKDN' : null,
+                            document.getElementById('chk_sni').checked ? 'SNI' : null
+                        ].filter(Boolean)
+                    },
+
+                    // Digital (Update Sesuai Kanal Baru)
                     kanal_penjualan: kanalJual,
+                    kanal_utama: document.getElementById('kanal_utama').value,
                     range_omzet: document.getElementById('omzet').value,
-                    sosmed: document.getElementById('sosmed').value,
+                    
+                    media_sosial: {
+                        platform: document.getElementById('sosmed_platform').value,
+                        username: document.getElementById('sosmed_username').value,
+                        followers: parseInt(document.getElementById('sosmed_followers').value) || 0,
+                        posting_per_minggu: parseInt(document.getElementById('sosmed_posting').value) || 0
+                    },
                     
                     status_setup: "completed",
                     last_updated: new Date()
                 };
 
-                // 4. Update Firestore
-                await updateDoc(doc(db, "users_umkm", currentUser.uid), umkmData);
+                // Hapus key yang undefined agar tidak error di Firestore
+                // Hapus key yang undefined agar tidak error di Firestore
+const cleanedData = cleanObject(JSON.parse(JSON.stringify(umkmData)));
+
+// 4. Update Firestore (GUNAKAN cleanedData)
+await updateDoc(doc(db, "users_umkm", currentUser.uid), cleanedData);
                 
-                alert("Setup Identitas Berhasil!");
+                alert("Setup Identitas & Keuangan Berhasil!");
                 window.location.href = "business-health.html";
 
             } catch (error) {
@@ -449,6 +753,28 @@
                 btn.disabled = false;
             }
         }
+
+        // TOGGLE SERTIFIKASI BERDASARKAN SEKTOR
+        window.toggleSertifikasi = function() {
+            const sektor = document.getElementById('sektor_usaha').value;
+            
+            // Hide semua terlebih dahulu
+            document.getElementById('cert_fnb').style.display = 'none';
+            document.getElementById('cert_fashion').style.display = 'none';
+            document.getElementById('cert_kosmetik').style.display = 'none';
+            
+            // Tampilkan sesuai pilihan
+            if (sektor === 'fnb') document.getElementById('cert_fnb').style.display = 'block';
+            if (sektor === 'fashion') document.getElementById('cert_fashion').style.display = 'block';
+            if (sektor === 'kosmetik') document.getElementById('cert_kosmetik').style.display = 'block';
+        }
+
+        // Panggil fungsi sekali saat halaman selesai dimuat
+        window.onload = function() {
+            if(typeof window.toggleSertifikasi === "function") {
+                window.toggleSertifikasi();
+            }
+        };
     </script>
 </body>
 </html>

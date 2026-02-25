@@ -74,6 +74,34 @@
         .badge-ok {
             background: #dcfce7; color: #166534; padding: 2px 8px; border-radius: 5px; font-size: 0.8rem; font-weight: bold;
         }
+
+        /* --- MODAL DETAIL VALIDASI --- */
+        .modal-overlay {
+            display: none; position: fixed; z-index: 1000; left: 0; top: 0; 
+            width: 100%; height: 100%; background-color: rgba(15, 23, 42, 0.6); 
+            backdrop-filter: blur(4px); align-items: center; justify-content: center;
+        }
+        .modal-content {
+            background-color: #fff; padding: 30px; border-radius: 20px; 
+            width: 90%; max-width: 650px; box-shadow: 0 20px 40px rgba(0,0,0,0.2); 
+            position: relative; animation: modalIn 0.3s ease; 
+            max-height: 90vh; overflow-y: auto;
+        }
+        @keyframes modalIn { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .close-modal {
+            position: absolute; top: 20px; right: 25px; color: #94a3b8; 
+            font-size: 1.5rem; cursor: pointer; transition: 0.2s;
+        }
+        .close-modal:hover { color: #ef4444; }
+        .detail-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;
+        }
+        .detail-item small { color: #64748b; display: block; margin-bottom: 4px; font-size: 0.85rem;}
+        .detail-item div { font-weight: 700; color: var(--dark); font-size: 1rem;}
+        .legal-box {
+            background: #f8fafc; padding: 20px; border-radius: 12px; 
+            border: 1px solid #e2e8f0; margin-bottom: 20px;
+        }
     </style>
 </head>
 <body>
@@ -90,12 +118,31 @@
     <main class="main">
         
         <div id="validasi" class="section active">
-            <div class="header"><h1 class="page-title">Validasi Legalitas</h1></div>
+            <div class="header"><h1 class="page-title">Validasi UMKM</h1></div>
             <div class="card">
                 <table id="tableValidasi">
-                    <thead><tr><th>Nama Usaha</th><th>Pemilik</th><th>NIB</th><th>Status</th><th>Aksi</th></tr></thead>
+                    <thead>
+                        <tr>
+                            <th>Nama Usaha</th>
+                            <th>Kategori</th>
+                            <th>Nomor NIB</th>
+                            <th>Status</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
                     <tbody><tr><td colspan="5" align="center">Memuat data...</td></tr></tbody>
                 </table>
+            </div>
+        </div>
+
+        <div id="modalDetailUmkm" class="modal-overlay">
+            <div class="modal-content">
+                <span class="close-modal" onclick="closeModalDetail()">&times;</span>
+                <h2 style="font-family: var(--font-head); margin-bottom: 5px; color: var(--forest-green);">Detail Profil UMKM</h2>
+                <p style="color: var(--text-gray); font-size: 0.9rem; margin-bottom: 25px;">Review data sebelum melakukan validasi akun.</p>
+                
+                <div id="modalBodyContent">
+                    </div>
             </div>
         </div>
 
@@ -213,6 +260,10 @@
         }
 
         // --- 1. LOAD VALIDASI (FIXED) ---
+        // Variabel global untuk menyimpan data sementara agar bisa dibaca oleh Modal
+        let umkmDataStore = {};
+
+        // --- 1. LOAD VALIDASI (MENDETAIL) ---
         async function loadValidasi() {
             const tbody = document.querySelector('#tableValidasi tbody');
             tbody.innerHTML = '<tr><td colspan="5" align="center">Memuat...</td></tr>';
@@ -223,32 +274,109 @@
                 if(snap.empty) { tbody.innerHTML = '<tr><td colspan="5" align="center">Tidak ada data UMKM.</td></tr>'; return; }
                 
                 tbody.innerHTML = "";
+                umkmDataStore = {}; // Reset data store
+
                 snap.forEach(doc => {
                     const d = doc.data();
+                    umkmDataStore[doc.id] = d; // Simpan data ke memori untuk modal
+
                     const status = d.is_verified ? 
-                        '<span style="background:#dcfce7; color:#166534; padding:2px 8px; border-radius:5px; font-size:0.8rem;">Terverifikasi</span>' : 
-                        '<span style="background:#fee2e2; color:#b91c1c; padding:2px 8px; border-radius:5px; font-size:0.8rem;">Pending</span>';
+                        '<span style="background:#dcfce7; color:#166534; padding:4px 10px; border-radius:50px; font-size:0.8rem; font-weight:bold;">Terverifikasi</span>' : 
+                        '<span style="background:#fee2e2; color:#b91c1c; padding:4px 10px; border-radius:50px; font-size:0.8rem; font-weight:bold;">Menunggu Review</span>';
                     
-                    const btnAction = d.is_verified ? 
-                        `<button class="btn-red" onclick="toggleVerify('${doc.id}', false)">Batal</button>` : 
-                        `<button class="btn-green" style="padding:5px 10px; font-size:0.8rem;" onclick="toggleVerify('${doc.id}', true)">Validasi</button>`;
+                    const namaUsaha = d.brand || d.nama_usaha || "Belum Setup";
+                    const kategori = d.kategori ? d.kategori.toUpperCase() : "-";
 
                     tbody.innerHTML += `
                     <tr>
-                        <td><strong>${d.nama_usaha || "-"}</strong></td>
-                        <td>${d.nama_lengkap || "-"}</td>
-                        <td>${d.nib || "Belum ada"}</td>
+                        <td><strong>${namaUsaha}</strong><br><small style="color:#64748b;">${d.nama_lengkap || "-"}</small></td>
+                        <td>${kategori}</td>
+                        <td style="font-family:monospace; color:var(--primary); font-weight:bold;">${d.nib || "Belum input"}</td>
                         <td>${status}</td>
-                        <td>${btnAction}</td>
+                        <td>
+                            <button class="btn btn-blue" style="padding:6px 12px; font-size:0.8rem;" onclick="openModalDetail('${doc.id}')">
+                                <i class="fas fa-search"></i> Cek Detail
+                            </button>
+                        </td>
                     </tr>`;
                 });
             } catch(e) { console.error(e); tbody.innerHTML = '<tr><td colspan="5" align="center">Error memuat data.</td></tr>'; }
         }
 
+        // Fungsi Buka Modal & Render Data Lengkap
+        window.openModalDetail = (uid) => {
+            const d = umkmDataStore[uid];
+            if (!d) return;
+
+            // Render tombol file NIB jika ada
+            const nibFileLink = d.nib_file_url 
+                ? `<a href="${d.nib_file_url}" target="_blank" class="btn btn-blue" style="font-size:0.8rem; padding:5px 10px;"><i class="fas fa-file-pdf"></i> Buka Dokumen</a>` 
+                : `<span style="color:#ef4444; font-size:0.85rem;"><i class="fas fa-times-circle"></i> Tidak upload file</span>`;
+
+            // Format array kanal penjualan
+            const kanal = Array.isArray(d.kanal_penjualan) && d.kanal_penjualan.length > 0 
+                ? d.kanal_penjualan.join(', ') 
+                : "Belum input";
+
+            // Format Omzet
+            const omzet = d.range_omzet ? d.range_omzet.replace('_', ' ').toUpperCase() : "-";
+
+            // Tombol Aksi di dalam Modal
+            const actionButtons = d.is_verified ? 
+                `<button class="btn btn-red" onclick="toggleVerify('${uid}', false)"><i class="fas fa-times"></i> Cabut Status Validasi</button>` : 
+                `<button class="btn btn-green" onclick="toggleVerify('${uid}', true)"><i class="fas fa-check-circle"></i> Validasi & Setujui UMKM Ini</button>`;
+
+            const html = `
+                <div class="detail-grid">
+                    <div class="detail-item"><small>Nama Pemilik</small><div>${d.nama_lengkap || '-'}</div></div>
+                    <div class="detail-item"><small>Email Kontak</small><div>${d.email || '-'}</div></div>
+                    <div class="detail-item"><small>Tahun Berdiri</small><div>${d.tahun_berdiri || '-'}</div></div>
+                    <div class="detail-item"><small>Lokasi Operasional</small><div>${d.lokasi || '-'}</div></div>
+                </div>
+
+                <div class="legal-box">
+                    <h4 style="margin-bottom:15px; color:var(--dark); display:flex; align-items:center; gap:8px;"><i class="fas fa-balance-scale" style="color:var(--primary);"></i> Data Legalitas & Ops</h4>
+                    <div class="detail-grid" style="margin-bottom:0;">
+                        <div class="detail-item"><small>Nomor NIB</small><div style="font-family:monospace; font-size:1.1rem; color:var(--primary);">${d.nib || '-'}</div></div>
+                        <div class="detail-item"><small>Dokumen Bukti NIB</small><div>${nibFileLink}</div></div>
+                        <div class="detail-item"><small>Sertifikasi Halal</small><div style="text-transform:capitalize;">${d.status_halal || '-'}</div></div>
+                        <div class="detail-item"><small>Izin Edar (BPOM/PIRT)</small><div>${d.izin_edar || '-'}</div></div>
+                    </div>
+                </div>
+
+                <div class="detail-grid">
+                    <div class="detail-item"><small>Estimasi Omzet Bulanan</small><div>${omzet}</div></div>
+                    <div class="detail-item"><small>Kanal Penjualan Aktif</small><div>${kanal}</div></div>
+                    <div class="detail-item"><small>Kapasitas Produksi</small><div>${d.kapasitas_produksi || '-'}</div></div>
+                    <div class="detail-item"><small>Sosial Media</small><div>${d.sosmed || '-'}</div></div>
+                </div>
+
+                <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:25px; padding-top:20px; border-top:1px solid #e2e8f0;">
+                    <button class="btn btn-prev" style="background:#f1f5f9; color:#64748b;" onclick="closeModalDetail()">Tutup</button>
+                    ${actionButtons}
+                </div>
+            `;
+
+            document.getElementById('modalBodyContent').innerHTML = html;
+            document.getElementById('modalDetailUmkm').style.display = 'flex';
+        }
+
+        window.closeModalDetail = () => {
+            document.getElementById('modalDetailUmkm').style.display = 'none';
+        }
+
         window.toggleVerify = async (uid, status) => {
-            if(confirm(status ? "Validasi UMKM ini?" : "Batalkan validasi?")) {
-                await updateDoc(doc(db, "users_umkm", uid), { is_verified: status });
-                loadValidasi();
+            const msg = status ? "Yakin ingin MEMVALIDASI UMKM ini?\n\nMereka akan mendapatkan centang hijau dan akses penuh." : "Yakin ingin MENCABUT validasi UMKM ini?";
+            if(confirm(msg)) {
+                try {
+                    await updateDoc(doc(db, "users_umkm", uid), { is_verified: status });
+                    alert(status ? "UMKM Berhasil Divalidasi!" : "Validasi Dicabut.");
+                    closeModalDetail(); // Tutup modal setelah aksi
+                    loadValidasi(); // Refresh tabel belakang
+                } catch(e) {
+                    console.error(e);
+                    alert("Terjadi kesalahan sistem.");
+                }
             }
         }
 

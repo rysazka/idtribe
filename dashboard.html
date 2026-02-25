@@ -71,7 +71,20 @@
             text-decoration: none; letter-spacing: -0.5px; display: flex; align-items: center; gap: 8px;
         }
         .brand span { color: var(--primary); }
-
+        
+        .user-profile-group { 
+            display: flex; 
+            align-items: center; 
+            gap: 15px; 
+            cursor: pointer; 
+            padding: 4px 8px;
+            border-radius: 14px;
+            transition: 0.2s ease;
+        }
+        .user-profile-group:hover { 
+            background: rgba(16, 185, 129, 0.1); 
+            transform: translateY(-2px); 
+        }
         .user-section { display: flex; align-items: center; gap: 15px; }
         .user-info-nav { text-align: right; display: none; }
         .avatar {
@@ -169,6 +182,54 @@
         .widget-icon { color: var(--primary); font-size: 1.2rem; background: var(--primary-soft); padding: 8px; border-radius: 8px; }
         .widget-title { font-family: var(--font-head); font-size: 1.3rem; font-weight: 800; color: var(--dark); }
 
+        .seminar-horizontal-widget {
+            background: white; border-radius: var(--radius); padding: 25px 30px;
+            box-shadow: 0 10px 40px -10px rgba(0,0,0,0.05); border: 1px solid #f1f5f9;
+            margin-bottom: 30px;
+        }
+        
+        .horizontal-scroll-container {
+            display: flex;
+            gap: 15px;
+            overflow-x: auto;
+            padding-bottom: 10px;
+            scroll-behavior: smooth;
+            /* Hide scrollbar untuk tampilan bersih */
+            scrollbar-width: none; /* Firefox */
+            -ms-overflow-style: none;  /* IE 10+ */
+        }
+        .horizontal-scroll-container::-webkit-scrollbar { 
+            display: none; /* Safari and Chrome */
+        }
+
+        .h-seminar-card {
+            min-width: 280px; max-width: 320px;
+            background: #f8fafc; border: 1px solid #e2e8f0;
+            border-radius: 16px; padding: 15px;
+            display: flex; align-items: flex-start; gap: 15px;
+            transition: 0.2s; cursor: pointer;
+            flex-shrink: 0; /* Mencegah kartu mengecil */
+        }
+        .h-seminar-card:hover {
+            border-color: var(--primary); background: #f0fdf4;
+            transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+
+        .h-seminar-icon {
+            width: 45px; height: 45px; background: #e0f2fe; color: #0284c7;
+            border-radius: 12px; display: flex; align-items: center; justify-content: center;
+            font-size: 1.2rem; flex-shrink: 0;
+        }
+        
+        .h-seminar-content { flex: 1; overflow: hidden; }
+        .h-seminar-title { font-weight: 700; font-size: 0.95rem; color: var(--dark); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 5px; }
+        .h-seminar-detail { font-size: 0.8rem; color: var(--text-gray); display: flex; align-items: center; gap: 6px; margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        
+        .h-seminar-btn {
+            font-size: 0.75rem; background: var(--primary); color: white;
+            padding: 4px 12px; border-radius: 50px; font-weight: 700; display: inline-block; margin-top: 5px;
+        }
+
         /* List Items */
         .list-wrap { display: flex; flex-direction: column; gap: 15px; }
         .list-row {
@@ -219,6 +280,41 @@
         @media (min-width: 768px) {
             .user-info-nav { display: block; }
         }
+
+        /* --- 7. FOOTER --- */
+        .main-footer {
+            background: white;
+            border-top: 1px solid #e2e8f0;
+            padding: 50px 20px 20px 20px;
+            margin-top: 40px;
+            text-align: center;
+            position: relative;
+            z-index: 10;
+        }
+        .footer-brand {
+            font-family: var(--font-head);
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: var(--dark);
+            text-decoration: none;
+            display: inline-block;
+            margin-bottom: 15px;
+        }
+        .footer-brand span { color: var(--primary); }
+        .footer-desc {
+            color: var(--text-gray);
+            max-width: 600px;
+            margin: 0 auto 30px auto;
+            line-height: 1.6;
+            font-size: 0.95rem;
+        }
+        .footer-bottom {
+            border-top: 1px solid #f1f5f9;
+            padding-top: 20px;
+            font-size: 0.85rem;
+            color: var(--text-light);
+            font-weight: 500;
+        }
     </style>
 </head>
 <body>
@@ -228,14 +324,18 @@
         <div class="blob blob-2"></div>
     </div>
 
-    <nav class="top-nav">
+   <nav class="top-nav">
         <a href="#" class="brand">ID<span>TRIBE</span></a>
         <div class="user-section">
-            <div class="user-info-nav">
-                <div style="font-weight:700; font-size:0.9rem;" id="navName">Loading...</div>
-                <div style="font-size:0.75rem; color:var(--text-gray);">Owner UMKM</div>
+            
+            <div class="user-profile-group" onclick="window.location.href='profile.html'" title="Lihat Profil">
+                <div class="user-info-nav">
+                    <div style="font-weight:700; font-size:0.9rem;" id="navName">Loading...</div>
+                    <div style="font-size:0.75rem; color:var(--text-gray);">Owner UMKM</div>
+                </div>
+                <div class="avatar" id="userAvatar">U</div>
             </div>
-            <div class="avatar" id="userAvatar">U</div>
+            
             <button class="logout-btn" onclick="logout()">
                 <i class="fas fa-sign-out-alt"></i> Keluar
             </button>
@@ -281,17 +381,16 @@
                         <h3>Digital Tools</h3>
                         <p>Marketplace & Tools manajemen operasional.</p>
                     </div>
-                    <button class="btn-action btn-lock" onclick="showLockReason('Digital Empowerment', 'Digital: Advanced')">Terkunci</button>
+                    <button class="btn-action btn-lock" onclick="showLockReason('Digital Empowerment', 'Terbuka Otomatis')">Terkunci</button>
                 </div>
 
-                <div class="menu-card" id="cardPartnership">
+                <div class="menu-card locked" id="cardPartnership">
                     <div class="icon-wrap">🤝</div>
                     <div>
                         <h3>Partnership</h3>
                         <p>Kolaborasi B2B Supply Chain & Distributor.</p>
                     </div>
-                    <a href="partnership.html" class="btn-action btn-go">Akses</a>
-                    <!-- <button class="btn-action btn-lock" onclick="showLockReason('Partnership', 'Level Kompetensi Intermediate+')">Terkunci</button> -->
+                    <button class="btn-action btn-lock" onclick="showLockReason('Partnership', 'Ops level Advanced DAN Network minimal Intermediate')">Terkunci</button>
                 </div>
 
                 <div class="menu-card locked" id="cardFinancing">
@@ -300,13 +399,25 @@
                         <h3>Akses Modal</h3>
                         <p>Pendanaan syariah dan investor aggregator.</p>
                     </div>
-                    <button class="btn-action btn-lock" onclick="showLockReason('Financing', 'Finance: Advanced')">Terkunci</button>
+                    <button class="btn-action btn-lock" onclick="showLockReason('Akses Modal', 'Finance level Advanced DAN Legal level Intermediate')">Terkunci</button>
                 </div>
 
             </div>
 
+            <div class="seminar-horizontal-widget">
+                <div class="widget-header" style="margin-bottom: 15px;">
+                    <i class="fas fa-calendar-check widget-icon" style="background: #e0f2fe; color: #0284c7;"></i>
+                    <span class="widget-title">Jadwal Seminar Terdekat Anda</span>
+                </div>
+                <div id="mySeminarsList" class="horizontal-scroll-container">
+                    <p style="text-align: center; color: var(--text-light); font-size: 0.9rem; width: 100%;">Memuat jadwal...</p>
+                </div>
+            </div>
+
+            <!-- SPLIT LAYOUT: RADAR KIRI, REKOMENDASI & TOP UMKM KANAN -->
             <div class="split-layout">
                 
+                <!-- KIRI: RADAR KOMPETENSI -->
                 <div class="widget-card">
                     <div class="widget-header">
                         <i class="fas fa-chart-pie widget-icon"></i>
@@ -315,8 +426,43 @@
                     <div class="chart-box">
                         <canvas id="healthRadar"></canvas>
                     </div>
+                    
+                    <div class="competency-insights" style="margin-top: 20px; padding-top: 25px; border-top: 1px dashed #e2e8f0;">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                            <div style="background: #f0fdf4; padding: 15px; border-radius: 16px; border: 1px solid #bbf7d0;">
+                                <div style="color: #166534; font-size: 0.75rem; font-weight: 800; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.5px;">
+                                    <i class="fas fa-arrow-up"></i> Kekuatan Utama
+                                </div>
+                                <div id="insightStrength" style="font-weight: 700; color: var(--dark); font-size: 0.95rem;">Menganalisis...</div>
+                            </div>
+                            <div style="background: #fff1f2; padding: 15px; border-radius: 16px; border: 1px solid #fecaca;">
+                                <div style="color: #991b1b; font-size: 0.75rem; font-weight: 800; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.5px;">
+                                    <i class="fas fa-bullseye"></i> Perlu Ditingkatkan
+                                </div>
+                                <div id="insightWeakness" style="font-weight: 700; color: var(--dark); font-size: 0.95rem;">Menganalisis...</div>
+                            </div>
+                        </div>
+                        
+                        <div style="display: flex; justify-content: space-around; margin-top: 15px; background: #f8fafc; padding: 15px; border-radius: 16px; border: 1px solid #f1f5f9;">
+                            <div style="text-align: center;">
+                                <div style="font-size: 1.5rem; font-family: var(--font-head); font-weight: 800; color: var(--primary);" id="statModules">0</div>
+                                <div style="font-size: 0.75rem; color: var(--text-gray); font-weight: 600;">Modul Selesai</div>
+                            </div>
+                            <div style="text-align: center; border-left: 1px solid #e2e8f0; border-right: 1px solid #e2e8f0; padding: 0 20px;">
+                                <div style="font-size: 1.5rem; font-family: var(--font-head); font-weight: 800; color: var(--accent);" id="statScore">0%</div>
+                                <div style="font-size: 0.75rem; color: var(--text-gray); font-weight: 600;">Skor Bisnis</div>
+                            </div>
+                            <div style="text-align: center;">
+                                <div style="font-size: 1.5rem; font-family: var(--font-head); font-weight: 800; color: #3b82f6;" id="statPeluang">0</div>
+                                <div style="font-size: 0.75rem; color: var(--text-gray); font-weight: 600;">Peluang Aktif</div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- AKHIR competency-insights -->
                 </div>
+                <!-- AKHIR widget-card radar -->
 
+                <!-- KANAN: KOLOM WIDGET REKOMENDASI & TOP UMKM -->
                 <div style="display: flex; flex-direction: column; gap: 30px;">
                     
                     <div class="widget-card">
@@ -340,15 +486,32 @@
                     </div>
 
                 </div>
+                <!-- AKHIR kolom kanan -->
+
+            </div>
+            <!-- AKHIR split-layout -->
+
+        </div>
+        <!-- AKHIR container -->
+
+    </section>
+
+    <footer class="main-footer">
+        <div class="container">
+            <a href="#" class="footer-brand">ID<span>TRIBE</span></a>
+            <p class="footer-desc">Platform inkubasi digital yang menghubungkan UMKM dengan ilmu, mentor, dan permodalan untuk masa depan ekonomi Indonesia yang lebih kuat.</p>
+            <div class="footer-bottom">
+                Copyright &copy; 2026 ID-TRIBE Initiative. Powered by KNEKS Strategic Framework.
             </div>
         </div>
-    </section>
+    </footer>
+
 
    <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-    import { getFirestore, doc, getDoc, collection, query, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
+    import { getFirestore, doc, getDoc, collection, query, getDocs, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    
     const firebaseConfig = {
         apiKey: "AIzaSyBIaLzkNM0KqPVKxuMNmardLqcrr2kYTWQ",
         authDomain: "database-idbm.firebaseapp.com",
@@ -363,11 +526,25 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    // 1. KONVERSI LEVEL KE ANGKA
+    // ================== PERBAIKAN SKOR ZERO-BASED ==================
+    // Beginner = 0, Intermediate = 1, Advanced = 2
     const getScore = (lvl) => {
-        if (lvl === 'Advanced') return 3;      // Nilai Tertinggi
-        if (lvl === 'Intermediate') return 2;  // Nilai Sedang
-        return 1;                              // Nilai Terendah (Beginner)
+        if (lvl === 'Advanced') return 2;      
+        if (lvl === 'Intermediate') return 1;  
+        return 0; // Beginner
+    };
+
+    // Skor detail dengan tambahan progres modul (0.25 per modul, maks 4 modul)
+    const getDetailedScore = (sector, level, progressData) => {
+        let baseScore = getScore(level);
+        if (baseScore >= 2) return 2; // Advanced sudah maksimal
+
+        const progressKey = `${sector}_${level}`;
+        const progress = progressData[progressKey] || 0;
+        // 4 modul untuk naik 1 level → 0.25 per modul
+        const fractionalScore = Math.min(progress, 4) * 0.25; 
+        
+        return baseScore + fractionalScore;
     };
 
     onAuthStateChanged(auth, async (user) => {
@@ -379,6 +556,7 @@
                 const data = docSnap.data();
                 renderDashboard(data);
                 loadLeaderboard(data.nama_usaha);
+                loadMyBookedSeminars(user.uid);
             } else {
                 window.location.href = "setup-umkm.html";
             }
@@ -391,65 +569,117 @@
         signOut(auth).then(() => window.location.href = "index.html");
     }
 
+    // --- FUNGSI UTAMA RENDER UI & UNLOCK LOGIC ---
     function renderDashboard(data) {
-        // --- PROFIL HEADER ---
         const shortName = data.nama_lengkap.split(' ')[0];
         document.getElementById('userName').innerText = shortName;
         if(document.getElementById('navName')) document.getElementById('navName').innerText = shortName;
         document.getElementById('userAvatar').innerText = shortName.charAt(0).toUpperCase();
         document.getElementById('userBusiness').innerText = data.nama_usaha + " • " + (data.kategori || "UMKM");
 
-        // --- LOGIKA KESEHATAN BISNIS (YANG DIPERBAIKI) ---
-        
-        // 1. Ambil data level, default ke 'Beginner' jika belum ada
-        const levels = data.competency_levels || { 
-            digital: "Beginner", finance: "Beginner", legal: "Beginner", 
-            ops: "Beginner", network: "Beginner" 
+        const healthData = data.health_check_result || {};
+        const learnedData = data.competency_levels || {};
+        const progressData = data.module_progress || {}; 
+
+        const getHighestLevel = (baselineLevel, learnedLevel) => {
+            if (!learnedLevel) return baselineLevel || "Beginner";
+            const baselineScore = getScore(baselineLevel || "Beginner");
+            const learnedScore = getScore(learnedLevel);
+            return learnedScore > baselineScore ? learnedLevel : (baselineLevel || "Beginner");
         };
 
-        // 2. Hitung Total Skor
+        const hc = data.health_check_result || {};
+        const fallback = data.competency_levels || {};
+        
+        const levels = { 
+            finance: hc["Financial Management"]?.level || fallback.finance || "Beginner",
+            digital: hc["Digital & Marketing"]?.level || fallback.digital || "Beginner",
+            legal: hc["Business Logic"]?.level || fallback.legal || "Beginner",
+            ops: hc["Productivity & Ops"]?.level || fallback.ops || "Beginner",
+            network: hc["Networking"]?.level || fallback.network || "Beginner"
+        };
+
+        // Hitung total skor dengan denominator baru (maks 10)
         let totalScore = 0;
         const categories = ['digital', 'finance', 'legal', 'ops', 'network'];
         
         categories.forEach(cat => {
-            totalScore += getScore(levels[cat]);
+            totalScore += getDetailedScore(cat, levels[cat], progressData);
         });
 
-        // 3. Hitung Persentase (Maksimal skor = 5 kategori * 3 poin = 15)
-        let percent = Math.round((totalScore / 15) * 100);
+        // Maksimal 5 pilar * 2 = 10
+        let percent = Math.round((totalScore / 10) * 100);
+
+        const categoryNames = ["Manajemen Keuangan", "Digital & Marketing", "Legalitas & Kepatuhan", "Operasional Bisnis", "Jejaring (Network)"];
+        const dataScores = [
+            getDetailedScore('finance', levels.finance, progressData),
+            getDetailedScore('digital', levels.digital, progressData),
+            getDetailedScore('legal', levels.legal, progressData),
+            getDetailedScore('ops', levels.ops, progressData),
+            getDetailedScore('network', levels.network, progressData)
+        ];
+
+        let maxScore = -1; let minScore = 4;
+        let maxIndex = 0; let minIndex = 0;
+
+        for (let i = 0; i < dataScores.length; i++) {
+            if (dataScores[i] > maxScore) { maxScore = dataScores[i]; maxIndex = i; }
+            if (dataScores[i] < minScore) { minScore = dataScores[i]; minIndex = i; }
+        }
+
+        if (maxScore === minScore) {
+            document.getElementById('insightStrength').innerText = "Seimbang di semua area";
+            document.getElementById('insightWeakness').innerText = "Tingkatkan secara bertahap";
+        } else {
+            document.getElementById('insightStrength').innerText = categoryNames[maxIndex];
+            document.getElementById('insightWeakness').innerText = categoryNames[minIndex];
+        }
+
+        const completedModulesCount = data.completed_courses ? data.completed_courses.length : 0;
+        document.getElementById('statModules').innerText = completedModulesCount;
+        document.getElementById('statScore').innerText = `${percent}%`;
+        document.getElementById('statPeluang').innerText = data.peluang_dibuat || "0";
         
-        // Update UI Angka & Bar
         const progressBar = document.getElementById('levelProgress');
         const progressText = document.getElementById('progressText');
         
         progressBar.style.width = `${percent}%`;
         progressText.innerText = `${percent}%`;
 
-        // 4. Update Warna & Level Badge Berdasarkan Kesehatan
-        let healthColor = '#ef4444'; // Merah (Default)
+        let healthColor = '#ef4444'; 
         let levelName = "Beginner";
 
         if (percent >= 80) {
-            healthColor = '#10b981'; // Hijau (Sehat)
+            healthColor = '#10b981'; 
             levelName = "Advanced";
         } else if (percent >= 50) {
-            healthColor = '#f59e0b'; // Kuning (Cukup)
+            healthColor = '#f59e0b'; 
             levelName = "Intermediate";
         }
 
-        // Terapkan Warna
         progressBar.style.backgroundColor = healthColor;
         document.getElementById('levelBadge').innerText = levelName + " Level";
         document.getElementById('levelBadge').style.borderColor = healthColor;
-        document.getElementById('levelBadge').style.color = "white"; // Pastikan teks terlihat
+        document.getElementById('levelBadge').style.color = "white"; 
 
-        // --- UNLOCK LOGIC (SAMA SEPERTI SEBELUMNYA) ---
-        if (getScore(levels.digital) >= 3) unlockCard('cardDigital', '#');
-        if (getScore(levels.finance) >= 3 || getScore(levels.legal) >= 2) unlockCard('cardFinancing', '#');
-        if (getScore(levels.legal) >= 2 || getScore(levels.ops) >= 2 || getScore(levels.network) >= 3) unlockCard('cardPartnership', 'partnership.html');
+        // -------------------------------------------------------------
+        // FEATURE TOGGLING DENGAN SKALA BARU
+        // -------------------------------------------------------------
+        
+        // 1. Digital Tools: Default Unlocked
+        unlockCard('cardDigital', 'digital-tools.html');
 
-        // Render komponen lain
-        renderChart(levels);
+        // 2. Akses Modal (Financing): Finance = Advanced (2) AND Legal >= Intermediate (1)
+        if (getScore(levels.finance) >= 2 && getScore(levels.legal) >= 1) {
+            unlockCard('cardFinancing', 'https://dbm.kneks.go.id/'); 
+        }
+
+        // 3. Partnership: Network > Beginner (>0) AND Ops = Advanced (2)
+        if (getScore(levels.network) > 0 && getScore(levels.ops) >= 2) {
+            unlockCard('cardPartnership', 'partnership.html');
+        }
+
+        renderChart(levels, progressData); 
         generateLearningPath(levels);
     }
 
@@ -472,11 +702,14 @@
         alert(`🔒 Fitur ${feature} Terkunci!\n\nSyarat: ${reason}\n\nSelesaikan modul di Training Hub untuk membuka.`);
     }
 
-    function renderChart(levels) {
+    function renderChart(levels, progressData) {
         const ctx = document.getElementById('healthRadar').getContext('2d');
         const dataScores = [
-            getScore(levels.finance), getScore(levels.digital), getScore(levels.legal),
-            getScore(levels.ops), getScore(levels.network)
+            getDetailedScore('finance', levels.finance, progressData),
+            getDetailedScore('digital', levels.digital, progressData),
+            getDetailedScore('legal', levels.legal, progressData),
+            getDetailedScore('ops', levels.ops, progressData),
+            getDetailedScore('network', levels.network, progressData)
         ];
 
         if(window.myRadar) window.myRadar.destroy();
@@ -498,36 +731,138 @@
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                scales: { r: { min: 0, max: 3, ticks: { display: false }, grid: { color: '#e2e8f0' } } },
+                scales: { 
+                    r: { 
+                        min: 0, 
+                        max: 2,   // ← diubah dari 3 menjadi 2
+                        ticks: { 
+                            display: true, 
+                            stepSize: 1, 
+                            color: '#94a3b8', 
+                            backdropColor: 'transparent' 
+                        }, 
+                        grid: { color: '#e2e8f0' } 
+                    } 
+                },
                 plugins: { legend: { display: false } }
             }
         });
     }
 
-    function generateLearningPath(levels) {
+    async function generateLearningPath(levels) {
         const container = document.getElementById('learningList');
-        container.innerHTML = "";
-        let modules = [];
+        container.innerHTML = '<p style="text-align: center; color: var(--text-light); font-size: 0.9rem; padding: 20px 0;"><i class="fas fa-circle-notch fa-spin"></i> Menyesuaikan rekomendasi...</p>';
         
-        // Logika Rekomendasi Belajar Pintar
-        if(levels.finance === 'Beginner') modules.push({title: "Dasar Keuangan & Pembukuan", tag: "Finance"});
-        if(levels.legal === 'Beginner') modules.push({title: "Cara Urus Legalitas NIB", tag: "Legal"});
-        if(levels.digital === 'Beginner') modules.push({title: "Digital Marketing 101", tag: "Digital"});
-        if(levels.ops === 'Beginner') modules.push({title: "Manajemen Stok Efisien", tag: "Ops"});
+        try {
+            const coursesRef = collection(db, "courses");
+            const snap = await getDocs(coursesRef);
+            
+            let allCourses = [];
+            snap.forEach(doc => {
+                allCourses.push({ id: doc.id, ...doc.data() });
+            });
 
-        if(modules.length === 0) {
-            container.innerHTML = `<div class="list-row"><div class="row-content"><div class="row-title">Luar Biasa!</div><div class="row-sub">Anda sudah di level atas. Pertahankan!</div></div></div>`;
-        } else {
-            modules.slice(0, 3).forEach(mod => { // Tampilkan max 3 rekomendasi
+            if (allCourses.length === 0) {
+                container.innerHTML = `<div class="list-row"><div class="row-content"><div class="row-title">Belum Ada Modul</div><div class="row-sub">Data kelas di database kosong.</div></div></div>`;
+                return;
+            }
+
+            let modules = [];
+            const categories = ['finance', 'legal', 'digital', 'ops', 'network'];
+            const levelScoreMap = { 'Beginner': 0, 'Intermediate': 1, 'Advanced': 2 };
+            
+            categories.sort((a, b) => {
+                let scoreA = levelScoreMap[levels[a] || 'Beginner'];
+                let scoreB = levelScoreMap[levels[b] || 'Beginner'];
+                return scoreA - scoreB;
+            });
+
+            for (let i = 0; i < categories.length; i++) {
+                if (modules.length >= 3) break; 
+                const cat = categories[i];
+                const currentLevel = levels[cat] || 'Beginner';
+                
+                if (currentLevel === 'Advanced') continue; 
+
+                const matchedCourse = allCourses.find(c => {
+                    const cSektor = (c.sektor || c.kategori || "").toLowerCase();
+                    const cLevel = (c.level || "").toLowerCase();
+                    return cSektor === cat.toLowerCase() && cLevel === currentLevel.toLowerCase();
+                });
+
+                if (matchedCourse) {
+                    const realTitle = matchedCourse.judul || matchedCourse.title || "Tanpa Judul";
+                    modules.push({
+                        id: matchedCourse.id,
+                        title: realTitle,
+                        tag: cat.charAt(0).toUpperCase() + cat.slice(1),
+                        levelText: currentLevel
+                    });
+                }
+            }
+
+            container.innerHTML = ""; 
+
+            if (modules.length === 0) {
+                container.innerHTML = `<div class="list-row"><div class="row-content"><div class="row-title">Luar Biasa!</div><div class="row-sub">Terus tingkatkan kapasitas Anda.</div></div></div>`;
+            } else {
+                modules.forEach(mod => { 
+                    container.innerHTML += `
+                    <div class="list-row" style="cursor:pointer;" onclick="window.location.href='course-player.html?id=${mod.id}'">
+                        <div class="row-content" style="overflow: hidden;">
+                            <div class="row-title" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${mod.title}">
+                                ${mod.title}
+                            </div>
+                            <div class="row-sub">Materi khusus level ${mod.levelText}</div>
+                        </div>
+                        <div style="font-size:0.7rem; background:#fff7ed; color:#f59e0b; padding:4px 10px; border-radius:50px; font-weight:700;">
+                            ${mod.tag}
+                        </div>
+                    </div>`;
+                });
+            }
+        } catch (error) {
+            console.error("Error mengambil rekomendasi:", error);
+            container.innerHTML = `<div class="list-row"><div class="row-content"><div class="row-title" style="color:red;">Error Koneksi</div><div class="row-sub">Gagal memuat rekomendasi.</div></div></div>`;
+        }
+    }
+
+    async function loadMyBookedSeminars(uid) {
+        const container = document.getElementById('mySeminarsList');
+        try {
+            const q = query(collection(db, "bookings"), where("user_uid", "==", uid));
+            const snap = await getDocs(q);
+            container.innerHTML = "";
+
+            if (snap.empty) {
+                container.innerHTML = `<p style="text-align: center; color: var(--text-light); font-size: 0.9rem; width: 100%;">Belum ada jadwal seminar yang Anda ikuti.</p>`;
+                return;
+            }
+
+            snap.forEach(docSnap => {
+                const data = docSnap.data();
+                const link = data.meet_link ? data.meet_link : `live-session.html?id=${data.seminar_id}`;
+                
                 container.innerHTML += `
-                <div class="list-row" style="cursor:pointer;" onclick="window.location.href='training-hub.html'">
-                    <div class="row-content">
-                        <div class="row-title">${mod.title}</div>
-                        <div class="row-sub">Rekomendasi untuk naik level</div>
+                <div class="h-seminar-card" onclick="window.open('${link}', '_blank')">
+                    <div class="h-seminar-icon">
+                        <i class="fas fa-video"></i>
                     </div>
-                    <div style="font-size:0.7rem; background:#fff7ed; color:#f59e0b; padding:4px 10px; border-radius:50px; font-weight:700;">${mod.tag}</div>
+                    <div class="h-seminar-content">
+                        <div class="h-seminar-title" title="${data.seminar_title || "Sesi Seminar"}">${data.seminar_title || "Sesi Seminar"}</div>
+                        <div class="h-seminar-detail" title="${data.schedule_date || "-"}">
+                            <i class="far fa-calendar-alt" style="color:var(--primary);"></i> ${data.schedule_date || "-"}
+                        </div>
+                        <div class="h-seminar-detail" title="${data.coach_name || "-"}">
+                            <i class="fas fa-user-tie" style="color:var(--primary);"></i> ${data.coach_name || "-"}
+                        </div>
+                        <div class="h-seminar-btn">Akses Room</div>
+                    </div>
                 </div>`;
             });
+        } catch (e) {
+            console.error("Gagal memuat jadwal seminar:", e);
+            container.innerHTML = `<p style="text-align: center; color: red; font-size: 0.9rem; width: 100%;">Gagal memuat data.</p>`;
         }
     }
 
@@ -537,12 +872,36 @@
             const q = query(collection(db, "users_umkm"));
             const snap = await getDocs(q);
             let data = [];
+            
+            const getHighestLevel = (baselineLevel, learnedLevel) => {
+                if (!learnedLevel) return baselineLevel || "Beginner";
+                const baselineScore = getScore(baselineLevel || "Beginner");
+                const learnedScore = getScore(learnedLevel);
+                return learnedScore > baselineScore ? learnedLevel : (baselineLevel || "Beginner");
+            };
+
             snap.forEach(d => {
                 const val = d.data();
                 let score = 0;
-                const l = val.competency_levels || {};
-                for(let k in l) score += getScore(l[k]);
-                data.push({ ...val, score: Math.round((score/15)*100) });
+                
+                const healthData = val.health_check_result || {};
+                const learnedData = val.competency_levels || {};
+                const progressData = val.module_progress || {}; 
+                
+                const levels = {
+                    digital: getHighestLevel(healthData["Digital & Marketing"]?.level, learnedData.digital),
+                    finance: getHighestLevel(healthData["Financial Management"]?.level, learnedData.finance),
+                    legal: getHighestLevel(healthData["Business Logic"]?.level, learnedData.legal),
+                    ops: getHighestLevel(healthData["Productivity & Ops"]?.level, learnedData.ops),
+                    network: getHighestLevel(healthData["Networking"]?.level, learnedData.network)
+                };
+
+                const categories = ['digital', 'finance', 'legal', 'ops', 'network'];
+                categories.forEach(cat => {
+                    score += getDetailedScore(cat, levels[cat], progressData); 
+                });
+
+                data.push({ ...val, score: Math.round((score/10)*100) }); // pembagi 10, bukan 15
             });
             
             data.sort((a,b) => b.score - a.score);

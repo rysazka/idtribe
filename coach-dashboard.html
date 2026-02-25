@@ -14,7 +14,7 @@
     <script type="module" src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"></script>
 
     <style>
-        /* --- VARIABLES --- */
+        /* (style tidak berubah, tetap sama seperti di kode Anda) */
         :root {
             --primary: #059669; --dark: #0f172a; --bg-light: #f8fafc; --live-red: #ef4444;
             --border: 1px solid #e2e8f0; --shadow: 0 4px 20px rgba(0,0,0,0.05);
@@ -23,7 +23,6 @@
         * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
         body { font-family: var(--font-body); background: var(--bg-light); color: var(--dark); height: 100vh; display: flex; overflow: hidden; }
 
-        /* --- SIDEBAR (Updated to match CMS) --- */
         .menu-toggle { display: none; position: fixed; top: 15px; left: 15px; z-index: 200; background: white; border: none; padding: 10px; border-radius: 8px; box-shadow: var(--shadow); }
         .sidebar { width: var(--sidebar-w); background: #1e293b; color: white; display: flex; flex-direction: column; padding: 25px; flex-shrink: 0; z-index: 150; transition: transform 0.3s; }
         .brand { font-family: var(--font-head); font-size: 1.5rem; font-weight: 800; margin-bottom: 40px; color: var(--primary); display: flex; align-items: center; gap: 10px; }
@@ -38,7 +37,6 @@
         
         .sidebar-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 140; backdrop-filter: blur(2px); }
 
-        /* --- MAIN --- */
         .main { flex: 1; padding: 25px; overflow-y: auto; display: flex; flex-direction: column; }
         .status-header { display: flex; justify-content: space-between; align-items: center; background: white; padding: 20px 30px; border-radius: 20px; margin-bottom: 25px; box-shadow: var(--shadow); border: var(--border); }
         .coach-name h2 { font-family: var(--font-head); font-size: 1.6rem; margin-bottom: 5px; }
@@ -48,12 +46,10 @@
         .toggle-btn.offline { background: transparent; color: #64748b; }
         .toggle-btn.online { background: #22c55e; color: white; box-shadow: 0 4px 12px rgba(34, 197, 94, 0.4); }
 
-        /* --- VIEWS --- */
         .view-section { display: none; height: 100%; }
         .view-section.active { display: block; animation: fadeIn 0.3s ease; }
         @keyframes fadeIn { from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:translateY(0);} }
 
-        /* --- STREAM STYLES --- */
         .studio-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 25px; height: 100%; }
         .studio-card { background: white; border-radius: 20px; padding: 25px; box-shadow: var(--shadow); border: var(--border); margin-bottom: 20px; }
         .card-head { font-family: var(--font-head); font-size: 1.2rem; font-weight: 800; margin-bottom: 20px; color: var(--dark); display: flex; justify-content: space-between; align-items: center; }
@@ -68,8 +64,8 @@
         .btn-action { width: 100%; padding: 15px; border-radius: 10px; border: none; font-weight: 800; cursor: pointer; transition: 0.3s; font-size: 1rem; }
         .btn-start { background: var(--primary); color: white; }
         .btn-stop { background: var(--live-red); color: white; display: none; }
+        .img-preview { width: 100%; height: 200px; object-fit: cover; border-radius: 10px; display: none; margin-bottom: 15px; border: 2px dashed #e2e8f0; }
 
-        /* --- TABLE STYLES --- */
         .tool-card { background: white; padding: 25px; border-radius: 20px; border: var(--border); box-shadow: var(--shadow); height: 100%; }
         table { width: 100%; border-collapse: collapse; }
         th, td { padding: 15px 20px; text-align: left; border-bottom: 1px solid #f1f5f9; }
@@ -89,6 +85,37 @@
             .toggle-switch { width: 100%; justify-content: center; }
             table { display: block; overflow-x: auto; white-space: nowrap; }
         }
+
+        .cal-modal {
+            display: none; position: fixed; inset: 0; z-index: 2000;
+            background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(8px);
+            align-items: center; justify-content: center; padding: 20px;
+        }
+        .cal-modal-content {
+            background: white; width: 100%; max-width: 420px; border-radius: 24px;
+            padding: 35px; text-align: center; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.2);
+            animation: modalPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        @keyframes modalPop { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } }
+        .cal-icon-wrapper {
+            width: 80px; height: 80px; background: #f0fdf4; color: #10b981;
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 20px; font-size: 2rem; border: 4px solid #d1fae5;
+        }
+        .cal-title { font-family: var(--font-head); font-size: 1.5rem; font-weight: 800; color: var(--dark); margin-bottom: 10px; }
+        .cal-desc { color: #64748b; font-size: 0.95rem; line-height: 1.5; margin-bottom: 25px; }
+        .btn-cal-go {
+            background: #4285F4; color: white; border: none; padding: 15px 25px;
+            border-radius: 14px; font-weight: 700; width: 100%; display: flex;
+            align-items: center; justify-content: center; gap: 10px; cursor: pointer;
+            transition: 0.3s; text-decoration: none; font-size: 1rem;
+        }
+        .btn-cal-go:hover { background: #1c62d4; transform: translateY(-3px); box-shadow: 0 10px 15px -3px rgba(66, 133, 244, 0.3); }
+        .btn-close-modal {
+            margin-top: 15px; background: transparent; border: none; color: #94a3b8;
+            font-weight: 600; cursor: pointer; font-size: 0.9rem;
+        }
+        .btn-close-modal:hover { color: #64748b; }
     </style>
 </head>
 <body>
@@ -109,10 +136,17 @@
         <div class="nav-link" onclick="switchView('bookingView', this)">
             <i class="fas fa-calendar-check"></i> Jadwal & Booking
         </div>
+        <div class="nav-link" id="nav-peluang" onclick="switchView('opportunityView', this)">
+            <i class="fas fa-handshake"></i> Kelola Peluang
+        </div>
         
         <a href="coach-cms.html" class="nav-link">
             <i class="fas fa-book-open"></i> Kelola Materi
         </a>
+
+        <div class="nav-link" id="nav-seminar" onclick="switchView('seminarView', this)">
+            <i class="fas fa-bullhorn"></i> Kelola Seminar
+        </div>
 
         <a onclick="logout()" class="nav-link" style="margin-top: auto; color: #ef4444; cursor: pointer;">
             <i class="fas fa-sign-out-alt"></i> Keluar
@@ -131,7 +165,9 @@
             </div>
         </div>
 
+        <!-- STREAM VIEW -->
         <div id="streamView" class="view-section active">
+            <!-- konten stream (tidak diubah) -->
             <div class="studio-grid">
                 <div class="left-col">
                     <div class="studio-card">
@@ -167,6 +203,7 @@
             </div>
         </div>
 
+        <!-- BOOKING VIEW (diperbaiki) -->
         <div id="bookingView" class="view-section">
             <div class="tool-card">
                 <div class="card-head">
@@ -174,117 +211,308 @@
                     <button onclick="loadBookings()" style="border:none; background:transparent; color:var(--primary); font-weight:bold; cursor:pointer;"><i class="fas fa-sync"></i> Refresh</button>
                 </div>
                 <table style="width:100%">
-                    <thead><tr><th>User</th><th>Topik</th><th>Jadwal</th><th>Status</th><th>Aksi</th></tr></thead>
-                    <tbody id="bookingTableBody"><tr><td colspan="5" style="text-align:center;">Memuat...</td></tr></tbody>
+                    <thead>
+                        <tr>
+                            <th>Nama Peserta</th>
+                            <th>Topik/Judul</th>
+                            <th>Jadwal</th>
+                            <th>Status</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="bookingTableBody">
+                        <tr><td colspan="5" style="text-align:center;">Memuat...</td></tr>
+                    </tbody>
                 </table>
+            </div>
+        </div>
+
+        <!-- OPPORTUNITY VIEW -->
+        <div id="opportunityView" class="view-section">
+            <!-- konten peluang (tidak diubah) -->
+            <div class="studio-grid">
+                <div class="left-col">
+                    <div class="tool-card">
+                        <div class="card-head">
+                            <span><i class="fas fa-plus-circle"></i> Buat Peluang Baru</span>
+                        </div>
+                        
+                        <img id="previewImg" class="img-preview">
+                        
+                        <div class="form-group">
+                            <label class="form-label">Foto (Opsional)</label>
+                            <input type="file" id="newOppImage" accept="image/*" class="form-input" onchange="previewImage(this)">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Judul Peluang</label>
+                            <input type="text" id="newOppTitle" class="form-input" placeholder="Contoh: Kolaborasi CSR Lingkungan" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Kategori</label>
+                            <select id="newOppCat" class="form-input">
+                                <option value="Jasa">Jasa</option>
+                                <option value="Teknologi">Teknologi</option>
+                                <option value="F&B">F&B</option>
+                                <option value="Agrikultur">Agrikultur</option>
+                                <option value="Pendidikan">Pendidikan</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Deskripsi / Detail Peluang</label>
+                            <textarea id="newOppDesc" class="form-input" rows="4" placeholder="Jelaskan detail peluang kerjasama yang Anda butuhkan..." style="resize: vertical; font-family: inherit;" required></textarea>
+                        </div>
+
+                        <button class="btn-action btn-start" id="btnPublishOpp" onclick="publishOpportunity()">Posting Peluang</button>
+                    </div>
+                </div>
+
+                <div class="right-col">
+                    <div class="tool-card">
+                        <div class="card-head">
+                            <span><i class="fas fa-list"></i> Peluang Aktif Anda</span>
+                            <button onclick="loadMyOpportunities()" style="border:none; background:transparent; color:var(--primary); font-weight:bold; cursor:pointer;"><i class="fas fa-sync"></i> Refresh</button>
+                        </div>
+                        <div style="overflow-x: auto;">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Judul</th>
+                                        <th>Kategori</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="oppTableBody">
+                                    <tr><td colspan="2" style="text-align:center;">Memuat...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SEMINAR VIEW (diperbaiki: tambah kolom Aksi) -->
+        <div id="seminarView" class="view-section">
+            <div class="studio-grid">
+                <div class="left-col">
+                    <div class="tool-card">
+                        <div class="card-head">
+                            <span><i class="fas fa-plus-circle"></i> Buat Tawaran Seminar</span>
+                        </div>
+                        
+                        <img id="previewSeminarImg" class="img-preview">
+                        
+                        <div class="form-group">
+                            <label class="form-label">Poster Seminar (img)</label>
+                            <input type="file" id="semImage" accept="image/*" class="form-input" onchange="previewSemImage(this)">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Judul Seminar (title)</label>
+                            <input type="text" id="semTitle" class="form-input" placeholder="Contoh: Strategi TikTok Ads" required>
+                        </div>
+
+                        <div class="form-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                            <div>
+                                <label class="form-label">Kategori (category)</label>
+                                <select id="semCategory" class="form-input">
+                                    <option value="Marketing">Marketing</option>
+                                    <option value="Finance">Finance</option>
+                                    <option value="Legal">Legal</option>
+                                    <option value="Export">Export</option>
+                                    <option value="Ops">Ops</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="form-label">Tipe (type)</label>
+                                <select id="semType" class="form-input">
+                                    <option value="upcoming">Upcoming (Akan Datang)</option>
+                                    <option value="recorded">Recorded (Rekaman)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Jadwal Pelaksanaan (date)</label>
+                            <input type="datetime-local" id="semDate" class="form-input" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Link Meeting (opsional)</label>
+                            <input type="url" id="semMeetLink" class="form-input" placeholder="https://zoom.us/... atau https://meet.google.com/...">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Harga Tiket (price)</label>
+                            <input type="number" id="semPrice" class="form-input" placeholder="Isi 0 untuk Gratis" required>
+                        </div>
+
+                        <button class="btn-action btn-start" id="btnPublishSeminar" onclick="publishSeminar()">Posting Seminar</button>
+                    </div>
+                </div>
+
+                <div class="right-col">
+                    <div class="tool-card">
+                        <div class="card-head">
+                            <span><i class="fas fa-list"></i> Seminar Anda</span>
+                            <button onclick="loadMySeminars()" style="border:none; background:transparent; color:var(--primary); font-weight:bold; cursor:pointer;"><i class="fas fa-sync"></i> Refresh</button>
+                        </div>
+                        <div style="overflow-x: auto;">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Judul</th>
+                                        <th>Jadwal</th>
+                                        <th>Tipe</th>
+                                        <th>Aksi</th> <!-- Kolom Aksi ditambahkan -->
+                                    </tr>
+                                </thead>
+                                <tbody id="semTableBody">
+                                    <tr><td colspan="4" style="text-align:center;">Memuat...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
+    <!-- MODAL GOOGLE CALENDAR -->
+    <div id="calendarModal" class="cal-modal">
+        <div class="cal-modal-content">
+            <div class="cal-icon-wrapper">
+                <i class="fas fa-calendar-check"></i>
+            </div>
+            <h3 class="cal-title">Seminar Ditayangkan!</h3>
+            <p class="cal-desc">Ingin menambahkan jadwal seminar ini sebagai pengingat di Google Calendar Anda?</p>
+            
+            <a href="#" id="googleCalBtn" target="_blank" class="btn-cal-go">
+                <i class="fab fa-google"></i> Tambah ke Kalender
+            </a>
+            
+            <button class="btn-close-modal" onclick="document.getElementById('calendarModal').style.display='none'">
+                Mungkin Nanti
+            </button>
+        </div>
+    </div>
+
     <script type="module">
+        // Import Firebase
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc, updateDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, updateDoc, collection, query, where, getDocs, addDoc, serverTimestamp, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        const firebaseConfig = { apiKey: "AIzaSyBIaLzkNM0KqPVKxuMNmardLqcrr2kYTWQ", authDomain: "database-idbm.firebaseapp.com", projectId: "database-idbm", storageBucket: "database-idbm.firebasestorage.app", messagingSenderId: "1052290789133", appId: "1:1052290789133:web:36b513630b7a87154eca44", measurementId: "G-EQLBB94DY2" };
+        const firebaseConfig = {
+            apiKey: "AIzaSyBIaLzkNM0KqPVKxuMNmardLqcrr2kYTWQ",
+            authDomain: "database-idbm.firebaseapp.com",
+            projectId: "database-idbm",
+            storageBucket: "database-idbm.firebasestorage.app",
+            messagingSenderId: "1052290789133",
+            appId: "1:1052290789133:web:36b513630b7a87154eca44",
+            measurementId: "G-EQLBB94DY2"
+        };
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        let coachId = null, coachNameVar = "";
+        // Variabel global
+        window.coachId = null;
+        window.coachNameVar = '';
+        window.currentUserRole = '';
 
-        // UI LOGIC
+        // Helper: konversi file ke base64
+        const toBase64 = (file) => new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = reject;
+        });
+
+        // ========== FUNGSI GOOGLE CALENDAR UNTUK COACH ==========
+        function createCoachCalendarLink(title, rawDate, userName, topic, bookingId, meetLink) {
+            if (!rawDate) return '#';
+            const startDate = new Date(rawDate);
+            if (isNaN(startDate.getTime())) return '#';
+            const endDate = new Date(startDate.getTime() + 60 * 60000); // Durasi 1 jam
+            
+            const formatGoogleDate = (date) => date.toISOString().replace(/-|:|\.\d\d\d/g, "");
+            const startStr = formatGoogleDate(startDate);
+            const endStr = formatGoogleDate(endDate);
+            
+            const virtualMeetLink = meetLink ? meetLink : `https://idtribe.id/coach-chat.html?session=${bookingId}`;
+            const details = `Sesi Konsultasi ID-TRIBE.%0APeserta: ${userName}%0ATopik: ${topic}%0A%0ALink Ruang Diskusi: ${virtualMeetLink}%0A%0AHarap standby di link tersebut 5 menit sebelum jadwal.`;
+            
+            return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent('Konsultasi: ' + title)}&dates=${startStr}/${endStr}&details=${details}&location=${encodeURIComponent(virtualMeetLink)}`;
+        }
+
+        // ========== FUNGSI GOOGLE CALENDAR UNTUK SEMINAR ==========
+        function createSeminarCalendarLink(title, rawDate, speaker, meetLink) {
+            if (!rawDate) return '#';
+            const startDate = new Date(rawDate);
+            if (isNaN(startDate.getTime())) return '#';
+            const endDate = new Date(startDate.getTime() + 60 * 60000); // Durasi 1 jam
+            const formatGoogleDate = (date) => date.toISOString().replace(/-|:|\.\d\d\d/g, "");
+            const startStr = formatGoogleDate(startDate);
+            const endStr = formatGoogleDate(endDate);
+            
+            let details = `Seminar ID-TRIBE Academy.%0APembicara: ${speaker}%0A%0A`;
+            if (meetLink) {
+                details += `Link Meeting: ${meetLink}%0A%0A`;
+            } else {
+                details += `Link akan menyusul di dashboard.%0A%0A`;
+            }
+            details += `Siap-siap 5 menit sebelum sesi dimulai.`;
+            
+            return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent('Seminar ID-TRIBE: ' + title)}&dates=${startStr}/${endStr}&details=${details}&location=${encodeURIComponent(meetLink || 'Dashboard Coach')}`;
+        }
+
+        // ========== UI GLOBAL ==========
         window.toggleSidebar = () => {
             document.querySelector('.sidebar').classList.toggle('active');
-            document.querySelector('.sidebar-overlay').style.display = document.querySelector('.sidebar').classList.contains('active') ? 'block' : 'none';
-        }
+            document.querySelector('.sidebar-overlay').style.display = 
+                document.querySelector('.sidebar').classList.contains('active') ? 'block' : 'none';
+        };
 
         window.switchView = (viewId, btn) => {
             document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
             document.getElementById(viewId).classList.add('active');
-            
-            // Remove active from all nav-links
             document.querySelectorAll('.nav-link').forEach(el => el.classList.remove('active'));
-            // Add active to the clicked button
             btn.classList.add('active');
-            
-            if(window.innerWidth <= 768) window.toggleSidebar();
-            if(viewId === 'bookingView') loadBookings();
+            if (window.innerWidth <= 768) window.toggleSidebar();
+            if (viewId === 'bookingView') loadBookings();
+            if (viewId === 'seminarView') loadMySeminars();
+            if (viewId === 'opportunityView') loadMyOpportunities();
         };
 
-        // AUTH & INIT
-        onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                coachId = user.uid;
-                const snap = await getDoc(doc(db, "users_umkm", coachId));
-                if (snap.exists() && (snap.data().role === 'coach' || snap.data().role === 'admin')) {
-                    const data = snap.data();
-                    coachNameVar = data.nama_lengkap;
-                    document.getElementById('coachName').innerText = "Halo, " + data.nama_lengkap.split(' ')[0] + "!";
-                    document.getElementById('coachSpec').innerText = "Expertise: " + (Array.isArray(data.spesialisasi) ? data.spesialisasi.join(", ") : (data.spesialisasi || "Generalist"));
-                    updateStatusUI(data.status || 'offline');
-                    
-                    // Check hash for direct navigation
-                    const hash = window.location.hash;
-                    if(hash === '#booking') {
-                        // Find element that triggers booking view
-                        const bookingBtn = document.querySelectorAll('.nav-link')[2]; // Index 2 based on layout
-                        if(bookingBtn) window.switchView('bookingView', bookingBtn);
-                    }
-                } else { window.location.href = "login.html"; }
-            } else { window.location.href = "login.html"; }
-        });
-
-        // STATUS
         window.setStatus = async (status) => {
-            if (!coachId) return;
-            try { await updateDoc(doc(db, "users_umkm", coachId), { status: status }); updateStatusUI(status); } catch (e) { alert("Gagal update status."); }
+            if (!window.coachId) return;
+            try {
+                await updateDoc(doc(db, "users_umkm", window.coachId), { status });
+                updateStatusUI(status);
+            } catch (e) {
+                alert("Gagal update status.");
+            }
         };
 
-        function updateStatusUI(status) {
-            const btnOff = document.getElementById('btnOffline');
-            const btnOn = document.getElementById('btnOnline');
-            if (status === 'offline') {
-                btnOff.className = 'toggle-btn active'; btnOn.className = 'toggle-btn offline';
-            } else {
-                btnOff.className = 'toggle-btn offline'; btnOn.className = 'toggle-btn online';
-            }
-        }
-
-        // BOOKING
-        window.loadBookings = async () => {
-            const tbody = document.getElementById('bookingTableBody');
-            try {
-                const q = query(collection(db, "bookings"), where("coach_name", "==", coachNameVar));
-                const snapshot = await getDocs(q);
-                tbody.innerHTML = "";
-                if (snapshot.empty) { tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Belum ada booking.</td></tr>'; return; }
-                snapshot.forEach(doc => {
-                    const b = doc.data();
-                    const statusClass = b.status === 'Confirmed' ? 'status-confirmed' : 'status-pending';
-                    const action = b.status === 'Pending' ? `<button onclick="confirmBooking('${doc.id}')" style="padding:5px; background:var(--primary); color:white; border:none; border-radius:5px; cursor:pointer;">Terima</button>` : `<i class="fas fa-check" style="color:green"></i>`;
-                    tbody.innerHTML += `<tr><td>${b.user_name}</td><td>${b.session_topic}</td><td>${b.schedule_date || '-'}</td><td><span class="status-badge ${statusClass}">${b.status}</span></td><td>${action}</td></tr>`;
-                });
-            } catch (e) { tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Gagal memuat.</td></tr>'; }
-        }
-
-        window.confirmBooking = async (id) => {
-            if(confirm("Terima?")) { await updateDoc(doc(db, "bookings", id), { status: "Confirmed" }); loadBookings(); }
-        }
-
-        // STREAM
         window.toggleStream = (isStart) => {
             if (isStart) {
                 const url = document.getElementById('streamUrl').value;
-                if(!url) { alert("Masukkan URL!"); return; }
+                if (!url) { alert("Masukkan URL YouTube Live!"); return; }
                 document.getElementById('btnStartStream').style.display = 'none';
                 document.getElementById('btnStopStream').style.display = 'block';
                 document.getElementById('streamStatusText').innerText = "LIVE";
                 document.getElementById('streamStatusText').style.color = "var(--live-red)";
                 document.getElementById('liveBadge').classList.add('active');
-                
-                let vId = url.includes('v=') ? url.split('v=')[1].split('&')[0] : url.split('youtu.be/')[1];
-                document.getElementById('previewScreen').innerHTML = `<iframe width="100%" height="100%" src="https://www.youtube.com/embed/${vId}?autoplay=1" frameborder="0"></iframe>`;
+
+                let vId = '';
+                if (url.includes('v=')) vId = url.split('v=')[1].split('&')[0];
+                else if (url.includes('youtu.be/')) vId = url.split('youtu.be/')[1];
+                else vId = url;
+
+                document.getElementById('previewScreen').innerHTML = `<iframe width="100%" height="100%" src="https://www.youtube.com/embed/${vId}?autoplay=1" frameborder="0" allowfullscreen></iframe>`;
             } else {
                 document.getElementById('btnStartStream').style.display = 'block';
                 document.getElementById('btnStopStream').style.display = 'none';
@@ -296,6 +524,321 @@
         };
 
         window.logout = () => signOut(auth).then(() => window.location.href = "login.html");
+
+        // ========== BOOKING ==========
+        window.loadBookings = async () => {
+            const tbody = document.getElementById('bookingTableBody');
+            if (!window.coachNameVar) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Memuat data pengguna...</td></tr>';
+                return;
+            }
+            try {
+                const q = query(collection(db, "bookings"), where("coach_name", "==", window.coachNameVar));
+                const snapshot = await getDocs(q);
+                tbody.innerHTML = "";
+                
+                if (snapshot.empty) {
+                    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Belum ada peserta yang mendaftar.</td></tr>';
+                    return;
+                }
+                
+                snapshot.forEach(docSnap => {
+                    const b = docSnap.data();
+                    // Karena otomatis diterima, status pasti Confirmed/Paid
+                    const displayStatus = (b.price && b.price > 0) ? "Paid & Confirmed" : "Confirmed";
+                    
+                    // Buat link kalender khusus Coach
+                    const calLink = createCoachCalendarLink(
+                        b.seminar_title || b.session_topic || "Sesi ID-TRIBE",
+                        b.schedule_date,
+                        b.user_name || "Peserta",
+                        b.session_topic || "Konsultasi",
+                        docSnap.id,
+                        b.meet_link
+                    );
+                    
+                    const action = `
+                        <div style="display:flex; gap:8px; align-items:center;">
+                            <i class="fas fa-check-circle" style="color:#10b981; font-size:1.2rem;" title="Terkonfirmasi Otomatis"></i>
+                            <a href="${calLink}" target="_blank" style="padding:5px 10px; background:#4285F4; color:white; border-radius:6px; text-decoration:none; font-size:0.8rem; display:flex; align-items:center; gap:5px;">
+                                <i class="far fa-calendar-alt"></i> G-Calendar
+                            </a>
+                        </div>
+                    `;
+                    
+                    tbody.innerHTML += `<tr>
+                        <td><strong>${b.user_name || '-'}</strong></td>
+                        <td>${b.seminar_title || b.session_topic || '-'}</td>
+                        <td>${b.schedule_date || '-'}</td>
+                        <td><span class="status-badge status-confirmed">${displayStatus}</span></td>
+                        <td>${action}</td>
+                    </tr>`;
+                });
+            } catch (e) {
+                console.error(e);
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Gagal memuat daftar peserta.</td></tr>';
+            }
+        };
+
+        // ========== KELOLA PELUANG ==========
+        window.previewImage = (input) => {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    document.getElementById('previewImg').src = e.target.result;
+                    document.getElementById('previewImg').style.display = 'block';
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        };
+
+        window.publishOpportunity = async () => {
+            const btn = document.getElementById('btnPublishOpp');
+            const title = document.getElementById('newOppTitle').value.trim();
+            const cat = document.getElementById('newOppCat').value;
+            const desc = document.getElementById('newOppDesc').value.trim();
+            const fileInput = document.getElementById('newOppImage');
+
+            if (!title || !desc) {
+                alert("Judul dan Deskripsi Peluang wajib diisi!");
+                return;
+            }
+
+            btn.innerText = "Memproses...";
+            btn.disabled = true;
+
+            try {
+                let imageBase64 = null;
+                if (fileInput.files.length > 0) imageBase64 = await toBase64(fileInput.files[0]);
+
+                await addDoc(collection(db, "opportunities"), {
+                    ownerId: window.coachId,
+                    ownerName: window.coachNameVar,
+                    title,
+                    desc,
+                    category: cat,
+                    role: window.currentUserRole || 'coach',
+                    image: imageBase64,
+                    createdAt: serverTimestamp()
+                });
+
+                alert('Peluang berhasil ditayangkan!');
+                document.getElementById('newOppTitle').value = "";
+                document.getElementById('newOppDesc').value = "";
+                document.getElementById('newOppImage').value = "";
+                document.getElementById('previewImg').style.display = "none";
+                loadMyOpportunities();
+            } catch (e) {
+                console.error(e);
+                alert('Gagal memposting peluang: ' + e.message);
+            } finally {
+                btn.innerText = "Posting Peluang";
+                btn.disabled = false;
+            }
+        };
+
+        window.loadMyOpportunities = async () => {
+            const tbody = document.getElementById('oppTableBody');
+            if (!window.coachId) return;
+            try {
+                const q = query(collection(db, "opportunities"), where("ownerId", "==", window.coachId));
+                const snapshot = await getDocs(q);
+                tbody.innerHTML = "";
+                if (snapshot.empty) {
+                    tbody.innerHTML = '<tr><td colspan="2" style="text-align:center; color:gray;">Belum ada peluang yang dibuat.</td></tr>';
+                    return;
+                }
+                snapshot.forEach(docSnap => {
+                    const d = docSnap.data();
+                    tbody.innerHTML += `<tr>
+                        <td style="font-weight:600;">${d.title}</td>
+                        <td><span class="status-badge status-confirmed">${d.category}</span></td>
+                    </tr>`;
+                });
+            } catch (e) {
+                console.error("Gagal memuat peluang", e);
+                tbody.innerHTML = '<tr><td colspan="2" style="text-align:center;">Gagal memuat data.</td></tr>';
+            }
+        };
+
+        // ========== KELOLA SEMINAR ==========
+        window.previewSemImage = (input) => {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    document.getElementById('previewSeminarImg').src = e.target.result;
+                    document.getElementById('previewSeminarImg').style.display = 'block';
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        };
+
+        window.publishSeminar = async () => {
+            const btn = document.getElementById('btnPublishSeminar');
+            const title = document.getElementById('semTitle').value.trim();
+            const category = document.getElementById('semCategory').value;
+            const type = document.getElementById('semType').value;
+            const rawDate = document.getElementById('semDate').value;
+            const meetLink = document.getElementById('semMeetLink').value.trim();
+            const price = Number(document.getElementById('semPrice').value) || 0;
+            const fileInput = document.getElementById('semImage');
+
+            if (!title || !rawDate) {
+                alert("Judul dan Jadwal wajib diisi!");
+                return;
+            }
+
+            // Format tanggal tampilan
+            const dateObj = new Date(rawDate);
+            const options = { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' };
+            const dateStr = dateObj.toLocaleDateString('id-ID', options).replace('.', ':') + " WIB";
+
+            btn.innerText = "Memproses...";
+            btn.disabled = true;
+
+            try {
+                let imageBase64 = null;
+                if (fileInput.files.length > 0) {
+                    imageBase64 = await toBase64(fileInput.files[0]);
+                }
+
+                const docRef = await addDoc(collection(db, "seminars"), {
+                    ownerId: window.coachId,
+                    speaker: window.coachNameVar,
+                    title,
+                    category,
+                    type,
+                    date: dateStr,
+                    rawDate: rawDate, // simpan raw date untuk keperluan kalender
+                    meetLink: meetLink || null,
+                    price,
+                    img: imageBase64,
+                    createdAt: serverTimestamp()
+                });
+
+                // Buat link Google Calendar dan tampilkan modal
+                const calLink = createSeminarCalendarLink(title, rawDate, window.coachNameVar, meetLink);
+                document.getElementById('googleCalBtn').href = calLink;
+                document.getElementById('calendarModal').style.display = 'flex';
+
+                // Reset form
+                document.getElementById('semTitle').value = "";
+                document.getElementById('semDate').value = "";
+                document.getElementById('semMeetLink').value = "";
+                document.getElementById('semPrice').value = "";
+                document.getElementById('semImage').value = "";
+                document.getElementById('previewSeminarImg').style.display = "none";
+
+                loadMySeminars();
+            } catch (e) {
+                console.error(e);
+                alert('Gagal memposting seminar: ' + e.message);
+            } finally {
+                btn.innerText = "Posting Seminar";
+                btn.disabled = false;
+            }
+        };
+
+        window.loadMySeminars = async () => {
+            const tbody = document.getElementById('semTableBody');
+            if (!window.coachId) return;
+            try {
+                const q = query(collection(db, "seminars"), where("ownerId", "==", window.coachId));
+                const snapshot = await getDocs(q);
+                tbody.innerHTML = "";
+                
+                if (snapshot.empty) { 
+                    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:gray;">Belum ada seminar yang dibuat.</td></tr>'; 
+                    return; 
+                }
+                
+                snapshot.forEach(docSnap => {
+                    const d = docSnap.data();
+                    const typeColor = d.type === 'upcoming' ? 'background: #dcfce7; color: #166534;' : 'background: #f1f5f9; color: #64748b;';
+                    
+                    tbody.innerHTML += `<tr>
+                        <td style="font-weight:600;">${d.title}</td>
+                        <td style="font-size: 0.9rem;">${d.date}</td>
+                        <td><span class="status-badge" style="${typeColor}; text-transform: capitalize;">${d.type}</span></td>
+                        <td>
+                            <button onclick="deleteSeminar('${docSnap.id}')" style="border:none; background:#fef2f2; color:#dc2626; padding:8px 12px; border-radius:8px; cursor:pointer; transition:0.2s;" onmouseover="this.style.background='#fee2e2'" onmouseout="this.style.background='#fef2f2'">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </td>
+                    </tr>`;
+                });
+            } catch (e) {
+                console.error("Gagal memuat seminar", e);
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">Gagal memuat data.</td></tr>';
+            }
+        };
+
+        window.deleteSeminar = async (id) => {
+            if (confirm("Apakah Anda yakin ingin menghapus jadwal seminar ini? Tindakan ini tidak dapat dibatalkan.")) {
+                try {
+                    await deleteDoc(doc(db, "seminars", id));
+                    alert("Seminar berhasil dihapus.");
+                    loadMySeminars();
+                } catch (e) {
+                    console.error("Gagal menghapus:", e);
+                    alert("Gagal menghapus seminar.");
+                }
+            }
+        };
+
+        // ========== AUTH ==========
+        function updateStatusUI(status) {
+            const btnOff = document.getElementById('btnOffline');
+            const btnOn = document.getElementById('btnOnline');
+            if (status === 'offline') {
+                btnOff.className = 'toggle-btn active';
+                btnOn.className = 'toggle-btn offline';
+            } else {
+                btnOff.className = 'toggle-btn offline';
+                btnOn.className = 'toggle-btn online';
+            }
+        }
+
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                const uid = user.uid;
+                const snap = await getDoc(doc(db, "users_umkm", uid));
+                if (snap.exists() && ['coach', 'admin', 'BUMN', 'GOVERNMENT', 'UNIVERSITY'].includes(snap.data().role)) {
+                    const data = snap.data();
+                    window.coachId = uid;
+                    window.coachNameVar = data.nama_lengkap || data.nama_usaha || 'Coach';
+                    window.currentUserRole = data.role;
+
+                    const navPeluang = document.getElementById('nav-peluang');
+                    if (navPeluang) {
+                        navPeluang.style.display = window.currentUserRole === 'coach' ? 'none' : 'flex';
+                    }
+
+                    document.getElementById('coachName').innerText = "Halo, " + window.coachNameVar.split(' ')[0] + "!";
+                    document.getElementById('coachSpec').innerText = window.currentUserRole + " | " + (Array.isArray(data.spesialisasi) ? data.spesialisasi.join(", ") : (data.kategori || "General"));
+
+                    updateStatusUI(data.status || 'offline');
+
+                    const hash = window.location.hash.substring(1);
+                    if (hash === 'booking') {
+                        const btn = document.querySelectorAll('.nav-link')[2];
+                        if (btn) window.switchView('bookingView', btn);
+                    } else if (hash === 'peluang' && navPeluang.style.display !== 'none') {
+                        window.switchView('opportunityView', navPeluang);
+                    } else if (hash === 'seminar') {
+                        const btnSeminar = document.getElementById('nav-seminar');
+                        if (btnSeminar) window.switchView('seminarView', btnSeminar);
+                    } else {
+                        const streamBtn = document.querySelectorAll('.nav-link')[1];
+                        if (streamBtn) window.switchView('streamView', streamBtn);
+                    }
+                } else {
+                    window.location.href = "login.html";
+                }
+            } else {
+                window.location.href = "login.html";
+            }
+        });
     </script>
 </body>
 </html>

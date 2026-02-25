@@ -204,8 +204,8 @@
     </div>
 
     <div class="navbar">
-        <a href="dashboard.html" class="nav-back">
-            <i class="fas fa-arrow-left"></i> Dashboard
+        <a href="training-hub.html" class="nav-back">
+            <i class="fas fa-arrow-left"></i> Kembali
         </a>
         <div style="font-weight: 800; font-family: var(--font-head); color: var(--primary-dark); font-size: 1.2rem;">ID-TRIBE <span style="color:var(--accent);">ACADEMY</span></div>
     </div>
@@ -394,35 +394,59 @@
             const user = auth.currentUser;
             if (user && isPassed) {
                 const userRef = doc(db, "users_umkm", user.uid);
-                
-                // Logic Naik Level
-                const courseLevel = currentCourseData.level; // Beginner/Intermediate/Advanced
-                const sector = currentCourseData.sector;
-                
-                // Ambil level user sekarang
                 const snap = await getDoc(userRef);
-                const currentLevels = snap.data().competency_levels || {};
-                const oldLevel = currentLevels[sector] || "Beginner";
+                const userData = snap.data();
                 
-                let newLevel = oldLevel;
+                const sector = currentCourseData.sector;
+                const courseLevel = currentCourseData.level; // "Beginner" atau "Intermediate"
+                
+                // 1. Ambil data progress belajar saat ini. Jika belum ada, set 0
+                const progressData = userData.module_progress || {};
+                const progressKey = `${sector}_${courseLevel}`; // Contoh: finance_Beginner
+                let currentProgress = progressData[progressKey] || 0;
+                
+                // 2. Tambah 1 point karena baru saja lulus modul ini
+                currentProgress += 1;
+                
+                // 3. Siapkan objek untuk update database
+                let updates = {
+                    completed_courses: arrayUnion(courseId), // Tambahkan ID modul agar tidak bisa diulang untuk curang poin
+                    [`module_progress.${progressKey}`]: currentProgress // Simpan angka 1/5, 2/5, dst
+                };
 
-                // Aturan Kenaikan: Hanya bisa naik, tidak bisa turun
-                if (courseLevel === "Advanced") {
-                    newLevel = "Advanced";
-                } else if (courseLevel === "Intermediate" && oldLevel !== "Advanced") {
-                    newLevel = "Intermediate";
+                // 4. CEK LOGIKA NAIK LEVEL (Apakah sudah mencapai 5 modul?)
+                const currentLevels = userData.competency_levels || {};
+                const oldLevel = currentLevels[sector] || "Beginner"; // Level saat ini
+
+                let isLevelUp = false;
+
+                if (currentProgress >= 5) {
+                    // Jika lulus 5 modul Beginner dan level sebelumnya belum Intermediate/Advanced
+                    if (courseLevel === "Beginner" && oldLevel === "Beginner") {
+                        updates[`competency_levels.${sector}`] = "Intermediate";
+                        isLevelUp = true;
+                    } 
+                    // Jika lulus 5 modul Intermediate
+                    else if (courseLevel === "Intermediate" && oldLevel !== "Advanced") {
+                        updates[`competency_levels.${sector}`] = "Advanced";
+                        isLevelUp = true;
+                    }
                 }
 
-                // Update Firestore: Tambah ke completed & Update Level
-                await updateDoc(userRef, {
-                    completed_courses: arrayUnion(courseId),
-                    [`competency_levels.${sector}`]: newLevel
-                });
+                // 5. Simpan semua perubahan ke Firestore
+                await updateDoc(userRef, updates);
 
-                // Update UI Badge
+                // 6. Update UI (Visual) di Player
                 const statusBadge = document.getElementById('statusBadge');
                 statusBadge.innerHTML = '<i class="fas fa-check-circle"></i> Selesai & Valid';
                 statusBadge.classList.add('completed');
+                
+                // 7. Berikan Alert / Pesan ke User
+                if (isLevelUp) {
+                    alert(`🎉 LUAR BIASA! Anda telah menyelesaikan 5 modul ${courseLevel} di sektor ${sector}.\n\nLevel Kompetensi Anda RESMI NAIK! Cek Dashboard sekarang.`);
+                } else {
+                    alert(`✅ Modul Selesai! Progress Anda: ${currentProgress} / 5 modul untuk naik level.`);
+                }
             }
         }
 

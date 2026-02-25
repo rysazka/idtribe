@@ -168,8 +168,8 @@
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label">Link Website / Sosmed</label>
-                    <input type="text" id="regWeb" class="form-input" placeholder="instagram.com/akun" required>
+                    <label class="form-label">Link Website / Sosmed <span style="font-weight:normal; color:#64748b;">(Opsional)</span></label>
+                    <input type="text" id="regWeb" class="form-input" placeholder="instagram.com/akun">
                 </div>
 
                 <div class="form-group form-full">
@@ -261,7 +261,7 @@
             const category = document.getElementById('regCategory').value;
             const year = document.getElementById('regYear').value;
             const phone = document.getElementById('regPhone').value;
-            const web = document.getElementById('regWeb').value;
+            const web = document.getElementById('regWeb').value; // Ini akan menghasilkan string kosong "" jika tidak diisi, dan tidak apa-apa.
             const email = document.getElementById('regEmail').value;
             const pass = document.getElementById('regPass').value;
 
@@ -288,9 +288,9 @@
                     // Field yang dipakai di Profile
                     nama_usaha: entityName,
                     kategori: category,
-                    berdiri_sejak: year, // Tahun Berdiri
-                    no_hp: phone, // Kontak WA
-                    website: web, // Sosmed
+                    berdiri_sejak: year, 
+                    no_hp: phone, 
+                    website: web, // Sosmed (bisa string kosong)
                     
                     lokasi: "Indonesia", // Default, nanti user bisa edit
                     deskripsi: `Profil resmi ${entityName}. Bergerak di bidang ${category}.`,
@@ -302,12 +302,12 @@
 
                 alert("Pendaftaran Berhasil!");
                 if (window.selectedRole === 'umkm') {
-    // UMKM butuh assessment mendalam
-    window.location.href = "setup-umkm.html"; 
-} else {
-    // Institusi lain (BUMN, Gov, Kampus, Coach) ke setup khusus mereka
-    window.location.href = "setup-institution.html"; 
-}
+                    // UMKM butuh assessment mendalam
+                    window.location.href = "setup-umkm.html"; 
+                } else {
+                    // Institusi lain (BUMN, Gov, Kampus, Coach) ke setup khusus mereka
+                    window.location.href = "setup-institution.html"; 
+                }
 
             } catch (error) {
                 console.error(error);

@@ -96,10 +96,18 @@
         <a href="coach-dashboard.html#booking" class="nav-link">
             <i class="fas fa-calendar-check"></i> Jadwal & Booking
         </a>
-        
-        <a href="#" class="nav-link active">
+        <a href="coach-dashboard.html#peluang" class="nav-link" id="nav-peluang">
+            <i class="fas fa-handshake"></i> Kelola Peluang
+        </a>
+
+        <a href="coach-cms.html" class="nav-link active">
             <i class="fas fa-book-open"></i> Kelola Materi
         </a>
+
+        <a href="coach-dashboard.html#seminar" class="nav-link" id="nav-seminar">
+            <i class="fas fa-bullhorn"></i> Kelola Seminar
+        </a>
+        
 
         <a onclick="logout()" class="nav-link" style="margin-top: auto; color: #ef4444; cursor: pointer;">
             <i class="fas fa-sign-out-alt"></i> Keluar
@@ -210,9 +218,18 @@
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 const snap = await getDoc(doc(db, "users_umkm", user.uid));
-                if (snap.exists() && (snap.data().role === 'coach' || snap.data().role === 'admin')) {
-                    currentCoachName = snap.data().nama_lengkap;
+                if (snap.exists() && (snap.data().role === 'coach' || snap.data().role === 'admin' || ['BUMN', 'GOVERNMENT', 'UNIVERSITY'].includes(snap.data().role))) {
+                    const data = snap.data();
+                    currentCoachName = data.nama_lengkap || data.nama_usaha;
                     document.getElementById('coachName').innerText = currentCoachName;
+                    
+                    // --- LOGIKA SEMBUNYIKAN MENU PELUANG UNTUK COACH ---
+                    const navPeluang = document.getElementById('nav-peluang');
+                    if (data.role === 'coach') {
+                        if (navPeluang) navPeluang.style.display = 'none';
+                    }
+                    // ----------------------------------------------------
+
                     loadCourses(); // Load data jika auth sukses
                 } else {
                     window.location.href = "dashboard.html";
@@ -281,6 +298,12 @@
                 author_id: auth.currentUser.uid,
                 timestamp: new Date()
             };
+
+            // Ambil Role User agar masuk di metadata Modul
+            const snap = await getDoc(doc(db, "users_umkm", auth.currentUser.uid));
+            if(snap.exists() && snap.data().role) {
+                payload.role = snap.data().role;
+            }
 
             try {
                 if (isEditingCourse) {

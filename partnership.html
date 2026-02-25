@@ -44,7 +44,7 @@
         .main-container { max-width: 1100px; margin: 0 auto; padding: 0 20px; }
         
         /* TABS */
-        .tab-switcher { display: flex; gap: 10px; margin-bottom: 30px; justify-content: center; }
+        .tab-switcher { display: flex; gap: 10px; margin-bottom: 30px; justify-content: center; flex-wrap: wrap; }
         .tab-btn {
             padding: 10px 25px; border-radius: 30px; border: none; font-weight: 700; cursor: pointer;
             font-family: var(--font-body); transition: 0.3s; background: rgba(255,255,255,0.6); color: var(--text-gray);
@@ -69,40 +69,52 @@
         .partner-card {
             background: white; border-radius: 16px; padding: 20px; border: 1px solid #f1f5f9;
             transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-            display: flex; flex-direction: column; gap: 12px; position: relative; cursor: pointer;
+            display: flex; flex-direction: column; position: relative;
             box-shadow: 0 4px 10px rgba(0,0,0,0.02); overflow: hidden;
-            border-top: 5px solid #e2e8f0; 
         }
-        .partner-card:hover { transform: translateY(-5px); box-shadow: 0 20px 40px rgba(0,0,0,0.08); border-color: var(--primary-light); }
-        
+        .partner-card:hover { transform: translateY(-5px); box-shadow: 0 15px 35px rgba(0,0,0,0.06); }
+        .border-top-card { border-top: 5px solid var(--primary); } /* Untuk tab bursa */
+
         .card-image-space {
-            width: 100%; height: 160px; background: #f8fafc; border-radius: 10px;
+            width: 100%; height: 180px; background: #f8fafc; border-radius: 12px;
             display: flex; align-items: center; justify-content: center; color: #cbd5e1;
-            margin-bottom: 5px; overflow: hidden; border: 1px solid #e2e8f0;
+            margin-bottom: 15px; overflow: hidden; border: 1px solid #e2e8f0; cursor: pointer;
         }
         .card-image-space img { width: 100%; height: 100%; object-fit: cover; }
         
-        .card-head { display: flex; align-items: center; gap: 12px; }
-        .card-avatar { width: 45px; height: 45px; background: var(--primary-light); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.1rem; color: var(--primary-dark); }
+        .card-head { display: flex; align-items: center; gap: 12px; cursor: pointer; margin-bottom:10px; }
+        .card-avatar { width: 45px; height: 45px; background: var(--primary-light); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.1rem; color: var(--primary-dark); flex-shrink: 0; }
         
         .badge { font-size: 0.7rem; padding: 4px 10px; border-radius: 6px; font-weight: 700; text-transform: uppercase; display: inline-block; }
-        .badge-umkm { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
-        .badge-bumn { background: #dbeafe; color: #1e40af; border: 1px solid #bfdbfe; }
-        .badge-gov { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
-        .badge-cat { background: #fef3c7; color: #b45309; border: 1px solid #fde68a; }
-
-        .card-desc { font-size: 0.85rem; color: var(--text-gray); line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-        .btn-card { width: 100%; padding: 10px; border-radius: 8px; border: none; font-weight: 700; font-size: 0.85rem; cursor: pointer; transition: 0.3s; background: #f8fafc; color: var(--dark); border: 1px solid #e2e8f0; margin-top: auto; }
-        .btn-card:hover { background: var(--dark); color: white; border-color: var(--dark); }
-
-        /* --- STATUS LIST STYLES (SESUAI SCREENSHOT) --- */
-        .status-container { max-width: 800px; margin: 0 auto; display: flex; flex-direction: column; gap: 15px; }
+        .badge-umkm { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; margin-bottom: 10px; }
         
+        /* DESAIN TOMBOL EDIT & DELETE (SEPERTI DI GAMBAR) */
+        .card-buttons { display: flex; gap: 10px; margin-top: auto; padding-top: 10px; }
+        
+        .btn-card { flex: 1; padding: 10px; border-radius: 8px; border: none; font-weight: 700; font-size: 0.85rem; cursor: pointer; transition: 0.3s; background: #f8fafc; color: var(--dark); border: 1px solid #e2e8f0; }
+        .btn-card:hover { background: var(--dark); color: white; border-color: var(--dark); }
+        
+        .btn-edit { 
+            flex: 1; padding: 10px; border-radius: 50px; border: 1px solid #bfdbfe;
+            background: #eff6ff; color: #2563eb; font-weight: 700; font-size: 0.9rem;
+            cursor: pointer; transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 6px;
+        }
+        .btn-edit:hover { background: #dbeafe; color: #1d4ed8; border-color:#93c5fd; }
+        
+        .btn-delete { 
+            width: 45px; border-radius: 50px; border: 1px solid #fecaca;
+            background: #fee2e2; color: #dc2626; cursor: pointer; transition: 0.3s;
+            display: flex; align-items: center; justify-content: center; font-size: 1.1rem;
+        }
+        .btn-delete:hover { background: #fca5a5; color: white; border-color:#f87171; }
+
+        /* --- STATUS LIST STYLES --- */
+        .status-container { max-width: 800px; margin: 0 auto; display: flex; flex-direction: column; gap: 15px; }
         .request-card {
             background: white; border-radius: 12px; padding: 20px;
             display: flex; flex-direction: column; gap: 5px; cursor: pointer;
             box-shadow: 0 2px 8px rgba(0,0,0,0.03); border: 1px solid #f1f5f9;
-            border-left: 6px solid #cbd5e1; /* Default Border */
+            border-left: 6px solid #cbd5e1; 
             transition: transform 0.2s; position: relative;
         }
         .request-card:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,0,0,0.05); }
@@ -115,32 +127,31 @@
         .dir-out { background: #f3f4f6; color: #64748b; border: 1px solid #e5e7eb; }
 
         .status-pill { font-size: 0.7rem; padding: 4px 12px; border-radius: 20px; font-weight: 700; text-transform: capitalize; }
-        .st-review { background: #fef3c7; color: #d97706; } /* Kuning Review */
-        .st-active { background: #dcfce7; color: #166534; } /* Hijau Active */
-        .st-rejected { background: #f3f4f6; color: #64748b; } /* Abu Rejected */
-
-        /* Border Colors */
+        .st-review { background: #fef3c7; color: #d97706; } 
+        .st-active { background: #dcfce7; color: #166534; } 
+        .st-rejected { background: #f3f4f6; color: #64748b; } 
         .br-review { border-left-color: #f59e0b; }
         .br-active { border-left-color: #10b981; }
         .br-rejected { border-left-color: #94a3b8; opacity: 0.7; }
-
         .req-title { font-weight: 600; font-size: 0.9rem; color: #334155; }
         .req-date { font-size: 0.75rem; color: #94a3b8; margin-top: 2px; }
 
-        /* FORM POPUP */
-        .form-container { max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
-        .form-input, .form-textarea { width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 10px; margin-bottom: 15px; }
-        .btn-primary { width: 100%; padding: 14px; background: var(--primary); color: white; border: none; border-radius: 12px; font-weight: 700; cursor: pointer; }
+        /* FORM POPUP & FULL PAGE FORMS */
+        .form-container { max-width: 600px; margin: 0 auto; background: white; padding: 40px; border-radius: 24px; box-shadow: 0 10px 40px rgba(0,0,0,0.05); }
+        .form-input, .form-textarea { width: 100%; padding: 14px; border: 1px solid #cbd5e1; border-radius: 12px; margin-bottom: 18px; outline:none; font-family: inherit; font-size: 0.95rem;}
+        .form-input:focus, .form-textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-light); }
+        .btn-primary { width: 100%; padding: 14px; background: var(--primary); color: white; border: none; border-radius: 12px; font-weight: 700; font-size: 1rem; cursor: pointer; transition: 0.3s;}
+        .btn-primary:hover { background: var(--primary-dark); }
 
-        /* FAB & MODAL */
+        /* FAB & MODAL BUAT BARU */
         .fab-container { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); z-index: 2000; }
-        .fab-btn { width: 65px; height: 65px; border-radius: 50%; border: none; background: linear-gradient(135deg, var(--primary), #34d399); color: white; font-size: 2rem; display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 25px rgba(16, 185, 129, 0.4); cursor: pointer; }
+        .fab-btn { width: 65px; height: 65px; border-radius: 50%; border: none; background: linear-gradient(135deg, var(--primary), #34d399); color: white; font-size: 2rem; display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 25px rgba(16, 185, 129, 0.4); cursor: pointer; transition: 0.3s; }
+        .fab-btn:hover { transform: scale(1.1); }
         
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); backdrop-filter: blur(5px); z-index: 3000; display: none; align-items: center; justify-content: center; padding: 20px; }
         .modal-overlay.active { display: flex; animation: fadeIn 0.3s ease; }
-        .upload-card { background: white; width: 100%; max-width: 500px; border-radius: 24px; padding: 25px; max-height: 90vh; overflow-y: auto; }
-        .close-modal { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-gray); }
-        .img-preview { width: 100%; height: 150px; object-fit: cover; border-radius: 10px; display: none; margin-bottom: 15px; border: 2px dashed #e2e8f0; }
+        .upload-card { background: white; width: 100%; max-width: 500px; border-radius: 24px; padding: 30px; max-height: 90vh; overflow-y: auto; position: relative; }
+        .img-preview { width: 100%; height: 180px; object-fit: cover; border-radius: 12px; display: none; margin-bottom: 15px; border: 2px dashed #cbd5e1; }
         .img-preview.active { display: block; }
     </style>
 </head>
@@ -153,8 +164,10 @@
     </nav>
 
     <div class="main-container">
-        <div class="tab-switcher">
+        
+        <div class="tab-switcher" id="mainTabSwitcher">
             <button class="tab-btn active" onclick="switchTab('marketplace')" id="btn-market">Bursa Peluang</button>
+            <button class="tab-btn" onclick="switchTab('my-opps')" id="btn-my-opps">Peluang Saya</button>
             <button class="tab-btn" onclick="switchTab('status')" id="btn-status">Status Pengajuan</button>
         </div>
 
@@ -186,6 +199,18 @@
             <div class="partner-grid" id="partnerGrid"></div>
         </div>
 
+        <div id="view-my-opps" class="view-section">
+            <div style="text-align: center; margin-bottom: 30px;">
+                <h2 style="font-family: var(--font-head); font-size: 1.8rem; margin-bottom: 5px;">Peluang Saya</h2>
+                <p style="color: var(--text-gray);">Kelola postingan peluang kolaborasi yang telah Anda buat.</p>
+            </div>
+            <div class="partner-grid" id="myOppGrid">
+                <div style="text-align:center; grid-column:1/-1; padding:40px; color:gray;">
+                    <i class="fas fa-circle-notch fa-spin"></i> Memuat data Anda...
+                </div>
+            </div>
+        </div>
+
         <div id="view-status" class="view-section">
             <div style="max-width: 800px; margin: 0 auto;">
                 <div class="filter-container" style="margin-bottom:20px;">
@@ -209,36 +234,64 @@
 
         <div id="view-form" class="view-section">
             <div class="form-container">
-                <button onclick="closeForm()" style="background:none; border:none; color:var(--text-gray); cursor:pointer; margin-bottom:15px; font-weight:600;"><i class="fas fa-arrow-left"></i> Batal</button>
-                <h2 style="font-family: var(--font-head); margin-bottom: 15px;">Formulir Pengajuan</h2>
+                <button onclick="switchTab('marketplace')" style="background:none; border:none; color:var(--text-gray); cursor:pointer; margin-bottom:15px; font-weight:600;"><i class="fas fa-arrow-left"></i> Kembali</button>
+                <h2 style="font-family: var(--font-head); margin-bottom: 20px; font-size: 1.8rem;">Formulir Pengajuan</h2>
                 <form onsubmit="submitProposal(event)">
                     <input type="hidden" id="formTargetID"> 
                     <label style="font-weight: 700; display: block; margin-bottom: 5px;">Target Partner</label>
-                    <input type="text" id="formTargetName" class="form-input" readonly style="background: #f8fafc; font-weight: 600;">
+                    <input type="text" id="formTargetName" class="form-input" readonly style="background: #f8fafc; font-weight: 600; color:var(--text-gray);">
+                    
                     <label style="font-weight: 700; display: block; margin-bottom: 5px;">Judul Kerjasama</label>
-                    <input type="text" id="formTitle" class="form-input" placeholder="Judul..." required>
-                    <label style="font-weight: 700; display: block; margin-bottom: 5px;">Pesan / Proposal</label>
-                    <textarea id="formDesc" class="form-textarea" rows="5" required placeholder="Jelaskan detail..."></textarea>
+                    <input type="text" id="formTitle" class="form-input" placeholder="Tuliskan judul penawaran..." required>
+                    
+                    <label style="font-weight: 700; display: block; margin-bottom: 5px;">Pesan / Proposal Singkat</label>
+                    <textarea id="formDesc" class="form-textarea" rows="5" required placeholder="Jelaskan detail kolaborasi yang Anda inginkan..."></textarea>
+                    
                     <button type="submit" class="btn-primary">Kirim Pengajuan</button>
                 </form>
             </div>
         </div>
+
+        <div id="view-edit-opp" class="view-section">
+            <div class="form-container">
+                <button onclick="closeEditForm()" style="background:none; border:none; color:var(--text-gray); cursor:pointer; margin-bottom:15px; font-weight:600;"><i class="fas fa-arrow-left"></i> Batal Edit</button>
+                <h2 style="font-family: var(--font-head); margin-bottom: 20px; font-size: 1.8rem; color:var(--primary);">Edit Peluang</h2>
+                
+                <img id="editPagePreviewImg" class="img-preview">
+                <label style="font-weight:700; font-size:0.9rem; display:block; margin-bottom:5px;">Update Foto (Abaikan jika tidak ingin mengubah)</label>
+                <input type="file" id="editPageOppImage" accept="image/*" class="form-input" onchange="previewImage(this, 'editPagePreviewImg')" style="margin-bottom:20px;">
+
+                <label style="font-weight:700; font-size:0.9rem; display:block; margin-bottom:5px;">Judul Peluang</label>
+                <input type="text" id="editPageOppTitle" class="form-input" placeholder="Tulis judul yang menarik...">
+                
+                <label style="font-weight:700; font-size:0.9rem; display:block; margin-bottom:5px;">Kategori</label>
+                <select id="editPageOppCat" class="form-input">
+                    <option value="Jasa">Jasa</option><option value="Teknologi">Teknologi</option><option value="F&B">F&B</option>
+                </select>
+                
+                <label style="font-weight:700; font-size:0.9rem; display:block; margin-bottom:5px;">Deskripsi Lengkap</label>
+                <textarea id="editPageOppDesc" class="form-textarea" rows="5" placeholder="Jelaskan detail peluang..."></textarea>
+                
+                <button class="btn-primary" id="btnPageUpdate" onclick="updateOpportunityPage()">Simpan Perubahan</button>
+            </div>
+        </div>
+
     </div>
 
     <div class="fab-container">
-        <button class="fab-btn" onclick="openUploadModal()"><i class="fas fa-plus"></i></button>
+        <button class="fab-btn" onclick="openUploadModal()" title="Posting Peluang Baru"><i class="fas fa-plus"></i></button>
     </div>
 
     <div class="modal-overlay" id="uploadModal">
         <div class="upload-card">
             <div style="display:flex; justify-content:space-between; margin-bottom:20px;">
-                <h3 style="margin:0;">Buat Peluang Baru</h3>
-                <button onclick="closeUploadModal()" style="border:none; background:none; font-size:1.5rem;">&times;</button>
+                <h3 style="margin:0; font-family:var(--font-head); font-size:1.5rem;">Buat Peluang Baru</h3>
+                <button onclick="closeUploadModal()" style="border:none; background:none; font-size:1.5rem; cursor:pointer;">&times;</button>
             </div>
             
             <img id="previewImg" class="img-preview">
             <label style="font-weight:700; font-size:0.9rem; display:block; margin-bottom:5px;">Foto (Opsional)</label>
-            <input type="file" id="newOppImage" accept="image/*" class="form-input" onchange="previewImage(this)" style="margin-bottom:15px;">
+            <input type="file" id="newOppImage" accept="image/*" class="form-input" onchange="previewImage(this, 'previewImg')" style="margin-bottom:15px;">
 
             <input type="text" id="newOppTitle" class="form-input" placeholder="Judul Peluang">
             <select id="newOppCat" class="form-input">
@@ -249,11 +302,13 @@
         </div>
     </div>
 
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore, collection, getDocs, addDoc, query, where, onSnapshot, orderBy, serverTimestamp, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, query, where, onSnapshot, serverTimestamp, doc, getDoc, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
+        // GANTI DENGAN CONFIG FIREBASE ANDA
         const firebaseConfig = {
             apiKey: "AIzaSyBIaLzkNM0KqPVKxuMNmardLqcrr2kYTWQ",
             authDomain: "database-idbm.firebaseapp.com",
@@ -270,9 +325,11 @@
 
         let currentUser = null;
         let currentUserData = null;
-        let partnersData = [];
-        let requestsData = [];
+        let partnersData = []; 
+        let requestsData = []; 
+        let currentEditDocId = null;
 
+        // --- AUTH & INITIAL LOAD ---
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 currentUser = user;
@@ -280,68 +337,285 @@
                 const docSnap = await getDoc(docRef);
                 if(docSnap.exists()) currentUserData = docSnap.data();
 
-                // SETUP LISTENERS
                 setupPartnersListener();
                 setupStatusListener();
 
-                // HANDLE ACTION FROM PROFILE
                 const urlParams = new URLSearchParams(window.location.search);
-                const action = urlParams.get('action');
-                if (action === 'apply') {
-                    const targetId = urlParams.get('id');
-                    const targetName = decodeURIComponent(urlParams.get('target') || '');
-                    const title = decodeURIComponent(urlParams.get('title') || '');
-                    if(targetId) openProposalForm(targetId, targetName, title);
+                if (urlParams.get('action') === 'apply') {
+                    openProposalForm(urlParams.get('id'), decodeURIComponent(urlParams.get('target') || ''), decodeURIComponent(urlParams.get('title') || ''));
                 }
             } else {
                 window.location.href = "login.html";
             }
         });
 
-        // --- SUBMIT PROPOSAL (REALTIME WRITE) ---
-        window.submitProposal = async (e) => {
-            e.preventDefault();
-            const btn = document.querySelector('.btn-primary');
-            const targetUid = document.getElementById('formTargetID').value;
-            const targetName = document.getElementById('formTargetName').value;
-            const title = document.getElementById('formTitle').value;
-            const desc = document.getElementById('formDesc').value;
-
-            if(!targetUid) { Swal.fire('Error', 'ID Target tidak ditemukan.', 'error'); return; }
-
-            btn.innerHTML = 'Mengirim...'; btn.disabled = true;
-
-            try {
-                await addDoc(collection(db, "partnership_requests"), {
-                    senderId: currentUser.uid,
-                    senderName: currentUserData?.nama_usaha || "User",
-                    targetId: targetUid,
-                    targetName: targetName,
-                    title: title, desc: desc,
-                    status: "pending", createdAt: serverTimestamp(), type: "General",
-                    direction: "out"
-                });
-
-                Swal.fire('Berhasil', 'Pengajuan dikirim.', 'success');
-                // Clean URL & Switch Tab
-                window.history.replaceState({}, document.title, "partnership.html");
-                closeForm();
-                switchTab('status');
-
-            } catch (error) {
-                Swal.fire('Gagal', error.message, 'error');
-            } finally {
-                btn.innerHTML = 'Kirim Pengajuan'; btn.disabled = false;
+        // --- PENGATUR TABS ---
+        window.switchTab = (t) => {
+            // Sembunyikan semua tab button
+            document.getElementById('mainTabSwitcher').style.display = 'flex';
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            
+            // Sembunyikan semua view section
+            document.querySelectorAll('.view-section').forEach(v => v.classList.remove('active')); 
+            
+            // Atur yang aktif
+            if(t === 'marketplace') {
+                document.getElementById('btn-market').classList.add('active');
+                document.getElementById('view-marketplace').classList.add('active');
+            } else if (t === 'status') {
+                document.getElementById('btn-status').classList.add('active');
+                document.getElementById('view-status').classList.add('active');
+            } else if (t === 'my-opps') {
+                document.getElementById('btn-my-opps').classList.add('active');
+                document.getElementById('view-my-opps').classList.add('active');
             }
         }
 
-        // --- STATUS LIST (CLEAN UI) ---
+        // =========================================================
+        // LOGIKA DATA: BURSA PELUANG & PELUANG SAYA
+        // =========================================================
+        
+        function setupPartnersListener() {
+            const loading = document.getElementById('loadingGrid');
+            const q = collection(db, "opportunities"); 
+            
+            onSnapshot(q, (snap) => {
+                if(loading) loading.style.display = 'none';
+                partnersData = [];
+                snap.forEach(doc => {
+                    const d = doc.data();
+                    partnersData.push({...d, id: d.ownerId, docId: doc.id}); 
+                });
+                
+                partnersData.sort((a,b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+
+                renderPartnerGrid(partnersData); 
+                renderMyOpportunities();         
+            }, (error) => {
+                if(loading) loading.innerHTML = `<span style='color:red'>Gagal memuat: ${error.message}</span>`;
+            });
+        }
+
+        // --- TAB 1: RENDER BURSA PELUANG (SEMUA ORANG) ---
+        function renderPartnerGrid(data) {
+            const grid = document.getElementById('partnerGrid');
+            grid.innerHTML = "";
+            if(data.length === 0) { grid.innerHTML = "<p style='text-align:center; grid-column:1/-1; color:gray;'>Belum ada peluang yang cocok.</p>"; return; }
+
+            data.forEach(p => {
+                let borderColor = "var(--primary)";
+                if(p.role === 'BUMN') borderColor = "#1d4ed8";
+                
+                let imgContent = `<i class="fas fa-handshake" style="font-size:3rem; opacity:0.3;"></i>`;
+                if(p.image) imgContent = `<img src="${p.image}" alt="Img">`;
+
+                grid.innerHTML += `
+                <div class="partner-card border-top-card" style="border-top-color: ${borderColor}">
+                    <div class="card-image-space" onclick="window.location.href='partner-profile.html?id=${p.id}'">${imgContent}</div>
+                    <div class="card-head" onclick="window.location.href='partner-profile.html?id=${p.id}'">
+                        <div class="card-avatar">${p.ownerName?p.ownerName.charAt(0):'U'}</div>
+                        <div><h4 style="margin-bottom:2px;">${p.title}</h4><span style="font-size:0.8rem;">${p.ownerName}</span></div>
+                    </div>
+                    <div style="margin-top:5px;"><span class="badge badge-umkm">${p.role}</span></div>
+                    <div class="card-buttons">
+                        <button class="btn-card" onclick="window.location.href='partner-profile.html?id=${p.id}'">Lihat Profil</button>
+                    </div>
+                </div>`;
+            });
+        }
+
+        // --- TAB 2: RENDER PELUANG SAYA (HANYA MILIK USER) ---
+        function renderMyOpportunities() {
+            const grid = document.getElementById('myOppGrid');
+            if(!grid) return;
+            grid.innerHTML = "";
+
+            if(!currentUser) return;
+            const myOpps = partnersData.filter(p => p.ownerId === currentUser.uid);
+
+            if(myOpps.length === 0) {
+                grid.innerHTML = `
+                    <div style='text-align:center; grid-column:1/-1; padding:50px; background:white; border-radius:24px; border:1px dashed #cbd5e1;'>
+                        <i class="fas fa-box-open fa-3x" style='margin-bottom:15px; color:#cbd5e1;'></i>
+                        <h3 style="color:var(--dark);">Peluang Kosong</h3>
+                        <p style="color:var(--text-gray);">Anda belum pernah membuat peluang kerjasama.<br>Klik tombol + di pojok kanan bawah untuk mempublikasikan peluang pertama Anda.</p>
+                    </div>`;
+                return;
+            }
+
+            myOpps.forEach(p => {
+                let imgContent = `<i class="fas fa-image fa-3x" style="opacity:0.3;"></i>`;
+                if(p.image) imgContent = `<img src="${p.image}" alt="Img">`;
+
+                grid.innerHTML += `
+                <div class="partner-card" style="border: 1px solid #e2e8f0; border-top: none;">
+                    <div class="card-image-space" style="height:180px; border-radius:12px;">${imgContent}</div>
+                    
+                    <div style="flex:1;">
+                        <h4 style="font-size: 1.1rem; color: var(--dark); margin-bottom: 5px; line-height: 1.3;">${p.title}</h4>
+                        <span style="font-size:0.8rem; color:var(--text-gray); display:flex; align-items:center; gap:5px;"><i class="fas fa-tag"></i> ${p.category}</span>
+                    </div>
+
+                    <div class="card-buttons">
+                        <button class="btn-edit" onclick="openEditForm('${p.docId}')"><i class="fas fa-pen"></i> Edit</button>
+                        <button class="btn-delete" onclick="deleteOpportunity('${p.docId}')" title="Hapus"><i class="fas fa-trash"></i></button>
+                    </div>
+                </div>`;
+            });
+        }
+
+        // =========================================================
+        // LOGIKA CRUD (CREATE, UPDATE, DELETE)
+        // =========================================================
+
+        const toBase64 = file => new Promise((resolve, reject) => {
+            const reader = new FileReader(); reader.readAsDataURL(file);
+            reader.onload = () => resolve(reader.result); reader.onerror = error => reject(error);
+        });
+
+        window.previewImage = (input, imgElementId) => {
+            if(input.files && input.files[0]){
+                const reader = new FileReader();
+                reader.onload = (e) => { 
+                    const img = document.getElementById(imgElementId);
+                    img.src = e.target.result; img.classList.add('active'); 
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        // --- CREATE (MODAL) ---
+        window.openUploadModal = () => document.getElementById('uploadModal').classList.add('active');
+        window.closeUploadModal = () => { 
+            document.getElementById('uploadModal').classList.remove('active'); 
+            document.getElementById('newOppImage').value = ""; 
+            document.getElementById('previewImg').classList.remove('active'); 
+        }
+
+        window.publishOpportunity = async () => {
+            const btn = document.getElementById('btnPublish');
+            const title = document.getElementById('newOppTitle').value;
+            const cat = document.getElementById('newOppCat').value;
+            const desc = document.getElementById('newOppDesc').value;
+            const fileInput = document.getElementById('newOppImage');
+
+            if(!title) { Swal.fire('Oops', 'Judul peluang harus diisi!', 'warning'); return; }
+            btn.innerText = "Proses..."; btn.disabled = true;
+
+            try {
+                let imageBase64 = null;
+                if(fileInput.files.length > 0) imageBase64 = await toBase64(fileInput.files[0]);
+
+                await addDoc(collection(db, "opportunities"), {
+                    ownerId: currentUser.uid, ownerName: currentUserData?.nama_usaha || "UMKM",
+                    title, desc, category: cat, role: currentUserData?.role || "UMKM",
+                    image: imageBase64, createdAt: serverTimestamp()
+                });
+                
+                closeUploadModal();
+                Swal.fire('Sukses', 'Peluang berhasil dipublikasikan!', 'success');
+                switchTab('my-opps'); 
+                
+            } catch(e) { Swal.fire('Error', e.message, 'error'); } 
+            finally { btn.innerText = "Posting Sekarang"; btn.disabled = false; }
+        }
+
+        // --- UPDATE (FULL PAGE FORM) ---
+        window.openEditForm = (docId) => {
+            const opp = partnersData.find(p => p.docId === docId);
+            if(!opp) return;
+
+            currentEditDocId = docId;
+            document.getElementById('editPageOppTitle').value = opp.title;
+            document.getElementById('editPageOppCat').value = opp.category;
+            document.getElementById('editPageOppDesc').value = opp.desc;
+
+            const preview = document.getElementById('editPagePreviewImg');
+            if(opp.image) { preview.src = opp.image; preview.classList.add('active'); } 
+            else { preview.src = ""; preview.classList.remove('active'); }
+
+            // Sembunyikan tab switcher & Tampilkan Form Edit
+            document.getElementById('mainTabSwitcher').style.display = 'none';
+            document.querySelectorAll('.view-section').forEach(v => v.classList.remove('active'));
+            document.getElementById('view-edit-opp').classList.add('active');
+            
+            // Scroll ke atas
+            window.scrollTo(0,0);
+        }
+
+        window.closeEditForm = () => {
+            currentEditDocId = null;
+            document.getElementById('editPageOppImage').value = "";
+            switchTab('my-opps'); // Kembali ke Peluang Saya
+        }
+
+        window.updateOpportunityPage = async () => {
+            if(!currentEditDocId) return;
+
+            const btn = document.getElementById('btnPageUpdate');
+            const title = document.getElementById('editPageOppTitle').value;
+            const cat = document.getElementById('editPageOppCat').value;
+            const desc = document.getElementById('editPageOppDesc').value;
+            const fileInput = document.getElementById('editPageOppImage');
+
+            if(!title) { Swal.fire('Oops', 'Judul peluang tidak boleh kosong!', 'warning'); return; }
+            btn.innerText = "Menyimpan..."; btn.disabled = true;
+
+            try {
+                let updateData = { title: title, category: cat, desc: desc };
+
+                if(fileInput.files.length > 0) {
+                    const imageBase64 = await toBase64(fileInput.files[0]);
+                    updateData.image = imageBase64;
+                }
+
+                await updateDoc(doc(db, "opportunities", currentEditDocId), updateData);
+                closeEditForm();
+                Swal.fire('Sukses', 'Perubahan berhasil disimpan!', 'success');
+            } catch(e) { Swal.fire('Error', e.message, 'error'); } 
+            finally { btn.innerText = "Simpan Perubahan"; btn.disabled = false; }
+        }
+
+        // --- DELETE ---
+        window.deleteOpportunity = async (docId) => {
+            const result = await Swal.fire({
+                title: 'Hapus Peluang?', text: "Data tidak bisa dikembalikan!", icon: 'warning',
+                showCancelButton: true, confirmButtonColor: '#ef4444', cancelButtonColor: '#64748b',
+                confirmButtonText: 'Hapus', cancelButtonText: 'Batal'
+            });
+
+            if (result.isConfirmed) {
+                try {
+                    await deleteDoc(doc(db, "opportunities", docId));
+                    Swal.fire('Terhapus!', 'Peluang telah dihapus.', 'success');
+                } catch (error) { Swal.fire('Gagal', error.message, 'error'); }
+            }
+        }
+
+        // =========================================================
+        // FILTER PENCARIAN (KHUSUS BURSA PELUANG)
+        // =========================================================
+        window.applyFilter = () => {
+            const searchText = document.getElementById('searchInput').value.toLowerCase();
+            const typeValue = document.getElementById('filterType').value;
+            const categoryValue = document.getElementById('filterCategory').value;
+
+            const filtered = partnersData.filter(p => {
+                const matchText = p.title.toLowerCase().includes(searchText) || (p.ownerName && p.ownerName.toLowerCase().includes(searchText));
+                const matchType = typeValue === "" || p.role === typeValue;
+                const matchCategory = categoryValue === "" || p.category === categoryValue;
+                return matchText && matchType && matchCategory;
+            });
+            renderPartnerGrid(filtered);
+        }
+
+        // =========================================================
+        // STATUS PENGAJUAN (APPLY) LOGIC
+        // =========================================================
         function setupStatusListener() {
-            // Listen Outgoing
             const qOut = query(collection(db, "partnership_requests"), where("senderId", "==", currentUser.uid));
             onSnapshot(qOut, (snap) => updateLocalData(snap, 'out'));
 
-            // Listen Incoming
             const qIn = query(collection(db, "partnership_requests"), where("targetId", "==", currentUser.uid));
             onSnapshot(qIn, (snap) => updateLocalData(snap, 'in'));
         }
@@ -350,7 +624,10 @@
             snapshot.docChanges().forEach(change => {
                 const data = change.doc.data();
                 const id = change.doc.id;
-                if (change.type === "added" || change.type === "modified") {
+                
+                if (change.type === "removed") {
+                    requestsData = requestsData.filter(r => r.id !== id);
+                } else if (change.type === "added" || change.type === "modified") {
                     const idx = requestsData.findIndex(r => r.id === id);
                     const item = { ...data, id, direction };
                     if (idx > -1) requestsData[idx] = item; else requestsData.push(item);
@@ -374,7 +651,6 @@
             requestsData.forEach(req => {
                 if(filterType !== 'all' && req.direction !== filterType) return;
 
-                // UI LOGIC SESUAI SCREENSHOT
                 let container, statusClass, borderClass, statusLabel;
                 
                 if (req.status === 'accepted' || req.status === 'active') {
@@ -385,26 +661,20 @@
                     container = listHistory; statusClass = 'st-rejected'; borderClass = 'br-rejected'; statusLabel = req.status; cHis++;
                 }
 
-                // Partner Name Logic
                 const partnerName = req.direction === 'in' ? req.senderName : req.targetName;
                 const dirBadgeClass = req.direction === 'in' ? 'dir-in' : 'dir-out';
                 const dirText = req.direction === 'in' ? 'Masuk' : 'Keluar';
                 const dateStr = req.createdAt?.toDate ? req.createdAt.toDate().toLocaleDateString() : "Baru Saja";
 
-                // HTML STRUCTURE (PERSIS SCREENSHOT)
                 const html = `
                 <div class="request-card ${borderClass}" onclick="window.location.href='request-detail.html?id=${req.id}'">
                     <div class="req-top-row">
-                        <div class="req-partner-name">
-                            ${partnerName} 
-                            <span class="dir-badge ${dirBadgeClass}">${dirText}</span>
-                        </div>
+                        <div class="req-partner-name">${partnerName} <span class="dir-badge ${dirBadgeClass}">${dirText}</span></div>
                         <span class="status-pill ${statusClass}">${statusLabel}</span>
                     </div>
                     <div class="req-title">${req.title}</div>
                     <div class="req-date">${dateStr}</div>
                 </div>`;
-
                 container.insertAdjacentHTML('beforeend', html);
             });
 
@@ -413,121 +683,15 @@
             document.getElementById('count-history').innerText = cHis;
         }
 
-        // --- MARKETPLACE & UPLOAD ---
-        function setupPartnersListener() {
-            const loading = document.getElementById('loadingGrid');
-            const q = query(collection(db, "opportunities"), orderBy("createdAt", "desc"));
-            onSnapshot(q, (snap) => {
-                loading.style.display = 'none';
-                partnersData = [];
-                snap.forEach(doc => {
-                    const d = doc.data();
-                    partnersData.push({...d, id: d.ownerId}); 
-                });
-                renderPartnerGrid(partnersData);
-            });
-        }
-
-        function renderPartnerGrid(data) {
-            const grid = document.getElementById('partnerGrid');
-            grid.innerHTML = "";
-            if(data.length === 0) { grid.innerHTML = "<p style='text-align:center; grid-column:1/-1; color:gray;'>Belum ada peluang.</p>"; return; }
-
-            data.forEach(p => {
-                let borderColor = "var(--primary)";
-                if(p.role === 'BUMN') borderColor = "#1d4ed8";
-                
-                let imgContent = `<i class="fas fa-handshake" style="font-size:3rem; opacity:0.3;"></i>`;
-                if(p.image) imgContent = `<img src="${p.image}" alt="Img">`;
-
-                grid.innerHTML += `
-                <div class="partner-card" style="border-top:5px solid ${borderColor}" onclick="window.location.href='partner-profile.html?id=${p.id}'">
-                    <div class="card-image-space">${imgContent}</div>
-                    <div class="card-head">
-                        <div class="card-avatar">${p.ownerName?p.ownerName.charAt(0):'U'}</div>
-                        <div><h4>${p.title}</h4><span>${p.ownerName}</span></div>
-                    </div>
-                    <div style="margin-top:10px;"><span class="badge badge-umkm">${p.role}</span></div>
-                    <button class="btn-card">Lihat Profil</button>
-                </div>`;
-            });
-        }
-
-        // UPLOAD & IMAGE LOGIC
-        const toBase64 = file => new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.readAsDataURL(file);
-            reader.onload = () => resolve(reader.result);
-            reader.onerror = error => reject(error);
-        });
-
-        window.previewImage = (input) => {
-            if(input.files && input.files[0]){
-                const reader = new FileReader();
-                reader.onload = (e) => { 
-                    const img = document.getElementById('previewImg');
-                    img.src = e.target.result; img.classList.add('active'); 
-                }
-                reader.readAsDataURL(input.files[0]);
-            }
-        }
-
-        const modal = document.getElementById('uploadModal');
-        window.openUploadModal = () => modal.classList.add('active');
-        window.closeUploadModal = () => { modal.classList.remove('active'); document.getElementById('newOppImage').value = ""; document.getElementById('previewImg').classList.remove('active'); }
-
-        window.publishOpportunity = async () => {
-            const btn = document.getElementById('btnPublish');
-            const title = document.getElementById('newOppTitle').value;
-            const cat = document.getElementById('newOppCat').value;
-            const desc = document.getElementById('newOppDesc').value;
-            const fileInput = document.getElementById('newOppImage');
-
-            if(!title) return;
-            btn.innerText = "Proses..."; btn.disabled = true;
-
-            try {
-                let imageBase64 = null;
-                if(fileInput.files.length > 0) imageBase64 = await toBase64(fileInput.files[0]);
-
-                await addDoc(collection(db, "opportunities"), {
-                    ownerId: currentUser.uid, ownerName: currentUserData?.nama_usaha,
-                    title, desc, category: cat, role: currentUserData?.role || "UMKM",
-                    image: imageBase64, createdAt: serverTimestamp()
-                });
-                closeUploadModal();
-                Swal.fire('Sukses', 'Peluang tayang!', 'success');
-            } catch(e) { Swal.fire('Error', e.message, 'error'); } 
-            finally { btn.innerText = "Posting Sekarang"; btn.disabled = false; }
-        }
-
-        // UI HELPERS
+        // FORM PENGAJUAN (APPLY KE ORANG LAIN)
         window.openProposalForm = (id, name, title) => {
-            document.querySelector('.tab-switcher').style.display='none';
-            document.getElementById('view-marketplace').classList.remove('active');
-            document.getElementById('view-status').classList.remove('active');
+            document.getElementById('mainTabSwitcher').style.display = 'none';
+            document.querySelectorAll('.view-section').forEach(v=>v.classList.remove('active'));
             document.getElementById('view-form').classList.add('active');
             
             document.getElementById('formTargetID').value = id;
             document.getElementById('formTargetName').value = name;
             if(title) document.getElementById('formTitle').value = title;
-        }
-        window.closeForm = () => {
-            document.getElementById('view-form').classList.remove('active');
-            document.getElementById('view-marketplace').classList.add('active');
-            document.querySelector('.tab-switcher').style.display='flex';
-        }
-        window.switchTab = (t) => {
-            document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
-            document.getElementById(t==='marketplace'?'btn-market':'btn-status').classList.add('active');
-            document.querySelectorAll('.view-section').forEach(v=>v.classList.remove('active')); 
-            if(t==='marketplace') document.getElementById('view-marketplace').classList.add('active');
-            else document.getElementById('view-status').classList.add('active');
-        }
-        window.applyFilter = () => {
-            const s = document.getElementById('searchInput').value.toLowerCase();
-            const filtered = partnersData.filter(p => p.title.toLowerCase().includes(s));
-            renderPartnerGrid(filtered);
         }
     </script>
 </body>
